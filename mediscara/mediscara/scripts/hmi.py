@@ -1,16 +1,13 @@
 import enum
-import sys
 from abc import abstractmethod
 from typing import List, Type
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl
-from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel, QApplication
-
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel
 
 import rclpy
 from .ros_node import QTROSNode
 from .utils import IPList
-
 from .widgets.layout.gui_UI import Ui_GUIWindow
 
 
@@ -79,6 +76,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             # connect the signals and slots
             self.ros_worker.signals.nodes_loaded.connect(self.nodes_loaded_callback)
             self.ros_worker.signals.info_loaded.connect(self.info_loaded_callback)
+            self.ros_worker.signals.new_error.connect(self.ros_error_callback)
 
             self.ros_thread.start()  # start the thread
 
@@ -136,6 +134,9 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     def info_loaded_callback(self):
         """Callback method for consuming the KPI info returned by the ROS thread"""
         pass
+
+    def ros_error_callback(self, node_name: str, msg: str, err_code: int):
+        self.list_error.addItem(f"{msg} CODE: {err_code}")
 
     """ CALLBACKS ************************************************************************************************** """
 
@@ -211,7 +212,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             self.tabWidget.setTabEnabled(5, True)  # login tab enabled
 
         elif self.user_level == LoginStatus.MANAGER:
-            self.tabWidget.setTabEnabled(0, False)  # info locked
+            self.tabWidget.setTabEnabled(0, True)  # info locked
             self.tabWidget.setTabEnabled(1, False)  # control locked
             self.tabWidget.setTabEnabled(2, True)  # nodes enabled
             self.tabWidget.setTabEnabled(3, True)  # grafana enabled
@@ -252,6 +253,7 @@ class ROSWorker(QObject):
     class Signals(QObject):
         nodes_loaded = pyqtSignal(list, list)
         info_loaded = pyqtSignal()
+        new_error = pyqtSignal(str, str, int)
 
     def __init__(self,
                  node_class: Type[QTROSNode],
