@@ -3,12 +3,14 @@ from abc import abstractmethod
 from typing import List, Type
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl
-from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel, QListWidget, QListWidgetItem, QWidget
 
 import rclpy
 from .ros_node import QTROSNode
 from .utils import IPList
 from .widgets.layout.gui_UI import Ui_GUIWindow
+from .widgets.layout.list_widget_item_UI import Ui_ListItem
+from .widgets.layout.statusbar_UI import Ui_StatusBar
 
 
 class LoginStatus(enum.Enum):
@@ -50,6 +52,31 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     __TAB_GRAFANA = 3
     __TAB_ERROR = 4
     __TAB_LOGIN = 5
+
+    class ErrorListItem(Ui_ListItem, QWidget):
+        def __init__(self, node_name: str, error_msg: str, error_code: int):
+            super(HMIApp.ErrorListItem, self).__init__()
+            self.setupUi(self)
+            self.label_node_name.setText(node_name)
+            self.label_error_message.setText(error_msg)
+            self.label_error_code.setText(str(error_code))
+
+    class StatusbarWidget(Ui_StatusBar, QWidget):
+        def __init__(self):
+            super(HMIApp.StatusbarWidget, self).__init__()
+            self.setupUi(self)
+
+        def set_error_count(self, err_count: int):
+            if err_count == 0:
+                self.label_error.setStyleSheet("background-color: white")
+                self.label_error.setText("No errors")
+            else:
+                self.label_error.setStyleSheet("background-color: red;")
+                if err_count == 1:
+                    self.label_error.setText("1 error")
+
+                else:
+                    self.label_error.setText(f"{err_count} errors")
 
     def __init__(self, name: str, depends_list: List[str], node_class: Type[QTROSNode]):
         """Constructor method
@@ -98,24 +125,28 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         self.web_widget.show()
 
         # error tab
+        self.button_clear_errors.clicked.connect(self.clear_errors_callback)
 
         """Set up the statusbar widget for login info"""
-        self.statusbar_label = QLabel()
-        self.statusbar_label.setText("Not logged in")
-        self.statusbar.addWidget(self.statusbar_label)
+        self.statusbar_widget = HMIApp.StatusbarWidget()
+        self.statusbar_widget.label_login.setText("Not logged in")
+        self.statusbar_widget.set_error_count(0)
+        self.statusbar.addPermanentWidget(self.statusbar_widget, stretch=1)
 
         """Set up login level"""
         self.__user_level = LoginStatus.LOGGED_OUT
         self.set_interface_lock()
 
-    """ OVERRIDES ************************************************************************************************** """
+    # region OVERRIDES ********************************************************************************************* """
 
     def closeEvent(self, event) -> None:
         self.ros_worker.stop()
         self.ros_thread.quit()
         self.ros_thread.wait()
 
-    """ ROS CALLBACKS ********************************************************************************************** """
+    # endregion
+
+    # region ROS CALLBACKS ***************************************************************************************** """
 
     def nodes_loaded_callback(self, dependencies: List[str], missing: List[str]):
         """Callback method for displaying the loaded nodes"""
@@ -136,9 +167,17 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         pass
 
     def ros_error_callback(self, node_name: str, msg: str, err_code: int):
-        self.list_error.addItem(f"{msg} CODE: {err_code}")
+        item_widget = HMIApp.ErrorListItem(node_name=node_name, error_msg=msg, error_code=err_code)
+        list_widget_item = QListWidgetItem(self.list_error)  # add a new list widget item
+        list_widget_item.setSizeHint(item_widget.sizeHint())  # copy the size hint from the item widget
+        self.list_error.addItem(list_widget_item)   # add a new item
+        self.list_error.setItemWidget(list_widget_item, item_widget)  # set the item widget to the item
 
-    """ CALLBACKS ************************************************************************************************** """
+        self.statusbar_widget.set_error_count(self.list_error.count())
+
+    # endregion
+
+    # region CALLBACKS **********************************************************************************************"""
 
     def tab_changed_callback(self, index: int):
         """Callback function for when the current selected tab changes"""
@@ -171,7 +210,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             level = LoginStatus(name)  # gets the login level /USER ADMIN MAINTENANCE/ or throws KeyError
             if passwd == LoginStatus.get_pass(level):  # if the password for the level is matching
                 self.user_level = level
-                self.statusbar_label.setText(f"Signed in as {level.name}")
+                self.statusbar_widget.label_login.setText(f"Signed in as {level.name}")
                 self.label_login.setText("")
 
             else:
@@ -183,9 +222,16 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     def logout_callback(self):
         """This method gets called when the logout button is pressed"""
         self.user_level = LoginStatus.LOGGED_OUT
-        self.statusbar_label.setText("Not logged in")
+        self.statusbar_widget.label_login.setText("Not logged in")
 
-    """ METHODS **************************************************************************************************** """
+    def clear_errors_callback(self):
+        """Callback method for the 'CLEAR ERRORS' button"""
+        self.list_error.clear()
+        self.statusbar_widget.set_error_count(0)
+
+    # endregion
+
+    # region METHODS *********************************************************************************************** """
 
     def load_nodes(self):
         self.ros_worker.load_nodes()
@@ -227,7 +273,9 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             self.tabWidget.setTabEnabled(4, True)  # error log enabled
             self.tabWidget.setTabEnabled(5, True)  # login tab enabled
 
-    """ PROPERTIES ************************************************************************************************* """
+    # endregion
+
+    # region PROPERTIES ******************************************************************************************** """
 
     @property
     def user_level(self):
@@ -237,6 +285,8 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     def user_level(self, value: LoginStatus):
         self.__user_level = value
         self.set_interface_lock()
+
+    # endregion
 
 
 class ROSWorker(QObject):

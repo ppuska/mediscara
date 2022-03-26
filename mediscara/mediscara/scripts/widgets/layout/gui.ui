@@ -39,9 +39,14 @@ QPushButton {
 	border-radius: 7px;
 	border-color: black;
 	background-color: #F0E454;
+	background-color: rgb(240, 228, 84);
+	
+	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 228, 84, 255), stop:1 rgba(255, 255, 255, 255));
 }
 QPushButton:pressed {
-	background-color: #A39C41
+	background-color: ;
+	background-color: rgb(163, 156, 65);
+	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(163, 156, 65, 255), stop:1 rgba(255, 255, 255, 255));
 }
 QTabWidget::tab-bar {
 	alignment: center;
@@ -60,11 +65,12 @@ QTabBar::tab {
 	margin-left: 6px;
  }
 QTabBar::tab:selected {
-	
-	background-color:#398AA3;
+	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(57, 138, 163, 255), stop:1 rgba(255, 255, 255, 255));
 }
 QTabBar::tab:!selected {
 	background-color:#6CD2F0;
+	background-color: rgb(108, 210, 240);
+	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(108, 210, 240, 255), stop:1 rgba(255, 255, 255, 255));
 }
 
 </string>
@@ -89,7 +95,7 @@ QTabBar::tab:!selected {
          <string notr="true"/>
         </property>
         <property name="currentIndex">
-         <number>4</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab_info">
          <attribute name="title">
@@ -214,11 +220,24 @@ QTabBar::tab:!selected {
          <attribute name="title">
           <string>ERROR LOG</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
+         <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="10,1">
           <item>
            <widget class="QListWidget" name="list_error">
             <property name="selectionMode">
              <enum>QAbstractItemView::NoSelection</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="button_clear_errors">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>CLEAR ERRORS</string>
             </property>
            </widget>
           </item>
@@ -352,11 +371,13 @@ QTabBar::tab:!selected {
               </property>
               <property name="styleSheet">
                <string notr="true">QPushButton {
-	background-color: #5CD44C
+	background-color: #5CD44C;
+	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));
 }
 
 QPushButton:pressed {
-	background-color: #58c647
+	background-color: #58c647;
+	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));
 }</string>
               </property>
               <property name="text">
@@ -380,10 +401,12 @@ QPushButton:pressed {
               <property name="styleSheet">
                <string notr="true">QPushButton {
 	background-color: #F03E72;
+	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 255), stop:1 rgba(255, 255, 255, 255));
 }
 
 QPushButton:pressed {
 	background-color: #d83868;
+	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 255), stop:1 rgba(255, 255, 255, 255));
 }</string>
               </property>
               <property name="text">
