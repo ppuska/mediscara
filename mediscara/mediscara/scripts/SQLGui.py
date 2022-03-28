@@ -79,7 +79,6 @@ class SQLGuiApp(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.logger = Logger(None)
-        Logger.LOG_LEVEL = Logger.INFO
 
         """Set up statusbar"""
         self.statusbar_widget = SQLGuiApp.StatusBarWidget()
@@ -235,7 +234,8 @@ class SQLGuiApp(QMainWindow, Ui_MainWindow):
 
     def tab_changed_callback(self):
         self.resize_table_columns()
-        self.load_data()
+        if self.sql_manager.connected:
+            self.load_data()
 
     def connect_to_db_callback(self, success: bool, msg: str):
         if success:
@@ -272,8 +272,9 @@ class SQLGuiApp(QMainWindow, Ui_MainWindow):
         self.clear_inputs()  # clear the input fields
 
     def sql_timer_callback(self):
-        self.logger.debug("Loading view")
-        self.load_data()
+        if self.sql_manager.connected:
+            self.logger.debug("Loading view")
+            self.load_data()
 
 
 def main():
