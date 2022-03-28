@@ -27,28 +27,28 @@ class Logger:
 
     def debug(self, msg: str):
         if self.__parent is not None:
-            self.__parent.get_logger().debug(msg)
+            self.__parent.get_logger().debug(f"{self.__tag} {msg}")
 
         else:
-            logging.debug(msg)
+            logging.debug(f"{self.__tag} {msg}")
 
     def info(self, msg: str):
         if self.__parent is not None:
-            self.__parent.get_logger().info(msg)
+            self.__parent.get_logger().info(f"{self.__tag} {msg}")
 
         else:
-            logging.info(msg)
+            logging.info(f"{self.__tag} {msg}")
 
     def warn(self, msg: str):
         if self.__parent is not None:
-            self.__parent.get_logger().warn(msg)
+            self.__parent.get_logger().warn(f"{self.__tag} {msg}")
 
         else:
-            logging.warning(msg)
+            logging.warning(f"{self.__tag} {msg}")
 
     def error(self, msg: str):
         if self.__parent is not None:
-            self.__parent.get_logger().error(msg)
+            self.__parent.get_logger().error(f"{self.__tag} {msg}")
 
         else:
-            logging.error(msg)
+            logging.error(f"{self.__tag} {msg}")
