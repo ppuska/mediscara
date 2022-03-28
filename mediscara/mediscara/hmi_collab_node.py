@@ -1,20 +1,119 @@
 import sys
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QWidget
 
 import rclpy
 from interfaces.msg import Error
 from .scripts.hmi import HMIApp, ROSWorker
 from .scripts.ros_node import QTROSNode
 from .scripts.utils import NodeList
+from .scripts.widgets.layout.collab_info_UI import Ui_CollabInfoTab
 
 
 class HMICollabApp(HMIApp):
     NODE_NAME = NodeList.HMINode.value
     DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
 
+    # region INNER CLASSES *********************************************************************************************
+
+    class InfoTab(QWidget, Ui_CollabInfoTab):
+        """Class for displaying the info QWidget on the info tab"""
+
+        VISION = 0
+        ROBOTIC = 1
+
+        __POWER_ON_TEXT = "Power ON"
+        __POWER_OFF_TEXT = "Power"
+
+        __BG_COLOR_GREEN = "background-color: green;"
+        __BG_COLOR_YELLOW = "background-color: yellow;"
+        __BG_COLOR_BEIGE = "background-color: #f6ffc9"
+        __BG_COLOR_RED = "background-color: red"
+
+        def __init__(self, parent=None):
+            super(HMICollabApp.InfoTab, self).__init__(parent)
+            self.setupUi(self)
+
+            self.label_availability_vis.setText("0 %")
+            self.label_availability_rob.setText("0 %")
+            self.label_performance_vis.setText("0 %")
+            self.label_performance_rob.setText("0 %")
+            self.label_quality_vis.setText("0 %")
+            self.label_quality_rob.setText("0 %")
+
+        def set_power(self, box: int, value: bool):
+            if box == self.VISION:
+                label = self.label_power_vis
+
+            elif box == self.ROBOTIC:
+                label = self.label_power_rob
+
+            else:
+                raise ValueError("Invalid box number")
+
+            if value is True:
+                label.setText(self.__POWER_ON_TEXT)
+                label.setStyleSheet(self.__BG_COLOR_GREEN)
+
+            else:
+                label.setText(self.__POWER_OFF_TEXT)
+                label.setStyleSheet("")
+
+        def set_running(self, box: int, value: bool):
+            if box == self.VISION:
+                label = self.label_running_vis
+
+            elif box == self.ROBOTIC:
+                label = self.label_running_rob
+
+            else:
+                raise ValueError("Invalid box number")
+
+            if value:
+                label.setStyleSheet(self.__BG_COLOR_YELLOW)
+
+            else:
+                label.setStyleSheet("")
+
+        def set_waiting(self, box: int, value: bool):
+            if box == self.VISION:
+                label = self.label_waiting_vis
+
+            elif box == self.ROBOTIC:
+                label = self.label_waiting_rob
+
+            else:
+                raise ValueError("Invalid box number")
+
+            if value:
+                label.setStyleSheet(self.__BG_COLOR_BEIGE)
+
+            else:
+                label.setStyleSheet("")
+
+        def set_error(self, box: int, value: bool):
+            if box == self.VISION:
+                label = self.label_error_vis
+
+            elif box == self.ROBOTIC:
+                label = self.label_error_rob
+
+            else:
+                raise ValueError("Invalid box number")
+
+            if value:
+                label.setStyleSheet(self.__BG_COLOR_RED)
+
+            else:
+                label.setStyleSheet("")
+
+    # endregion
+
     def __init__(self):
         super(HMICollabApp, self).__init__(name=self.NODE_NAME, depends_list=self.DEPENDS, node_class=ROSNodeCollab)
+
+        self.info_widget = HMICollabApp.InfoTab(self.tab_info)
+        self.info_widget_layout.addWidget(self.info_widget)
 
 
 class ROSNodeCollab(QTROSNode):
