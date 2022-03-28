@@ -33,9 +33,14 @@ class Ui_GUIWindow(object):
 "    border-radius: 7px;\n"
 "    border-color: black;\n"
 "    background-color: #F0E454;\n"
+"    background-color: rgb(240, 228, 84);\n"
+"    \n"
+"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 228, 84, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "}\n"
 "QPushButton:pressed {\n"
-"    background-color: #A39C41\n"
+"    background-color: ;\n"
+"    background-color: rgb(163, 156, 65);\n"
+"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(163, 156, 65, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "}\n"
 "QTabWidget::tab-bar {\n"
 "    alignment: center;\n"
@@ -54,11 +59,12 @@ class Ui_GUIWindow(object):
 "    margin-left: 6px;\n"
 " }\n"
 "QTabBar::tab:selected {\n"
-"    \n"
-"    background-color:#398AA3;\n"
+"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(57, 138, 163, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "}\n"
 "QTabBar::tab:!selected {\n"
 "    background-color:#6CD2F0;\n"
+"    background-color: rgb(108, 210, 240);\n"
+"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(108, 210, 240, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "}\n"
 "\n"
 "")
@@ -80,19 +86,9 @@ class Ui_GUIWindow(object):
         self.tabWidget.setObjectName("tabWidget")
         self.tab_info = QtWidgets.QWidget()
         self.tab_info.setObjectName("tab_info")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.tab_info)
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.info_widget = QtWidgets.QWidget(self.tab_info)
-        self.info_widget.setObjectName("info_widget")
-        self.verticalLayout_3.addWidget(self.info_widget)
         self.tabWidget.addTab(self.tab_info, "")
         self.tab_control = QtWidgets.QWidget()
         self.tab_control.setObjectName("tab_control")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.tab_control)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.control_widget = QtWidgets.QWidget(self.tab_control)
-        self.control_widget.setObjectName("control_widget")
-        self.verticalLayout_2.addWidget(self.control_widget)
         self.tabWidget.addTab(self.tab_control, "")
         self.tab_nodes = QtWidgets.QWidget()
         self.tab_nodes.setObjectName("tab_nodes")
@@ -232,11 +228,13 @@ class Ui_GUIWindow(object):
         font.setPointSize(32)
         self.button_login.setFont(font)
         self.button_login.setStyleSheet("QPushButton {\n"
-"    background-color: #5CD44C\n"
+"    background-color: #5CD44C;\n"
+"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
-"    background-color: #58c647\n"
+"    background-color: #58c647;\n"
+"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "}")
         self.button_login.setObjectName("button_login")
         self.horizontalLayout_2.addWidget(self.button_login)
@@ -247,10 +245,12 @@ class Ui_GUIWindow(object):
         self.button_logout.setFont(font)
         self.button_logout.setStyleSheet("QPushButton {\n"
 "    background-color: #F03E72;\n"
+"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
 "    background-color: #d83868;\n"
+"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "}")
         self.button_logout.setObjectName("button_logout")
         self.horizontalLayout_2.addWidget(self.button_logout)
@@ -272,7 +272,7 @@ class Ui_GUIWindow(object):
         self.label_2.setBuddy(self.line_edit_pass)
 
         self.retranslateUi(GUIWindow)
-        self.tabWidget.setCurrentIndex(4)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(GUIWindow)
         GUIWindow.setTabOrder(self.line_edit_name, self.line_edit_pass)
         GUIWindow.setTabOrder(self.line_edit_pass, self.tabWidget)

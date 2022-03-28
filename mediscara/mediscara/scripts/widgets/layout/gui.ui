@@ -95,27 +95,17 @@ QTabBar::tab:!selected {
          <string notr="true"/>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_info">
          <attribute name="title">
           <string>INFO</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QWidget" name="info_widget" native="true"/>
-          </item>
-         </layout>
         </widget>
         <widget class="QWidget" name="tab_control">
          <attribute name="title">
           <string>CONTROL</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QWidget" name="control_widget" native="true"/>
-          </item>
-         </layout>
         </widget>
         <widget class="QWidget" name="tab_nodes">
          <attribute name="title">
