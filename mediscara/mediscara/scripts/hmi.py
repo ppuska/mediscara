@@ -66,6 +66,9 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             super(HMIApp.StatusbarWidget, self).__init__()
             self.setupUi(self)
 
+            self.label_login.setText("Not logged in")
+            self.set_error_count(0)
+
         def set_error_count(self, err_count: int):
             if err_count == 0:
                 self.label_error.setStyleSheet("background-color: white")
@@ -129,8 +132,6 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
         """Set up the statusbar widget for login info"""
         self.statusbar_widget = HMIApp.StatusbarWidget()
-        self.statusbar_widget.label_login.setText("Not logged in")
-        self.statusbar_widget.set_error_count(0)
         self.statusbar.addPermanentWidget(self.statusbar_widget, stretch=1)
 
         """Set up login level"""

@@ -115,6 +115,21 @@ class HMICollabApp(HMIApp):
         self.info_widget = HMICollabApp.InfoTab(self.tab_info)
         self.info_widget_layout.addWidget(self.info_widget)
 
+    # region OVERRIDES *************************************************************************************************
+
+    def ros_error_callback(self, node_name: str, msg: str, err_code: int):
+        super(HMICollabApp, self).ros_error_callback(node_name, msg, err_code)
+
+        # todo differentiate between vision system and robot
+        self.info_widget.set_error(HMICollabApp.InfoTab.VISION, True)
+
+    def clear_errors_callback(self):
+        super(HMICollabApp, self).clear_errors_callback()
+
+        self.info_widget.set_error(HMICollabApp.InfoTab.VISION, False)
+
+    # endregion
+
 
 class ROSNodeCollab(QTROSNode):
 
