@@ -4,8 +4,8 @@ import threading
 from functools import wraps
 from typing import Callable, Tuple
 
-from .logger import Logger
-from .thread_manager import WorkerThread
+from mediscara.scripts.logger import Logger
+from mediscara.scripts.thread_manager import WorkerThread
 
 
 class Decorator:

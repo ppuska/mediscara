@@ -4,10 +4,10 @@ from PyQt5.QtWidgets import QApplication, QWidget
 
 import rclpy
 from interfaces.msg import Error
-from .scripts.hmi import HMIApp, ROSWorker
-from .scripts.ros_node import QTROSNode
-from mediscara.mediscara.config import NodeList
-from .scripts.widgets.layout.collab_info_UI import Ui_CollabInfoTab
+from mediscara.scripts.hmi import HMIApp, ROSWorker
+from mediscara.scripts.ros_node import QTROSNode
+from mediscara.config import NodeList
+from mediscara.scripts.widgets.layout.collab_info_UI import Ui_CollabInfoTab
 
 
 class HMICollabApp(HMIApp):

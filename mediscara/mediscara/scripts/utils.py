@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 
 from interfaces.msg import Error

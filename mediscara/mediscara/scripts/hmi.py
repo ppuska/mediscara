@@ -6,11 +6,11 @@ from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel, QListWidget, QListWidgetItem, QWidget
 
 import rclpy
-from .ros_node import QTROSNode
-from mediscara.mediscara.config import IPList
-from .widgets.layout.gui_UI import Ui_GUIWindow
-from .widgets.layout.list_widget_item_UI import Ui_ListItem
-from .widgets.layout.statusbar_UI import Ui_StatusBar
+from mediscara.scripts.ros_node import QTROSNode
+from mediscara.config import IPList
+from mediscara.scripts.widgets.layout.gui_UI import Ui_GUIWindow
+from mediscara.scripts.widgets.layout.list_widget_item_UI import Ui_ListItem
+from mediscara.scripts.widgets.layout.statusbar_UI import Ui_StatusBar
 
 
 class LoginStatus(enum.Enum):

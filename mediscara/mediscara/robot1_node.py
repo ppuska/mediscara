@@ -1,8 +1,8 @@
 import rclpy
 from interfaces.msg import Error
 
-from .scripts.ros_node import ROSNode
-from mediscara.mediscara.config import NodeList
+from mediscara.scripts.ros_node import ROSNode
+from mediscara.config import NodeList
 
 
 class Robot1Node(ROSNode):

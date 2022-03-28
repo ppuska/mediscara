@@ -4,8 +4,8 @@ from typing import Callable
 import serial
 import sys
 
-from .thread_manager import WorkerThread
-from .logger import Logger
+from mediscara.scripts.thread_manager import WorkerThread
+from mediscara.scripts.logger import Logger
 
 
 class SerialManager:

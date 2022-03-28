@@ -3,11 +3,11 @@ import enum
 import rclpy
 from interfaces.msg import Error, MarkerStatus
 from std_msgs.msg import Bool
-from .scripts.ros_node import ROSNode
-from .scripts.socket_manager import SocketManager
-from .scripts.sql import SQLManager, Cell2Data
-from mediscara.mediscara.config import NodeList, MessageList, PortList, IPList, SQLTableNames
-from mediscara.mediscara.scripts.utils import ErrorClass
+from mediscara.scripts.ros_node import ROSNode
+from mediscara.scripts.socket_manager import SocketManager
+from mediscara.scripts.sql import SQLManager, Cell2Data
+from mediscara.config import NodeList, MessageList, PortList, IPList, SQLTableNames
+from mediscara.scripts.utils import ErrorClass
 
 
 class Robot2Node(ROSNode):

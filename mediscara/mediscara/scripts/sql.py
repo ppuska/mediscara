@@ -3,16 +3,12 @@ from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime
 from functools import wraps
-from typing import ClassVar, Type, List, Tuple, Any
+from typing import ClassVar, Type, List, Tuple
 
 import mysql.connector
+from mediscara.scripts.logger import Logger
 from mysql.connector import MySQLConnection, CMySQLConnection
 from mysql.connector.errors import ProgrammingError, DatabaseError
-
-try:
-    from .logger import Logger
-except ImportError:
-    from logger import Logger
 
 
 class Decorator:

@@ -3,7 +3,7 @@ from typing import List
 from rclpy.node import Node
 
 from interfaces.msg import Error
-from .utils import ErrorClass as UtilsError
+from mediscara.scripts.utils import ErrorClass as UtilsError
 
 from abc import ABC, abstractmethod
 

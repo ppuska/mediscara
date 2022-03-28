@@ -10,10 +10,10 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHeaderView, QTa
 from widgets.sql_gui_UI import Ui_MainWindow
 from widgets.statusbar_widget_UI import Ui_StatusBarWidget
 
-from logger import Logger
-from sql import SQLManager, Bell, SQLDataClass, Cell2Data
-from thread_manager import WorkerThread
-from mediscara.mediscara.config import SQLTableNames
+from mediscara.scripts.logger import Logger
+from mediscara.scripts.sql import SQLManager, Bell, SQLDataClass, Cell2Data
+from mediscara.scripts.thread_manager import WorkerThread
+from mediscara.config import SQLTableNames
 
 
 class SQLGuiApp(QMainWindow, Ui_MainWindow):
