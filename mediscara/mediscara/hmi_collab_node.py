@@ -8,6 +8,7 @@ from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.config import NodeList
 from mediscara.scripts.widgets.layout.collab_info_UI import Ui_CollabInfoTab
+from mediscara.scripts.widgets.layout.collab_control_UI import Ui_CollabControlWidget
 
 
 class HMICollabApp(HMIApp):
@@ -16,7 +17,7 @@ class HMICollabApp(HMIApp):
 
     # region INNER CLASSES *********************************************************************************************
 
-    class InfoTab(QWidget, Ui_CollabInfoTab):
+    class InfoWidget(QWidget, Ui_CollabInfoTab):
         """Class for displaying the info QWidget on the info tab"""
 
         VISION = 0
@@ -31,7 +32,7 @@ class HMICollabApp(HMIApp):
         __BG_COLOR_RED = "background-color: red"
 
         def __init__(self, parent=None):
-            super(HMICollabApp.InfoTab, self).__init__(parent)
+            super(HMICollabApp.InfoWidget, self).__init__(parent)
             self.setupUi(self)
 
             self.label_availability_vis.setText("0 %")
@@ -107,13 +108,24 @@ class HMICollabApp(HMIApp):
             else:
                 label.setStyleSheet("")
 
+    class ControlWidget(QWidget, Ui_CollabControlWidget):
+
+        def __init__(self, parent=None):
+            super(HMICollabApp.ControlWidget, self).__init__(parent=parent)
+            self.setupUi(self)
+
     # endregion
 
     def __init__(self):
         super(HMICollabApp, self).__init__(name=self.NODE_NAME, depends_list=self.DEPENDS, node_class=ROSNodeCollab)
 
-        self.info_widget = HMICollabApp.InfoTab(self.tab_info)
+        # add info widget
+        self.info_widget = HMICollabApp.InfoWidget(self.tab_info)
         self.info_widget_layout.addWidget(self.info_widget)
+
+        # add control widget
+        self.control_widget = HMICollabApp.ControlWidget(self.tab_control)
+        self.control_widget_layout.addWidget(self.control_widget)
 
     # region OVERRIDES *************************************************************************************************
 
@@ -121,12 +133,12 @@ class HMICollabApp(HMIApp):
         super(HMICollabApp, self).ros_error_callback(node_name, msg, err_code)
 
         # todo differentiate between vision system and robot
-        self.info_widget.set_error(HMICollabApp.InfoTab.VISION, True)
+        self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, True)
 
     def clear_errors_callback(self):
         super(HMICollabApp, self).clear_errors_callback()
 
-        self.info_widget.set_error(HMICollabApp.InfoTab.VISION, False)
+        self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, False)
 
     # endregion
 
