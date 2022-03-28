@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel, QListWidget, 
 
 import rclpy
 from .ros_node import QTROSNode
-from .utils import IPList
+from mediscara.mediscara.config import IPList
 from .widgets.layout.gui_UI import Ui_GUIWindow
 from .widgets.layout.list_widget_item_UI import Ui_ListItem
 from .widgets.layout.statusbar_UI import Ui_StatusBar

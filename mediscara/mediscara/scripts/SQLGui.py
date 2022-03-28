@@ -13,7 +13,7 @@ from widgets.statusbar_widget_UI import Ui_StatusBarWidget
 from logger import Logger
 from sql import SQLManager, Bell, SQLDataClass, Cell2Data
 from thread_manager import WorkerThread
-from utils import SQLTableNames
+from mediscara.mediscara.config import SQLTableNames
 
 
 class SQLGuiApp(QMainWindow, Ui_MainWindow):

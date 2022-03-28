@@ -6,7 +6,7 @@ import rclpy
 from interfaces.msg import Error
 from .scripts.hmi import HMIApp, ROSWorker
 from .scripts.ros_node import QTROSNode
-from .scripts.utils import NodeList
+from mediscara.mediscara.config import NodeList
 from .scripts.widgets.layout.collab_info_UI import Ui_CollabInfoTab
 
 
@@ -151,7 +151,7 @@ class ROSNodeCollab(QTROSNode):
         pass
 
     def load_nodes(self):
-        self.get_logger().info("Loading nodes")
+        self.get_logger().debug("Loading nodes")
         all_nodes = self.dependencies
         missing_nodes = self.missing_dependencies
         self.signals.nodes_loaded.emit(all_nodes, missing_nodes)

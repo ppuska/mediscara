@@ -6,16 +6,9 @@ from typing import Callable, Tuple
 
 from .logger import Logger
 from .thread_manager import WorkerThread
-from .utils import Debug
 
 
 class Decorator:
-
-    @staticmethod
-    @Debug.debug_method
-    def _log_error(msg):
-        print("SOCKET ERROR: ", msg)
-
     @staticmethod
     def socket_check(func):
         """Wraps a try...except case around the function to except socket exceptions"""
@@ -28,7 +21,7 @@ class Decorator:
                 return result
 
             except OSError as e:
-                Decorator._log_error(f"Socket error in {func.__name__}: {e}")
+                logging.error(f"Socket error in {func.__name__}: {e}")
 
         return wrapper
 

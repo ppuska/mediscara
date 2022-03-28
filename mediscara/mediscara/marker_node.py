@@ -7,7 +7,8 @@ from std_msgs.msg import Bool
 
 from .scripts.socket_manager import SocketManager
 from .scripts.ros_node import ROSNode
-from .scripts.utils import NodeList, MessageList, ErrorClass as UtilsError
+from mediscara.mediscara.config import NodeList, MessageList
+from mediscara.mediscara.scripts.utils import ErrorClass as UtilsError
 
 
 class MarkerNode(ROSNode):

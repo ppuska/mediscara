@@ -6,7 +6,8 @@ from std_msgs.msg import Bool
 from .scripts.ros_node import ROSNode
 from .scripts.socket_manager import SocketManager
 from .scripts.sql import SQLManager, Cell2Data
-from .scripts.utils import NodeList, MessageList, PortList, IPList, SQLTableNames, ErrorClass
+from mediscara.mediscara.config import NodeList, MessageList, PortList, IPList, SQLTableNames
+from mediscara.mediscara.scripts.utils import ErrorClass
 
 
 class Robot2Node(ROSNode):
