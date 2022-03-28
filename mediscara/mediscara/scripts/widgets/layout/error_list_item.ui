@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ListItem</class>
- <widget class="QWidget" name="ListItem">
+ <class>ErrorListItem</class>
+ <widget class="QWidget" name="ErrorListItem">
   <property name="geometry">
    <rect>
     <x>0</x>

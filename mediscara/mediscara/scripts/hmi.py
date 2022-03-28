@@ -2,14 +2,16 @@ import enum
 from abc import abstractmethod
 from typing import List, Type
 
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl, Qt
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel, QListWidget, QListWidgetItem, QWidget
 
 import rclpy
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.config import IPList
 from mediscara.scripts.widgets.layout.gui_UI import Ui_GUIWindow
-from mediscara.scripts.widgets.layout.list_widget_item_UI import Ui_ListItem
+from mediscara.scripts.widgets.layout.error_list_item_UI import Ui_ErrorListItem
+from mediscara.scripts.widgets.layout.node_list_item_UI import Ui_NodeListItem
+
 from mediscara.scripts.widgets.layout.statusbar_UI import Ui_StatusBar
 
 
@@ -53,13 +55,30 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     __TAB_ERROR = 4
     __TAB_LOGIN = 5
 
-    class ErrorListItem(Ui_ListItem, QWidget):
+    # region INNER CLASSES *********************************************************************************************
+
+    class ErrorListItem(Ui_ErrorListItem, QWidget):
         def __init__(self, node_name: str, error_msg: str, error_code: int):
             super(HMIApp.ErrorListItem, self).__init__()
             self.setupUi(self)
             self.label_node_name.setText(node_name)
             self.label_error_message.setText(error_msg)
             self.label_error_code.setText(str(error_code))
+
+    class NodeListItem(Ui_NodeListItem, QWidget):
+        def __init__(self, node_name: str, missing: bool):
+            super(HMIApp.NodeListItem, self).__init__()
+            self.setupUi(self)
+
+            self.label_node_name.setText(node_name)
+            self.missing = missing
+            if missing:
+                self.label_node_name.setStyleSheet("background-color: yellow")
+            else:
+                self.label_node_name.setStyleSheet("background-color: green")
+
+        def __repr__(self):
+            return f"{self.__class__.__name__}({self.label_node_name.text()}, {self.missing})"
 
     class StatusbarWidget(Ui_StatusBar, QWidget):
         def __init__(self):
@@ -80,6 +99,8 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
                 else:
                     self.label_error.setText(f"{err_count} errors")
+
+    # endregion
 
     def __init__(self, name: str, depends_list: List[str], node_class: Type[QTROSNode]):
         """Constructor method
@@ -151,17 +172,14 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     def nodes_loaded_callback(self, dependencies: List[str], missing: List[str]):
         """Callback method for displaying the loaded nodes"""
-        self.table_nodes.setRowCount(len(dependencies))  # set the row number
-
         for row, node in enumerate(dependencies):  # iterate through the dependency nodes
-            self.table_nodes.setItem(row, 0, QTableWidgetItem(node))
-
-            if node in missing:
-                text = "Offline"
-            else:
-                text = "Online"
-
-            self.table_nodes.setItem(row, 1, QTableWidgetItem(text))
+            item_widget = HMIApp.NodeListItem(node, missing=(node in missing))
+            print(item_widget)
+            list_widget_item = QListWidgetItem(self.list_nodes)  # add a new list widget item
+            list_widget_item.setSizeHint(item_widget.sizeHint())  # copy the size hint from the item widget
+            self.list_nodes.addItem(list_widget_item)
+            self.list_nodes.setItemWidget(list_widget_item, item_widget)
+            # todo finish this
 
     def info_loaded_callback(self):
         """Callback method for consuming the KPI info returned by the ROS thread"""
