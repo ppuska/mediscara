@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_CollabControlWidget(object):
     def setupUi(self, CollabControlWidget):
         CollabControlWidget.setObjectName("CollabControlWidget")
-        CollabControlWidget.resize(429, 342)
+        CollabControlWidget.resize(497, 496)
         CollabControlWidget.setStyleSheet("/* \n"
 "    primary color: #6CD2F0\n"
 "    primary color dark: #398AA3\n"
@@ -111,6 +111,11 @@ class Ui_CollabControlWidget(object):
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
         self.gridLayout.addWidget(self.label_2, 0, 1, 1, 1)
+        self.label_3 = QtWidgets.QLabel(CollabControlWidget)
+        self.label_3.setStyleSheet("image: url(:/images/logo);")
+        self.label_3.setText("")
+        self.label_3.setObjectName("label_3")
+        self.gridLayout.addWidget(self.label_3, 3, 1, 1, 1)
         self.gridLayout.setRowStretch(1, 1)
         self.gridLayout.setRowStretch(2, 1)
         self.gridLayout.setRowStretch(3, 1)
@@ -128,3 +133,4 @@ class Ui_CollabControlWidget(object):
         self.pushButton_5.setText(_translate("CollabControlWidget", "START MEASURE - PCB"))
         self.label.setText(_translate("CollabControlWidget", "Vision"))
         self.label_2.setText(_translate("CollabControlWidget", "Robotic"))
+from . import res_rc

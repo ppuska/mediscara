@@ -172,14 +172,15 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     def nodes_loaded_callback(self, dependencies: List[str], missing: List[str]):
         """Callback method for displaying the loaded nodes"""
+
+        self.list_nodes.clear()  # clear the nodes list
+
         for row, node in enumerate(dependencies):  # iterate through the dependency nodes
             item_widget = HMIApp.NodeListItem(node, missing=(node in missing))
-            print(item_widget)
             list_widget_item = QListWidgetItem(self.list_nodes)  # add a new list widget item
             list_widget_item.setSizeHint(item_widget.sizeHint())  # copy the size hint from the item widget
             self.list_nodes.addItem(list_widget_item)
             self.list_nodes.setItemWidget(list_widget_item, item_widget)
-            # todo finish this
 
     def info_loaded_callback(self):
         """Callback method for consuming the KPI info returned by the ROS thread"""
