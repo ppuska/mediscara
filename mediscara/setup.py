@@ -3,9 +3,7 @@ from setuptools import setup
 from setuptools import find_packages
 import os
 
-packages = ["mediscara", "mediscara.scripts", "mediscara.scripts.managers", "mediscara.scripts.widgets"]
 package_name = 'mediscara'
-layout_submodule = 'widgets'
 
 setup(
     name=package_name,
@@ -20,7 +18,7 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Admin',
+    maintainer='Peter Puska',
     maintainer_email='p.puska@lasram.hu',
     description='',
     license='TODO: License declaration',
