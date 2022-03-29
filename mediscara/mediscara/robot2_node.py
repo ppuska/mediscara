@@ -1,8 +1,10 @@
 import enum
 
 import rclpy
-from interfaces.msg import Error, MarkerStatus
+
+from interfaces.msg import Error, MarkerStatus, Robot2Control
 from std_msgs.msg import Bool
+
 from mediscara.scripts.ros_node import ROSNode
 from mediscara.scripts.socket_manager import SocketManager
 from mediscara.scripts.sql import SQLManager, Cell2Data
@@ -22,7 +24,7 @@ class Robot2Node(ROSNode):
     INVALID_ROBOT_JOB_ERROR = ErrorClass(error_msg="The robot job was invalid", error_code=0)  # todo configure this
     ROBOT_JOB_FAILED_ERROR = ErrorClass(error_msg="The robot job has failed", error_code=0)
 
-    class MarkerState(enum.Enum):
+    class MarkerState(enum.Enum):  # todo remove this from code
         WAITING = enum.auto()
         MARKING = enum.auto()
 
@@ -35,7 +37,7 @@ class Robot2Node(ROSNode):
         self.__marker_state = Robot2Node.MarkerState.WAITING
         self.__current_item = None
 
-        """Creating status and control channels"""
+        # Creating status and control channels
         # subscription
         self.__marker_status_sub = self.create_subscription(
             msg_type=MessageList.MarkerStatus.value[1],
@@ -58,7 +60,7 @@ class Robot2Node(ROSNode):
             qos_profile=10
         )
 
-        """Initializing the TCP Socket server"""
+        # Initializing the TCP Socket server
         self.__socket_client = SocketManager(
             parent=self,
             host=IPList.Robot2.value,
@@ -105,39 +107,52 @@ class Robot2Node(ROSNode):
                 self.get_logger().warn(f'Marker error: [{msg.error_code}]\n\t{msg.error_msg}')
 
     def destroy_node(self) -> bool:
-        self.set_in_production(False)
+        if self.__db_handler.connected:
+            self.set_in_production(False)
         self.__db_handler.close()
         return super().destroy_node()
 
     """ CALLBACKS ************************************************************************************************** """
 
-    def control_callback(self, msg: Bool):
-        if msg.data:
-            self.send_job()
-            assert isinstance(self.__current_item, Cell2Data)
-            self.__current_item.in_production = True
+    # region TCP/IP messages
 
-            print(self.__db_handler.update_element(table_name=self.SQL_TABLE_NAME,
-                                                   new_value=self.__current_item
-                                                   )
-                  )
-
-    def status_callback(self, msg: MarkerStatus):
-        if msg.marking_successful:
-            self.get_logger().info("Marking successful")
-            self.__socket_client.send(self.MARKING_SUCCESS)
-
-# region TCP/IP messages
+    # marker
     START_MARKING = 'START_MARKING'
     STOP_MARKING = 'STOP_MARKING'
     MARKING_SUCCESS = "MARKING_SUCCESS"
     MARKING_ERROR = "MARKING_ERROR"
+    # jobs
     JOB_INVALID = "JOB_INVALID"
     JOB_STARTED = "JOB_STARTED"
     JOB_SUCCESS = "JOB_SUCCESS"
     JOB_FAILED = "JOB_FAILED"
     JOB_REQUEST = "JOB_REQUEST"
-# endregion
+    # homing
+    HOME = "HOME"
+
+    # endregion
+
+    def control_callback(self, msg: Robot2Control):
+        if msg.home:
+            self.__socket_client.send(self.HOME)
+
+        elif msg.start_marking:
+            self.__socket_client.send(self.START_MARKING)
+
+        # if msg.data:
+        #     self.send_job()
+        #     assert isinstance(self.__current_item, Cell2Data)
+        #     self.__current_item.in_production = True
+        #
+        #     print(self.__db_handler.update_element(table_name=self.SQL_TABLE_NAME,
+        #                                            new_value=self.__current_item
+        #                                            )
+        #           )
+
+    def status_callback(self, msg: MarkerStatus):
+        if msg.marking_successful:
+            self.get_logger().info("Marking successful")
+            self.__socket_client.send(self.MARKING_SUCCESS)
 
     def socket_received_callback(self, success: bool, msg: str):
         """Callback function for socket receive"""
