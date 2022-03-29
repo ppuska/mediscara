@@ -331,6 +331,7 @@ class ROSWorker(QObject):
         nodes_loaded = pyqtSignal(list, list)
         info_loaded = pyqtSignal()
         new_error = pyqtSignal(str, str, int)
+        depends_online = pyqtSignal(bool)
         kpi = pyqtSignal(object)
         status = pyqtSignal(object)
 
@@ -390,6 +391,10 @@ class ROSWorker(QObject):
         self.__ros_node.get_logger().info("Shutting down ROS node")
         rclpy.shutdown()
         self.finished.emit()
+
+    @pyqtSlot()
+    def missing_dependencies(self):
+        return self.__ros_node.missing_dependencies
 
     @property
     def signals(self):

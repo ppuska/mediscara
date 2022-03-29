@@ -14,3 +14,10 @@
 - [x] Node for the Robotic cell 2 (collaborative)
 - [ ] Node for the laser cutter
 
+## Errors
+
+- Robotic Cell 1:
+
+- Robotic Cell 2:
+  - Node went offline: 021
+
