@@ -230,7 +230,6 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             level = LoginStatus(name)  # gets the login level /USER ADMIN MAINTENANCE/ or throws KeyError
             if passwd == LoginStatus.get_pass(level):  # if the password for the level is matching
                 self.user_level = level
-                self.statusbar_widget.label_login.setText(f"Signed in as {level.name}")
                 self.label_login.setText("")
 
             else:
@@ -242,7 +241,6 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     def logout_callback(self):
         """This method gets called when the logout button is pressed"""
         self.user_level = LoginStatus.LOGGED_OUT
-        self.statusbar_widget.label_login.setText("Not logged in")
 
     def clear_errors_callback(self):
         """Callback method for the 'CLEAR ERRORS' button"""
@@ -304,6 +302,12 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     @user_level.setter
     def user_level(self, value: LoginStatus):
         self.__user_level = value
+        if value == LoginStatus.LOGGED_OUT:
+            self.statusbar_widget.label_login.setText(f"Not signed in")
+
+        else:
+            self.statusbar_widget.label_login.setText(f"Signed in as {value.value}")
+
         self.set_interface_lock()
 
     # endregion
