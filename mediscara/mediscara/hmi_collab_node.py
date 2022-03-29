@@ -167,12 +167,13 @@ class HMICollabApp(HMIApp):
         # connect slots and signals
         self.ros_worker.signals.kpi.connect(self.kpi_callback)
         self.ros_worker.signals.status.connect(self.status_callback)
-        self.ros_worker.signals.all_depends_online.connect(self.depends_callback)
+        self.ros_worker.signals.dependency_online.connect(self.dependency_callback)
 
         # lock the systems
-        self.__depends_online = False
-        self.control_widget.lock_control_robotic(True)
-        self.control_widget.lock_control_vision(True)
+
+        self.__marker_online = False
+        self.__robot_online = False
+        self.__vision_online = False
 
         # command line arguments
         if sys.argv is not None:
@@ -181,6 +182,25 @@ class HMICollabApp(HMIApp):
                 self.user_level = LoginStatus.ADMIN
 
     # region OVERRIDES *************************************************************************************************
+
+    def ros_node_online_callback(self):
+        self.logger.debug("ROS Node online")
+
+        missing = self.ros_worker.missing_dependencies()  # check for missing dependencies
+        if bool(missing): # the list is not empty
+            if NodeList.MarkerNode.value not in missing:  # marker is online
+                self.__marker_online = True
+
+            if NodeList.Robot2Node.value not in missing:  # robot is online
+                self.__robot_online = True
+
+            if not self.__robot_online or not self.__marker_online:  # if either offline, lock
+                self.control_widget.lock_control_robotic(True)
+
+            if not self.__vision_online:
+                self.control_widget.lock_control_vision(True)
+
+            # todo finish the vision system nodes
 
     def ros_error_callback(self, node_name: str, msg: str, err_code: int):
         super(HMICollabApp, self).ros_error_callback(node_name, msg, err_code)
@@ -215,8 +235,30 @@ class HMICollabApp(HMIApp):
             self.info_widget.set_waiting(HMICollabApp.InfoWidget.ROBOTIC, msg.waiting)
             self.info_widget.set_running(HMICollabApp.InfoWidget.ROBOTIC, msg.running)
 
-    def depends_callback(self, online: bool):
-        self.depends_online = online
+    def dependency_callback(self, name: str, online: bool):
+        if name == NodeList.MarkerNode.value:
+            self.__marker_online = online
+
+        elif name == NodeList.Robot2Node.value:
+            self.__robot_online = online
+
+        # todo implement vision system
+
+        if self.__marker_online and self.__robot_online:
+            self.logger.info("Unlocking robot UI")
+            self.control_widget.lock_control_robotic(False)  # unlock the UI
+
+        else:
+            self.logger.info("Locking robot UI")
+            self.control_widget.lock_control_robotic(True)
+
+        if self.__vision_online:
+            self.logger.info("Unlocking vision UI")
+            self.control_widget.lock_control_vision(False)
+
+        else:
+            self.logger.info("Locking vision IO")
+            self.control_widget.lock_control_vision(True)
 
     # endregion
 
@@ -278,15 +320,25 @@ class ROSNodeCollab(QTROSNode):
         )
 
         self.get_logger().info("ROS node online")
+        self.signals.started.emit()
 
     def error_callback(self, msg: Error):
         self.signals.new_error.emit(msg.node_name, msg.error_msg, msg.error_code)
 
-    def depends_online(self):
-        self.signals.all_depends_online.emit(True)
+    def all_depends_online(self):
+        self.get_logger().info("All dependencies are online")
+
+    def dependency_online(self, name: str, online: bool):
+        if online:
+            self.get_logger().info(f"A dependency has come online: {name}")
+
+        else:
+            self.get_logger().info(f"A dependency has gone offline: {name}")
+
+        self.signals.dependency_online.emit(name, online)
 
     def depends_offline(self):
-        self.signals.all_depends_online.emit(False)
+        self.signals.dependency_online.emit("", False)
         self.signals.new_error.emit("Internal error", "A dependency node has gone offline", 0)
 
     def load_info(self):

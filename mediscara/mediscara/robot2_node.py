@@ -90,8 +90,12 @@ class Robot2Node(ROSNode):
 
     # region OVERRIDES *************************************************************************************************
 
-    def dependency_online(self, name: str):
-        print(name)
+    def dependency_online(self, name: str, online: bool):
+        if online:
+            self.get_logger().info(f"Node is now online: {name}")
+
+        else:
+            self.get_logger().info("Node went offline:" + name)
 
     def all_depends_online(self):
         self.get_logger().info("Missing dependencies have come online")
