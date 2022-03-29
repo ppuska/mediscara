@@ -1,6 +1,6 @@
 from enum import Enum
 
-from interfaces.msg import Error, MarkerStatus as Ms
+from interfaces.msg import VisionControl, Robot2Control, MarkerStatus as Ms
 from std_msgs.msg import Bool
 
 
@@ -19,7 +19,8 @@ class MessageList(Enum):
     """Enum class for storing message topics and their respective message types"""
     MarkerStatus = 'marker_status', Ms
     MarkerControl = 'marker_control', Bool
-    Robot2Control = 'robot_control', Bool  # todo implement correctly
+    Robot2Control = 'robot2_control', Robot2Control
+    VisionControl = 'vision_control', VisionControl
 
 
 class IPList(Enum):

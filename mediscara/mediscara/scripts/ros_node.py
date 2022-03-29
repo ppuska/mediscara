@@ -149,7 +149,7 @@ class QTROSNode(ROSNode, ABC):
         pass
 
     @abstractmethod
-    def send_control(self):
+    def send_control(self, *args, **kwargs):
         """Send messages to the respective control topics"""
         pass
 

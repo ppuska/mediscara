@@ -1,12 +1,12 @@
 import sys
 
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 
 import rclpy
-from interfaces.msg import Error
+from interfaces.msg import Error, Robot2Control, VisionControl
 from mediscara.scripts.hmi import HMIApp, ROSWorker, LoginStatus
 from mediscara.scripts.ros_node import QTROSNode
-from mediscara.config import NodeList
+from mediscara.config import NodeList, MessageList
 from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
 from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlWidget
 
@@ -116,6 +116,16 @@ class HMICollabApp(HMIApp):
             super(HMICollabApp.ControlWidget, self).__init__(parent=parent)
             self.setupUi(self)
 
+        @property
+        def buttons(self):
+            """Returns the buttons in the layout"""
+            return [self.button_home_robotic,
+                    self.button_home_vision,
+                    self.button_start_marking,
+                    self.button_measure_label,
+                    self.button_measure_pcb
+                    ]
+
     # endregion
 
     def __init__(self):
@@ -128,6 +138,11 @@ class HMICollabApp(HMIApp):
         # add control widget
         self.control_widget = HMICollabApp.ControlWidget(self.tab_control)
         self.control_widget_layout.addWidget(self.control_widget)
+
+        # connect button clicks to callbacks
+        for button in self.control_widget.buttons:
+            assert isinstance(button, QPushButton)
+            button.clicked.connect(self.button_clicked_callback)
 
         # command line arguments
         if sys.argv is not None:
@@ -150,11 +165,69 @@ class HMICollabApp(HMIApp):
 
     # endregion
 
+    # region CALLBACKS *************************************************************************************************
+
+    def button_clicked_callback(self):
+        button_clicked = self.sender()
+
+        # vision
+        msg = VisionControl()
+        if button_clicked == self.control_widget.button_home_vision:
+            msg.home = True
+            msg.measure_pcb = False
+            msg.measure_label = False
+
+            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
+
+        elif button_clicked == self.control_widget.button_measure_pcb:
+            msg.home = False
+            msg.measure_pcb = True
+            msg.measure_label = False
+
+            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
+
+        elif button_clicked == self.control_widget.button_measure_label:
+            msg.home = False
+            msg.measure_pcb = False
+            msg.measure_label = True
+
+            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
+
+        # robot
+        msg = Robot2Control()
+        if button_clicked == self.control_widget.button_home_robotic:
+            msg.home = True
+            msg.start_marking = False
+
+            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
+
+        elif button_clicked == self.control_widget.button_start_marking:
+            msg.home = False
+            msg.start_marking = True
+
+            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
+
+    # endregion
+
 
 class ROSNodeCollab(QTROSNode):
 
+    VISION = 0
+    ROBOTIC = 1
+
     def __init__(self, node_name, depends_on, signals: ROSWorker.Signals):
         super(ROSNodeCollab, self).__init__(node_name=node_name, depends_on=depends_on, signals=signals)
+
+        # publishers
+        self.__robot_control = self.create_publisher(msg_type=MessageList.Robot2Control.value[1],
+                                                     topic=MessageList.Robot2Control.value[0],
+                                                     qos_profile=10
+                                                     )
+
+        self.__vision_control = self.create_publisher(msg_type=MessageList.VisionControl.value[1],
+                                                      topic=MessageList.VisionControl.value[0],
+                                                      qos_profile=10
+                                                      )
 
         self.get_logger().info("ROS node online")
 
@@ -176,8 +249,18 @@ class ROSNodeCollab(QTROSNode):
         missing_nodes = self.missing_dependencies
         self.signals.nodes_loaded.emit(all_nodes, missing_nodes)
 
-    def send_control(self):
-        pass
+    def send_control(self, cell: int, msg: Robot2Control or VisionControl):
+        self.get_logger().debug(f"Sending command: {msg}")
+        if cell == self.VISION:
+            assert isinstance(msg, VisionControl)
+            self.__vision_control.publish(msg)
+
+        elif cell == self.ROBOTIC:
+            assert isinstance(msg, Robot2Control)
+            self.__robot_control.publish(msg)
+
+        else:
+            raise ValueError(f"Invalid cell (number: {cell})")
 
 
 class SQLManager:

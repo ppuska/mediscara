@@ -46,7 +46,7 @@ QPushButton:pressed {
   </property>
   <layout class="QGridLayout" name="gridLayout" rowstretch="0,1,1,1" columnstretch="0,0">
    <item row="1" column="0">
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="button_home_vision">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -74,7 +74,7 @@ QPushButton:pressed {
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QPushButton" name="pushButton_4">
+    <widget class="QPushButton" name="button_start_marking">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -93,7 +93,7 @@ QPushButton:pressed {
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="button_home_robotic">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -121,7 +121,7 @@ QPushButton:pressed {
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QPushButton" name="pushButton_3">
+    <widget class="QPushButton" name="button_measure_pcb">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -140,7 +140,7 @@ QPushButton:pressed {
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QPushButton" name="pushButton_5">
+    <widget class="QPushButton" name="button_measure_label">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
        <horstretch>0</horstretch>

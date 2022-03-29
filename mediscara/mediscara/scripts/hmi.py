@@ -66,6 +66,9 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             self.label_error_code.setText(str(error_code))
 
     class NodeListItem(Ui_NodeListItem, QWidget):
+
+        __STYLESHEET = "padding: 12px; border: 1px solid black; border-radius: 7px; "
+
         def __init__(self, node_name: str, missing: bool):
             super(HMIApp.NodeListItem, self).__init__()
             self.setupUi(self)
@@ -73,9 +76,9 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             self.label_node_name.setText(node_name)
             self.missing = missing
             if missing:
-                self.label_node_name.setStyleSheet("background-color: yellow")
+                self.label_node_name.setStyleSheet(self.__STYLESHEET + "background-color: yellow")
             else:
-                self.label_node_name.setStyleSheet("background-color: green")
+                self.label_node_name.setStyleSheet(self.__STYLESHEET + "background-color: green")
 
         def __repr__(self):
             return f"{self.__class__.__name__}({self.label_node_name.text()}, {self.missing})"
@@ -159,7 +162,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         self.__user_level = LoginStatus.LOGGED_OUT
         self.set_interface_lock()
 
-    # region OVERRIDES ********************************************************************************************* """
+    # region OVERRIDES *************************************************************************************************
 
     def closeEvent(self, event) -> None:
         self.ros_worker.stop()
@@ -168,7 +171,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     # endregion
 
-    # region ROS CALLBACKS ***************************************************************************************** """
+    # region ROS CALLBACKS *********************************************************************************************
 
     def nodes_loaded_callback(self, dependencies: List[str], missing: List[str]):
         """Callback method for displaying the loaded nodes"""
@@ -197,7 +200,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     # endregion
 
-    # region CALLBACKS **********************************************************************************************"""
+    # region CALLBACKS *************************************************************************************************
 
     def tab_changed_callback(self, index: int):
         """Callback function for when the current selected tab changes"""
@@ -249,7 +252,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     # endregion
 
-    # region METHODS *********************************************************************************************** """
+    # region METHODS ***************************************************************************************************
 
     def load_nodes(self):
         self.ros_worker.load_nodes()
@@ -293,7 +296,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     # endregion
 
-    # region PROPERTIES ******************************************************************************************** """
+    # region PROPERTIES ************************************************************************************************
 
     @property
     def user_level(self):
@@ -364,7 +367,6 @@ class ROSWorker(QObject):
         self.__ready = True
         self.mutex.unlock()
 
-    @abstractmethod
     @pyqtSlot()
     def load_info(self):
         """Loads the info to the INFO tab of the hmi"""
@@ -377,9 +379,9 @@ class ROSWorker(QObject):
         self.__ros_node.load_nodes()
 
     @pyqtSlot()
-    def send_control(self):
+    def send_control(self, *args, **kwargs):
         assert isinstance(self.__ros_node, QTROSNode)
-        self.__ros_node.send_control()
+        self.__ros_node.send_control(*args, **kwargs)
 
     @pyqtSlot()
     def stop(self):
