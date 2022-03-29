@@ -167,7 +167,7 @@ class HMICollabApp(HMIApp):
         # connect slots and signals
         self.ros_worker.signals.kpi.connect(self.kpi_callback)
         self.ros_worker.signals.status.connect(self.status_callback)
-        self.ros_worker.signals.depends_online.connect(self.depends_callback)
+        self.ros_worker.signals.all_depends_online.connect(self.depends_callback)
 
         # lock the systems
         self.__depends_online = False
@@ -283,10 +283,10 @@ class ROSNodeCollab(QTROSNode):
         self.signals.new_error.emit(msg.node_name, msg.error_msg, msg.error_code)
 
     def depends_online(self):
-        self.signals.depends_online.emit(True)
+        self.signals.all_depends_online.emit(True)
 
     def depends_offline(self):
-        self.signals.depends_online.emit(False)
+        self.signals.all_depends_online.emit(False)
         self.signals.new_error.emit("Internal error", "A dependency node has gone offline", 0)
 
     def load_info(self):

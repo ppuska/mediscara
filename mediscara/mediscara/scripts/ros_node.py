@@ -27,14 +27,18 @@ class ROSNode(Node, ABC):
         """Create dependency check"""
         self.__dependencies = depends_on
         self.__missing_depends_prev_state = None
+        self.__missing_depends_prev = None
         self.__depends_timer = self.create_timer(ROSNode.__DEPENDENCY_CHECK_INTERVAL, self.__depends_callback)
 
         if not self.dependencies_ok:
-            self.get_logger().warn(f"Missing dependency nodes: \n{self.missing_dependencies}")
+            missing = self.missing_dependencies
+            self.get_logger().warn(f"Missing dependency nodes: \n{missing}")
             self.__missing_depends_prev_state = True
+            self.__missing_depends_prev = missing
 
         else:
             self.__missing_depends_prev_state = False
+            self.__missing_depends_prev = []
 
         """Create error and status subscription on dependencies"""
         if self.__dependencies is not None:
@@ -60,9 +64,28 @@ class ROSNode(Node, ABC):
 
     def __depends_callback(self):
         """Checks is the missing dependencies have come online"""
+        # check if a single dependency has come online
+        if self.missing_dependencies != self.__missing_depends_prev:
+            if len(self.__missing_depends_prev) > len(self.missing_dependencies):
+                # a dependency has come online
+                new_nodes_online = set(self.__missing_depends_prev).symmetric_difference(set(self.missing_dependencies))
+
+                for new in new_nodes_online:
+                    self.dependency_online(new, True)
+
+            if len(self.__missing_depends_prev) < len(self.missing_dependencies):
+                new_nodes_offline = set(self.missing_dependencies).symmetric_difference(
+                    set(self.__missing_depends_prev))
+
+                for new in new_nodes_offline:
+                    self.dependency_online(new, False)
+
+            self.__missing_depends_prev = self.missing_dependencies  # update the previous state
+
+        # check if all dependencies have come online
         if self.dependencies_ok and self.__missing_depends_prev_state:
             self.__missing_depends_prev_state = False
-            self.depends_online()
+            self.all_depends_online()
 
         elif not self.dependencies_ok and not self.__missing_depends_prev_state:
             self.depends_offline()
@@ -76,8 +99,12 @@ class ROSNode(Node, ABC):
 
     """ METHODS -----------------------------------------------------------------------------------------------------"""
 
-    def depends_online(self):
-        """Method to notify subclass that the dependencies have come online
+    def dependency_online(self, name: str, online: bool):
+        """Method to notify subclass that a dependency has come online"""
+        raise NotImplementedError("A subclass must implement this method if it has dependency nodes")
+
+    def all_depends_online(self):
+        """Method to notify subclass that all the dependencies have come online
         The child class must override this method
         """
         raise NotImplementedError("A subclass must implement this method if it has dependency nodes")
