@@ -27,7 +27,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Error.msg"
   "msg/MarkerStatus.msg"
   "msg/KPIC1.msg"
-#  "msg/KPIC2.msg"
+  "msg/Robot2Control.msg"
+  "msg/VisionControl.msg"
 )
 
 if(BUILD_TESTING)
