@@ -32,6 +32,16 @@ QPushButton {
 	background-color: rgb(240, 228, 84);
 	
 	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 228, 84, 255), stop:1 rgba(255, 255, 255, 255));
+}
+
+QPushButton:pressed {
+	border: 1px;
+	border-style: outset;
+	border-radius: 7px;
+	border-color: black;
+	background-color: #F0E454;
+	background-color: rgb(240, 228, 84);
+	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(163, 156, 65, 255), stop:1 rgba(255, 255, 255, 255));
 }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" rowstretch="0,1,1,1" columnstretch="0,0">
@@ -144,7 +154,7 @@ QPushButton:pressed {
       </size>
      </property>
      <property name="text">
-      <string>START MEASURE - PCB</string>
+      <string>START MEASURE - LABEL</string>
      </property>
     </widget>
    </item>

@@ -21,13 +21,12 @@ class Ui_NodeListItem(object):
         sizePolicy.setHeightForWidth(NodeListItem.sizePolicy().hasHeightForWidth())
         NodeListItem.setSizePolicy(sizePolicy)
         self.verticalLayout = QtWidgets.QVBoxLayout(NodeListItem)
+        self.verticalLayout.setContentsMargins(3, 3, 3, 3)
         self.verticalLayout.setObjectName("verticalLayout")
         self.label_node_name = QtWidgets.QLabel(NodeListItem)
-        self.label_node_name.setStyleSheet("QLabel {\n"
-"    padding: 12px;\n"
-"    border: 1px solid black;\n"
-"    border-radius: 7px;\n"
-"}")
+        self.label_node_name.setStyleSheet("padding: 12px;\n"
+"border: 1px solid black;\n"
+"border-radius: 7px;")
         self.label_node_name.setObjectName("label_node_name")
         self.verticalLayout.addWidget(self.label_node_name)
 

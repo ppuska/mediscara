@@ -33,6 +33,16 @@ class Ui_CollabControlWidget(object):
 "    background-color: rgb(240, 228, 84);\n"
 "    \n"
 "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 228, 84, 255), stop:1 rgba(255, 255, 255, 255));\n"
+"}\n"
+"\n"
+"QPushButton:pressed {\n"
+"    border: 1px;\n"
+"    border-style: outset;\n"
+"    border-radius: 7px;\n"
+"    border-color: black;\n"
+"    background-color: #F0E454;\n"
+"    background-color: rgb(240, 228, 84);\n"
+"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(163, 156, 65, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "}")
         self.gridLayout = QtWidgets.QGridLayout(CollabControlWidget)
         self.gridLayout.setObjectName("gridLayout")
