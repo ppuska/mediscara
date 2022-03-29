@@ -88,7 +88,7 @@ class Robot2Node(ROSNode):
 
         # self.dt = self.create_timer(timer_period_sec=5, callback=self.dummy_timer_cb)  # todo remove this
 
-    """ OVERRIDES ************************************************************************************************** """
+    # region OVERRIDES *************************************************************************************************
 
     def depends_online(self):
         self.get_logger().info("Missing dependencies have come online")
@@ -112,7 +112,9 @@ class Robot2Node(ROSNode):
         self.__db_handler.close()
         return super().destroy_node()
 
-    """ CALLBACKS ************************************************************************************************** """
+    # endregion
+
+    # region CALLBACKS *************************************************************************************************
 
     # region TCP/IP messages
 
@@ -215,7 +217,9 @@ class Robot2Node(ROSNode):
             else:
                 self.get_logger().warn(msg)
 
-    """ MESSAGE GENERATION ***************************************************************************************** """
+    # endregion
+
+    # region MESSAGE GENERATION ****************************************************************************************
 
     def start_marking(self):
         """Send a MarkerControl ROS message to start the marking"""
@@ -246,7 +250,9 @@ class Robot2Node(ROSNode):
 
         self.dt.destroy()
 
-    """ METHODS **************************************************************************************************** """
+    # endregion
+
+    # region METHODS ***************************************************************************************************
 
     def get_current_item(self):
         """Sets the current item variable"""
@@ -312,6 +318,8 @@ class Robot2Node(ROSNode):
                                                    )
 
         return success
+
+    # endregion
 
 
 def main(args=None):

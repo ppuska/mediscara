@@ -331,6 +331,8 @@ class ROSWorker(QObject):
         nodes_loaded = pyqtSignal(list, list)
         info_loaded = pyqtSignal()
         new_error = pyqtSignal(str, str, int)
+        kpi = pyqtSignal(object)
+        status = pyqtSignal(object)
 
     def __init__(self,
                  node_class: Type[QTROSNode],

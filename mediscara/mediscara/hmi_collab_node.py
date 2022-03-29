@@ -3,7 +3,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 
 import rclpy
-from interfaces.msg import Error, Robot2Control, VisionControl
+from interfaces.msg import Error, Robot2Status, Robot2Control, VisionControl, KPIC2
 from mediscara.scripts.hmi import HMIApp, ROSWorker, LoginStatus
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.config import NodeList, MessageList
@@ -43,6 +43,11 @@ class HMICollabApp(HMIApp):
             self.label_performance_rob.setText("0 %")
             self.label_quality_vis.setText("0 %")
             self.label_quality_rob.setText("0 %")
+
+        def display_kpi(self, kpi: KPIC2):
+            self.label_availability_rob.setText(str(kpi.availability) + '%')
+            self.label_quality_rob.setText(str(kpi.quality) + '%')
+            self.label_performance_rob.setText(str(kpi.performance)+ '%')
 
         def set_power(self, box: int, value: bool):
             if box == self.VISION:
@@ -144,6 +149,10 @@ class HMICollabApp(HMIApp):
             assert isinstance(button, QPushButton)
             button.clicked.connect(self.button_clicked_callback)
 
+        # connect slots and signals
+        self.ros_worker.signals.kpi.connect(self.kpi_callback)
+        self.ros_worker.signals.status.connect(self.status_callback)
+
         # command line arguments
         if sys.argv is not None:
             if self.__NO_LOGIN in sys.argv:
@@ -209,9 +218,23 @@ class HMICollabApp(HMIApp):
 
     # endregion
 
+    # region ROS CALLBACKS *********************************************************************************************
+
+    def kpi_callback(self, msg: KPIC2):
+        assert isinstance(msg, KPIC2)
+        self.info_widget.display_kpi(msg)
+
+    def status_callback(self, msg):
+        if isinstance(msg, Robot2Status):
+            self.info_widget.set_error(HMICollabApp.InfoWidget.ROBOTIC, msg.error)
+            self.info_widget.set_power(HMICollabApp.InfoWidget.ROBOTIC, msg.power)
+            self.info_widget.set_waiting(HMICollabApp.InfoWidget.ROBOTIC, msg.waiting)
+            self.info_widget.set_running(HMICollabApp.InfoWidget.ROBOTIC, msg.running)
+
+    # endregion
+
 
 class ROSNodeCollab(QTROSNode):
-
     VISION = 0
     ROBOTIC = 1
 
@@ -228,6 +251,20 @@ class ROSNodeCollab(QTROSNode):
                                                       topic=MessageList.VisionControl.value[0],
                                                       qos_profile=10
                                                       )
+
+        # subscriptions
+        self.__kpi_subscription = self.create_subscription(msg_type=MessageList.KPIC2.value[1],
+                                                           topic=MessageList.KPIC2.value[0],
+                                                           callback=self.kpi_callback,
+                                                           qos_profile=10
+                                                           )
+
+        self.__robot_status_subscription = self.create_subscription(
+            msg_type=MessageList.Robot2Status.value[1],
+            topic=MessageList.Robot2Status.value[0],
+            callback=self.robot_status_callback,
+            qos_profile=10
+        )
 
         self.get_logger().info("ROS node online")
 
@@ -261,6 +298,12 @@ class ROSNodeCollab(QTROSNode):
 
         else:
             raise ValueError(f"Invalid cell (number: {cell})")
+
+    def kpi_callback(self, msg: KPIC2):
+        self.signals.kpi.emit(msg)
+
+    def robot_status_callback(self, msg: Robot2Status):
+        self.signals.status.emit(msg)
 
 
 class SQLManager:
