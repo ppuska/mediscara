@@ -124,12 +124,7 @@ class HMICollabApp(HMIApp):
         @property
         def buttons(self):
             """Returns the buttons in the layout"""
-            return [self.button_home_robotic,
-                    self.button_home_vision,
-                    self.button_start_marking,
-                    self.button_measure_label,
-                    self.button_measure_pcb
-                    ]
+            return []
 
     # endregion
 

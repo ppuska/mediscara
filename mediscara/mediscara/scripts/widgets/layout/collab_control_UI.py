@@ -14,121 +14,80 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_CollabControlWidget(object):
     def setupUi(self, CollabControlWidget):
         CollabControlWidget.setObjectName("CollabControlWidget")
-        CollabControlWidget.resize(497, 496)
-        CollabControlWidget.setStyleSheet("/* \n"
-"    primary color: #6CD2F0\n"
-"    primary color dark: #398AA3\n"
-"    alternate color: #F0E454\n"
-"    alternare color dark: #A39C41\n"
-"    accent color: #F03E72\n"
-"    background color: #aee2f0\n"
-"*/\n"
-"\n"
-"QPushButton {\n"
-"    border: 1px;\n"
-"    border-style: outset;\n"
-"    border-radius: 7px;\n"
-"    border-color: black;\n"
-"    background-color: #F0E454;\n"
-"    background-color: rgb(240, 228, 84);\n"
-"    \n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 228, 84, 255), stop:1 rgba(255, 255, 255, 255));\n"
+        CollabControlWidget.resize(704, 496)
+        CollabControlWidget.setStyleSheet("QLabel {\n"
+"    border: 1px solid black;\n"
+"    border-radius: 10px;\n"
+"    background-color: rgba(0, 255, 127, 128);\n"
 "}\n"
 "\n"
-"QPushButton:pressed {\n"
-"    border: 1px;\n"
-"    border-style: outset;\n"
-"    border-radius: 7px;\n"
-"    border-color: black;\n"
-"    background-color: #F0E454;\n"
-"    background-color: rgb(240, 228, 84);\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(163, 156, 65, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
-        self.gridLayout = QtWidgets.QGridLayout(CollabControlWidget)
+"")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(CollabControlWidget)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.groupBox = QtWidgets.QGroupBox(CollabControlWidget)
+        self.groupBox.setObjectName("groupBox")
+        self.gridLayout = QtWidgets.QGridLayout(self.groupBox)
+        self.gridLayout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
         self.gridLayout.setObjectName("gridLayout")
-        self.button_home_vision = QtWidgets.QPushButton(CollabControlWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.button_home_vision.sizePolicy().hasHeightForWidth())
-        self.button_home_vision.setSizePolicy(sizePolicy)
-        self.button_home_vision.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_home_vision.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
-        self.button_home_vision.setObjectName("button_home_vision")
-        self.gridLayout.addWidget(self.button_home_vision, 1, 0, 1, 1)
-        self.button_start_marking = QtWidgets.QPushButton(CollabControlWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.button_start_marking.sizePolicy().hasHeightForWidth())
-        self.button_start_marking.setSizePolicy(sizePolicy)
-        self.button_start_marking.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_start_marking.setObjectName("button_start_marking")
-        self.gridLayout.addWidget(self.button_start_marking, 2, 1, 1, 1)
-        self.button_home_robotic = QtWidgets.QPushButton(CollabControlWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.button_home_robotic.sizePolicy().hasHeightForWidth())
-        self.button_home_robotic.setSizePolicy(sizePolicy)
-        self.button_home_robotic.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_home_robotic.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
-        self.button_home_robotic.setObjectName("button_home_robotic")
-        self.gridLayout.addWidget(self.button_home_robotic, 1, 1, 1, 1)
-        self.button_measure_pcb = QtWidgets.QPushButton(CollabControlWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.button_measure_pcb.sizePolicy().hasHeightForWidth())
-        self.button_measure_pcb.setSizePolicy(sizePolicy)
-        self.button_measure_pcb.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_measure_pcb.setObjectName("button_measure_pcb")
-        self.gridLayout.addWidget(self.button_measure_pcb, 2, 0, 1, 1)
-        self.button_measure_label = QtWidgets.QPushButton(CollabControlWidget)
+        self.label_maintenance = QtWidgets.QLabel(self.groupBox)
+        self.label_maintenance.setObjectName("label_maintenance")
+        self.gridLayout.addWidget(self.label_maintenance, 1, 1, 1, 2)
+        self.button_home = QtWidgets.QPushButton(self.groupBox)
+        self.button_home.setMinimumSize(QtCore.QSize(0, 30))
+        self.button_home.setObjectName("button_home")
+        self.gridLayout.addWidget(self.button_home, 1, 0, 1, 1)
+        self.label_pcb_ok = QtWidgets.QLabel(self.groupBox)
+        self.label_pcb_ok.setObjectName("label_pcb_ok")
+        self.gridLayout.addWidget(self.label_pcb_ok, 2, 2, 1, 1)
+        self.label_message = QtWidgets.QLabel(self.groupBox)
+        self.label_message.setObjectName("label_message")
+        self.gridLayout.addWidget(self.label_message, 4, 0, 1, 3)
+        self.label_label_ok = QtWidgets.QLabel(self.groupBox)
+        self.label_label_ok.setObjectName("label_label_ok")
+        self.gridLayout.addWidget(self.label_label_ok, 3, 2, 1, 1)
+        self.button_measure_label = QtWidgets.QPushButton(self.groupBox)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.button_measure_label.sizePolicy().hasHeightForWidth())
         self.button_measure_label.setSizePolicy(sizePolicy)
-        self.button_measure_label.setMinimumSize(QtCore.QSize(0, 60))
+        self.button_measure_label.setMinimumSize(QtCore.QSize(0, 30))
         self.button_measure_label.setObjectName("button_measure_label")
-        self.gridLayout.addWidget(self.button_measure_label, 3, 0, 1, 1)
-        self.label = QtWidgets.QLabel(CollabControlWidget)
-        self.label.setMinimumSize(QtCore.QSize(0, 30))
-        font = QtGui.QFont()
-        font.setPointSize(24)
-        self.label.setFont(font)
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setObjectName("label")
-        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
-        self.label_2 = QtWidgets.QLabel(CollabControlWidget)
-        self.label_2.setMinimumSize(QtCore.QSize(0, 30))
-        font = QtGui.QFont()
-        font.setPointSize(24)
-        self.label_2.setFont(font)
-        self.label_2.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_2.setObjectName("label_2")
-        self.gridLayout.addWidget(self.label_2, 0, 1, 1, 1)
-        self.label_3 = QtWidgets.QLabel(CollabControlWidget)
-        self.label_3.setStyleSheet("image: url(:/images/logo);")
-        self.label_3.setText("")
-        self.label_3.setObjectName("label_3")
-        self.gridLayout.addWidget(self.label_3, 3, 1, 1, 1)
+        self.gridLayout.addWidget(self.button_measure_label, 2, 1, 2, 1)
+        self.button_end_session = QtWidgets.QPushButton(self.groupBox)
+        self.button_end_session.setMinimumSize(QtCore.QSize(0, 30))
+        self.button_end_session.setObjectName("button_end_session")
+        self.gridLayout.addWidget(self.button_end_session, 0, 2, 1, 1)
+        self.button_start_session = QtWidgets.QPushButton(self.groupBox)
+        self.button_start_session.setMinimumSize(QtCore.QSize(0, 30))
+        self.button_start_session.setObjectName("button_start_session")
+        self.gridLayout.addWidget(self.button_start_session, 0, 0, 1, 1)
+        self.button_pause = QtWidgets.QPushButton(self.groupBox)
+        self.button_pause.setMinimumSize(QtCore.QSize(0, 30))
+        self.button_pause.setObjectName("button_pause")
+        self.gridLayout.addWidget(self.button_pause, 0, 1, 1, 1)
+        self.button_measure_pcb = QtWidgets.QPushButton(self.groupBox)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.button_measure_pcb.sizePolicy().hasHeightForWidth())
+        self.button_measure_pcb.setSizePolicy(sizePolicy)
+        self.button_measure_pcb.setMinimumSize(QtCore.QSize(0, 30))
+        self.button_measure_pcb.setObjectName("button_measure_pcb")
+        self.gridLayout.addWidget(self.button_measure_pcb, 2, 0, 2, 1)
+        self.label_5 = QtWidgets.QLabel(self.groupBox)
+        self.label_5.setObjectName("label_5")
+        self.gridLayout.addWidget(self.label_5, 5, 0, 1, 3)
+        self.gridLayout.setRowStretch(0, 1)
         self.gridLayout.setRowStretch(1, 1)
         self.gridLayout.setRowStretch(2, 1)
         self.gridLayout.setRowStretch(3, 1)
+        self.gridLayout.setRowStretch(4, 1)
+        self.gridLayout.setRowStretch(5, 1)
+        self.horizontalLayout.addWidget(self.groupBox)
+        self.groupBox_2 = QtWidgets.QGroupBox(CollabControlWidget)
+        self.groupBox_2.setObjectName("groupBox_2")
+        self.horizontalLayout.addWidget(self.groupBox_2)
 
         self.retranslateUi(CollabControlWidget)
         QtCore.QMetaObject.connectSlotsByName(CollabControlWidget)
@@ -136,11 +95,17 @@ class Ui_CollabControlWidget(object):
     def retranslateUi(self, CollabControlWidget):
         _translate = QtCore.QCoreApplication.translate
         CollabControlWidget.setWindowTitle(_translate("CollabControlWidget", "Form"))
-        self.button_home_vision.setText(_translate("CollabControlWidget", "HOME"))
-        self.button_start_marking.setText(_translate("CollabControlWidget", "START MARKING"))
-        self.button_home_robotic.setText(_translate("CollabControlWidget", "HOME"))
-        self.button_measure_pcb.setText(_translate("CollabControlWidget", "START MEASURE - PCB"))
-        self.button_measure_label.setText(_translate("CollabControlWidget", "START MEASURE - LABEL"))
-        self.label.setText(_translate("CollabControlWidget", "Vision"))
-        self.label_2.setText(_translate("CollabControlWidget", "Robotic"))
+        self.groupBox.setTitle(_translate("CollabControlWidget", "VISION"))
+        self.label_maintenance.setText(_translate("CollabControlWidget", "Remaining time: "))
+        self.button_home.setText(_translate("CollabControlWidget", "HOME"))
+        self.label_pcb_ok.setText(_translate("CollabControlWidget", "TextLabel"))
+        self.label_message.setText(_translate("CollabControlWidget", "TextLabel"))
+        self.label_label_ok.setText(_translate("CollabControlWidget", "TextLabel"))
+        self.button_measure_label.setText(_translate("CollabControlWidget", "Measure Label"))
+        self.button_end_session.setText(_translate("CollabControlWidget", "End Session"))
+        self.button_start_session.setText(_translate("CollabControlWidget", "Start Session"))
+        self.button_pause.setText(_translate("CollabControlWidget", "Pause/Resume"))
+        self.button_measure_pcb.setText(_translate("CollabControlWidget", "Measure PCB"))
+        self.label_5.setText(_translate("CollabControlWidget", "TextLabel"))
+        self.groupBox_2.setTitle(_translate("CollabControlWidget", "MARKING SYSTEM"))
 from . import res_rc
