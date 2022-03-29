@@ -7,8 +7,8 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QObject, QTimer
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHeaderView, QTableWidgetItem, QMessageBox
 
-from widgets.sql_gui_UI import Ui_MainWindow
-from widgets.statusbar_widget_UI import Ui_StatusBarWidget
+from widgets.sql_gui_ui import Ui_MainWindow
+from widgets.statusbar_widget_ui import Ui_StatusBarWidget
 
 from mediscara.scripts.logger import Logger
 from mediscara.scripts.sql import SQLManager, Bell, SQLDataClass, Cell2Data

@@ -7,8 +7,8 @@ from interfaces.msg import Error
 from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.config import NodeList
-from mediscara.scripts.widgets.layout.collab_info_UI import Ui_CollabInfoTab
-from mediscara.scripts.widgets.layout.collab_control_UI import Ui_CollabControlWidget
+from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
+from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlWidget
 
 
 class HMICollabApp(HMIApp):

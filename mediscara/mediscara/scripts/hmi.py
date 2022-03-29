@@ -8,11 +8,11 @@ from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel, QListWidget, 
 import rclpy
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.config import IPList
-from mediscara.scripts.widgets.layout.gui_UI import Ui_GUIWindow
-from mediscara.scripts.widgets.layout.error_list_item_UI import Ui_ErrorListItem
-from mediscara.scripts.widgets.layout.node_list_item_UI import Ui_NodeListItem
+from mediscara.scripts.widgets.layout.gui_ui import Ui_GUIWindow
+from mediscara.scripts.widgets.layout.error_list_item_ui import Ui_ErrorListItem
+from mediscara.scripts.widgets.layout.node_list_item_ui import Ui_NodeListItem
 
-from mediscara.scripts.widgets.layout.statusbar_UI import Ui_StatusBar
+from mediscara.scripts.widgets.layout.statusbar_ui import Ui_StatusBar
 
 
 class LoginStatus(enum.Enum):

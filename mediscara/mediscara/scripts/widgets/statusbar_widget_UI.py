@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'src\mediscara\extras\widgets\statusbar_widget.ui'
+# Form implementation generated from reading ui file 'C:\ROS\mediscara_ws\src\mediscara\mediscara\scripts\widgets\statusbar_widget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #

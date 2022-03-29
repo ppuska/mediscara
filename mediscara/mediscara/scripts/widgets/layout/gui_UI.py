@@ -257,7 +257,7 @@ class Ui_GUIWindow(object):
         self.label_2.setBuddy(self.line_edit_pass)
 
         self.retranslateUi(GUIWindow)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(4)
         QtCore.QMetaObject.connectSlotsByName(GUIWindow)
         GUIWindow.setTabOrder(self.line_edit_name, self.line_edit_pass)
         GUIWindow.setTabOrder(self.line_edit_pass, self.tabWidget)
