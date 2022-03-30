@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 
 import rclpy
 from interfaces.msg import Error, Robot2Status, Robot2Control, VisionControl, KPIC2
-from mediscara.scripts.hmi import HMIApp, ROSWorker, LoginStatus
+from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.config import NodeList, MessageList
 from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
@@ -14,8 +14,6 @@ from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlW
 class HMICollabApp(HMIApp):
     NODE_NAME = NodeList.HMINode.value
     DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
-
-    __NO_LOGIN = "--nologin"
 
     # region INNER CLASSES *********************************************************************************************
 
@@ -47,7 +45,7 @@ class HMICollabApp(HMIApp):
         def display_kpi(self, kpi: KPIC2):
             self.label_availability_rob.setText(str(kpi.availability) + '%')
             self.label_quality_rob.setText(str(kpi.quality) + '%')
-            self.label_performance_rob.setText(str(kpi.performance)+ '%')
+            self.label_performance_rob.setText(str(kpi.performance) + '%')
 
         def set_power(self, box: int, value: bool):
             if box == self.VISION:
@@ -121,15 +119,30 @@ class HMICollabApp(HMIApp):
             super(HMICollabApp.ControlWidget, self).__init__(parent=parent)
             self.setupUi(self)
 
+        def lock_control_vision(self, lock: bool):
+            self.button_start_session.setEnabled(not lock)
+            self.button_home.setEnabled(not lock)
+            self.button_measure_label.setEnabled(not lock)
+            self.button_measure_pcb.setEnabled(not lock)
+
+        def lock_control_robotic(self, lock: bool):
+            self.button_start_session_rob.setEnabled(not lock)
+            self.button_home_rob.setEnabled(not lock)
+            self.button_start_marking.setEnabled(not lock)
+
         @property
         def buttons(self):
-            """Returns the buttons in the layout"""
-            return [self.button_home_robotic,
-                    self.button_home_vision,
-                    self.button_start_marking,
+            return [self.button_home,
+                    self.button_home_rob,
                     self.button_measure_label,
-                    self.button_measure_pcb
-                    ]
+                    self.button_measure_pcb,
+                    self.button_start_session,
+                    self.button_start_session_rob,
+                    self.button_start_marking,
+                    self.button_pause,
+                    self.button_pause_rob,
+                    self.button_end_session,
+                    self.button_end_session_rob]
 
     # endregion
 
@@ -152,14 +165,34 @@ class HMICollabApp(HMIApp):
         # connect slots and signals
         self.ros_worker.signals.kpi.connect(self.kpi_callback)
         self.ros_worker.signals.status.connect(self.status_callback)
+        self.ros_worker.signals.dependency_online.connect(self.dependency_callback)
 
-        # command line arguments
-        if sys.argv is not None:
-            if self.__NO_LOGIN in sys.argv:
-                # no login mode
-                self.user_level = LoginStatus.ADMIN
+        # lock the systems
+
+        self.__marker_online = False
+        self.__robot_online = False
+        self.__vision_online = False
 
     # region OVERRIDES *************************************************************************************************
+
+    def ros_node_online_callback(self):
+        self.logger.debug("ROS Node online")
+
+        missing = self.ros_worker.missing_dependencies()  # check for missing dependencies
+        if bool(missing): # the list is not empty
+            if NodeList.MarkerNode.value not in missing:  # marker is online
+                self.__marker_online = True
+
+            if NodeList.Robot2Node.value not in missing:  # robot is online
+                self.__robot_online = True
+
+            if not self.__robot_online or not self.__marker_online:  # if either offline, lock
+                self.control_widget.lock_control_robotic(True)
+
+            if not self.__vision_online:
+                self.control_widget.lock_control_vision(True)
+
+            # todo finish the vision system nodes
 
     def ros_error_callback(self, node_name: str, msg: str, err_code: int):
         super(HMICollabApp, self).ros_error_callback(node_name, msg, err_code)
@@ -179,43 +212,6 @@ class HMICollabApp(HMIApp):
     def button_clicked_callback(self):
         button_clicked = self.sender()
 
-        # vision
-        msg = VisionControl()
-        if button_clicked == self.control_widget.button_home_vision:
-            msg.home = True
-            msg.measure_pcb = False
-            msg.measure_label = False
-
-            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
-
-        elif button_clicked == self.control_widget.button_measure_pcb:
-            msg.home = False
-            msg.measure_pcb = True
-            msg.measure_label = False
-
-            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
-
-        elif button_clicked == self.control_widget.button_measure_label:
-            msg.home = False
-            msg.measure_pcb = False
-            msg.measure_label = True
-
-            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
-
-        # robot
-        msg = Robot2Control()
-        if button_clicked == self.control_widget.button_home_robotic:
-            msg.home = True
-            msg.start_marking = False
-
-            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
-
-        elif button_clicked == self.control_widget.button_start_marking:
-            msg.home = False
-            msg.start_marking = True
-
-            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
-
     # endregion
 
     # region ROS CALLBACKS *********************************************************************************************
@@ -230,6 +226,55 @@ class HMICollabApp(HMIApp):
             self.info_widget.set_power(HMICollabApp.InfoWidget.ROBOTIC, msg.power)
             self.info_widget.set_waiting(HMICollabApp.InfoWidget.ROBOTIC, msg.waiting)
             self.info_widget.set_running(HMICollabApp.InfoWidget.ROBOTIC, msg.running)
+
+    def dependency_callback(self, name: str, online: bool):
+        if name == NodeList.MarkerNode.value:
+            self.__marker_online = online
+
+        elif name == NodeList.Robot2Node.value:
+            self.__robot_online = online
+
+        # todo implement vision system
+
+        if self.__marker_online and self.__robot_online:
+            self.logger.info("Unlocking robot UI")
+            self.control_widget.lock_control_robotic(False)  # unlock the UI
+
+        else:
+            self.logger.info("Locking robot UI")
+            self.control_widget.lock_control_robotic(True)
+
+        if self.__vision_online:
+            self.logger.info("Unlocking vision UI")
+            self.control_widget.lock_control_vision(False)
+
+        else:
+            self.logger.info("Locking vision IO")
+            self.control_widget.lock_control_vision(True)
+
+    # endregion
+
+    # region PROPERTIES ************************************************************************************************
+
+    @property
+    def depends_online(self) -> bool:
+        return self.__depends_online
+
+    @depends_online.setter
+    def depends_online(self, online: bool):
+        self.__depends_online = online
+        if online:
+            self.control_widget.lock_control_robotic(False)
+            self.control_widget.lock_control_vision(False)
+
+        else:
+            missing = self.ros_worker.missing_dependencies()
+            if NodeList.MarkerNode.value in missing or NodeList.Robot2Node.value in missing:
+                # marker system missing nodes
+                self.control_widget.lock_control_robotic(True)
+
+            elif True:
+                pass  # todo program the vision system
 
     # endregion
 
@@ -267,15 +312,26 @@ class ROSNodeCollab(QTROSNode):
         )
 
         self.get_logger().info("ROS node online")
+        self.signals.started.emit()
 
     def error_callback(self, msg: Error):
         self.signals.new_error.emit(msg.node_name, msg.error_msg, msg.error_code)
 
-    def depends_online(self):
-        pass
+    def all_depends_online(self):
+        self.get_logger().info("All dependencies are online")
+
+    def dependency_online(self, name: str, online: bool):
+        if online:
+            self.get_logger().info(f"A dependency has come online: {name}")
+
+        else:
+            self.get_logger().info(f"A dependency has gone offline: {name}")
+
+        self.signals.dependency_online.emit(name, online)
 
     def depends_offline(self):
-        pass
+        self.signals.dependency_online.emit("", False)
+        self.signals.new_error.emit("Internal error", "A dependency node has gone offline", 0)
 
     def load_info(self):
         pass

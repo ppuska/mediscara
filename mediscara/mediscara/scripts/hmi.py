@@ -1,5 +1,5 @@
 import enum
-from abc import abstractmethod
+import sys
 from typing import List, Type
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl, Qt
@@ -11,6 +11,7 @@ from mediscara.config import IPList
 from mediscara.scripts.widgets.layout.gui_ui import Ui_GUIWindow
 from mediscara.scripts.widgets.layout.error_list_item_ui import Ui_ErrorListItem
 from mediscara.scripts.widgets.layout.node_list_item_ui import Ui_NodeListItem
+from mediscara.scripts.logger import Logger
 
 from mediscara.scripts.widgets.layout.statusbar_ui import Ui_StatusBar
 
@@ -54,6 +55,8 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     __TAB_GRAFANA = 3
     __TAB_ERROR = 4
     __TAB_LOGIN = 5
+
+    __NO_LOGIN = "--nologin"
 
     # region INNER CLASSES *********************************************************************************************
 
@@ -116,23 +119,27 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         super(HMIApp, self).__init__()
         self.setupUi(self)
 
+        self.logger = Logger(parent=None, tag="HMI", level=Logger.DEBUG)
+
+        self.__user_level = None
+
         """ Create ROS thread """
         self.ros_thread = QThread()  # create thread
 
-        if node_class is not None:
-            self.ros_worker = ROSWorker(node_class=node_class,
-                                        node_name=name,
-                                        depends_list=depends_list
-                                        )
+        self.ros_worker = ROSWorker(node_class=node_class,
+                                    node_name=name,
+                                    depends_list=depends_list
+                                    )
 
-            self.ros_worker.add_to_thread(self.ros_thread)
+        self.ros_worker.add_to_thread(self.ros_thread)
 
-            # connect the signals and slots
-            self.ros_worker.signals.nodes_loaded.connect(self.nodes_loaded_callback)
-            self.ros_worker.signals.info_loaded.connect(self.info_loaded_callback)
-            self.ros_worker.signals.new_error.connect(self.ros_error_callback)
+        # connect the signals and slots
+        self.ros_worker.signals.started.connect(self.ros_node_online_callback)
+        self.ros_worker.signals.nodes_loaded.connect(self.nodes_loaded_callback)
+        self.ros_worker.signals.info_loaded.connect(self.info_loaded_callback)
+        self.ros_worker.signals.new_error.connect(self.ros_error_callback)
 
-            self.ros_thread.start()  # start the thread
+        self.ros_thread.start()  # start the thread
 
         """ Create callbacks """
         self.tabWidget.currentChanged.connect(self.tab_changed_callback)
@@ -159,8 +166,16 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         self.statusbar.addPermanentWidget(self.statusbar_widget, stretch=1)
 
         """Set up login level"""
-        self.__user_level = LoginStatus.LOGGED_OUT
-        self.set_interface_lock()
+        # command line arguments
+        if sys.argv is not None:
+            if self.__NO_LOGIN in sys.argv:
+                # no login mode
+                self.user_level = LoginStatus.ADMIN
+
+        else:
+            self.user_level = LoginStatus.LOGGED_OUT  # initialize the variable
+
+        self.logger.info("Base class constructor done")
 
     # region OVERRIDES *************************************************************************************************
 
@@ -172,6 +187,9 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     # endregion
 
     # region ROS CALLBACKS *********************************************************************************************
+
+    def ros_node_online_callback(self):
+        pass
 
     def nodes_loaded_callback(self, dependencies: List[str], missing: List[str]):
         """Callback method for displaying the loaded nodes"""
@@ -322,15 +340,16 @@ class ROSWorker(QObject):
     mutex = QMutex()
 
     """ SIGNALS """
-    started = pyqtSignal()
     finished = pyqtSignal()
 
     """ SIGNALS FOR THE ROS NODE """
 
     class Signals(QObject):
+        started = pyqtSignal()
         nodes_loaded = pyqtSignal(list, list)
         info_loaded = pyqtSignal()
         new_error = pyqtSignal(str, str, int)
+        dependency_online = pyqtSignal(str, bool)
         kpi = pyqtSignal(object)
         status = pyqtSignal(object)
 
@@ -390,6 +409,14 @@ class ROSWorker(QObject):
         self.__ros_node.get_logger().info("Shutting down ROS node")
         rclpy.shutdown()
         self.finished.emit()
+
+    @pyqtSlot()
+    def missing_dependencies(self):
+        self.mutex.lock()
+        missing = self.__ros_node.missing_dependencies
+        self.mutex.unlock()
+
+        return missing
 
     @property
     def signals(self):
