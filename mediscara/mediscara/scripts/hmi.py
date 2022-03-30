@@ -57,6 +57,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     __TAB_LOGIN = 5
 
     __NO_LOGIN = "--nologin"
+    __NO_LOCK = "--nolock"
 
     # region INNER CLASSES *********************************************************************************************
 
@@ -168,12 +169,19 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         """Set up login level"""
         # command line arguments
         if sys.argv is not None:
+            print(sys.argv)
             if self.__NO_LOGIN in sys.argv:
                 # no login mode
                 self.user_level = LoginStatus.ADMIN
 
-        else:
-            self.user_level = LoginStatus.LOGGED_OUT  # initialize the variable
+            else:
+                self.user_level = LoginStatus.LOGGED_OUT
+
+            if self.__NO_LOCK in sys.argv:
+                self.ui_locking = False
+
+            else:
+                self.ui_locking = True
 
         self.logger.info("Base class constructor done")
 
