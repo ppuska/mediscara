@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 
 import rclpy
 from interfaces.msg import Error, Robot2Status, Robot2Control, VisionControl, KPIC2
-from mediscara.scripts.hmi import HMIApp, ROSWorker, LoginStatus
+from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.config import NodeList, MessageList
 from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
@@ -14,8 +14,6 @@ from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlW
 class HMICollabApp(HMIApp):
     NODE_NAME = NodeList.HMINode.value
     DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
-
-    __NO_LOGIN = "--nologin"
 
     # region INNER CLASSES *********************************************************************************************
 
@@ -174,12 +172,6 @@ class HMICollabApp(HMIApp):
         self.__marker_online = False
         self.__robot_online = False
         self.__vision_online = False
-
-        # command line arguments
-        if sys.argv is not None:
-            if self.__NO_LOGIN in sys.argv:
-                # no login mode
-                self.user_level = LoginStatus.ADMIN
 
     # region OVERRIDES *************************************************************************************************
 

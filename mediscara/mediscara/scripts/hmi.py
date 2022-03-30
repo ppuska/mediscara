@@ -1,5 +1,5 @@
 import enum
-from abc import abstractmethod
+import sys
 from typing import List, Type
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl, Qt
@@ -55,6 +55,8 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     __TAB_GRAFANA = 3
     __TAB_ERROR = 4
     __TAB_LOGIN = 5
+
+    __NO_LOGIN = "--nologin"
 
     # region INNER CLASSES *********************************************************************************************
 
@@ -119,6 +121,8 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
         self.logger = Logger(parent=None, tag="HMI", level=Logger.DEBUG)
 
+        self.__user_level = None
+
         """ Create ROS thread """
         self.ros_thread = QThread()  # create thread
 
@@ -162,8 +166,14 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         self.statusbar.addPermanentWidget(self.statusbar_widget, stretch=1)
 
         """Set up login level"""
-        self.__user_level = LoginStatus.LOGGED_OUT
-        self.set_interface_lock()
+        # command line arguments
+        if sys.argv is not None:
+            if self.__NO_LOGIN in sys.argv:
+                # no login mode
+                self.user_level = LoginStatus.ADMIN
+
+        else:
+            self.user_level = LoginStatus.LOGGED_OUT  # initialize the variable
 
         self.logger.info("Base class constructor done")
 
