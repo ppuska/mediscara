@@ -1,4 +1,9 @@
+import logging
 import sys
+from abc import ABC
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import ClassVar
 
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 
@@ -144,6 +149,57 @@ class HMICollabApp(HMIApp):
                     self.button_end_session,
                     self.button_end_session_rob]
 
+    class KPI:
+        """Class for tracking and managing KPIs"""
+
+        def __init__(self):
+            self.__availability = self.Availability()
+
+        @property
+        def availability(self):
+            return self.__availability
+
+        @dataclass
+        class Availability:
+            format = "%H:%M:%S"
+            planned_start: ClassVar[datetime] = datetime.strptime("08:00:00", format)
+            planned_end: ClassVar[datetime] = datetime.strptime("8:03:00", format)
+
+            actual_start: datetime = field(default=None)
+            actual_end: datetime = field(default=None)
+
+            def __str__(self):
+                if self.actual_start is None:
+                    actual_start_str = "Not started yet"
+                else:
+                    actual_start_str = self.actual_start.strftime(self.format)
+
+                if self.actual_end is None:
+                    actual_end_str = "Not ended yet"
+                else:
+                    actual_end_str = self.actual_end.strftime(self.format)
+
+                return f"planned start: {self.planned_start.strftime(self.format)} " \
+                       f"planned start: {self.planned_start.strftime(self.format)} " \
+                       f"actual start: {actual_start_str} " \
+                       f"actual end: {actual_end_str}"
+
+            def start_now(self):
+                self.actual_start = datetime.now()
+
+            def end_now(self):
+                self.actual_end = datetime.now()
+
+            def calculate(self):
+                if self.actual_start is None or self.actual_end is None:
+                    logging.warning("Start or end time not set, do not call calculate yet")
+                    return None
+
+                planned_duration = self.planned_end - self.planned_start
+                actual_duration = self.actual_end - self.actual_start
+
+                return actual_duration / planned_duration
+
     # endregion
 
     def __init__(self):
@@ -179,7 +235,7 @@ class HMICollabApp(HMIApp):
         self.logger.debug("ROS Node online")
 
         missing = self.ros_worker.missing_dependencies()  # check for missing dependencies
-        if bool(missing): # the list is not empty
+        if bool(missing):  # the list is not empty
             if NodeList.MarkerNode.value not in missing:  # marker is online
                 self.__marker_online = True
 
@@ -211,6 +267,14 @@ class HMICollabApp(HMIApp):
 
     def button_clicked_callback(self):
         button_clicked = self.sender()
+
+        if button_clicked == self.control_widget.button_pause_rob:
+            avail = HMICollabApp.KPI.Availability()
+            avail.start_now()
+            from time import sleep
+            sleep(1)
+            avail.end_now()
+            print(avail.calculate())
 
     # endregion
 
@@ -377,5 +441,15 @@ def main(args=None):
         print("Stopping")
 
 
+def t():
+    import time
+    avail = HMICollabApp.KPI.Availability()
+    avail.start_now()
+    time.sleep(1)
+    avail.end_now()
+    print(avail)
+
+
 if __name__ == '__main__':
+    # main()
     main()
