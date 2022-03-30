@@ -358,7 +358,6 @@ class ROSWorker(QObject):
         info_loaded = pyqtSignal()
         new_error = pyqtSignal(str, str, int)
         dependency_online = pyqtSignal(str, bool)
-        kpi = pyqtSignal(object)
         status = pyqtSignal(object)
 
     def __init__(self,

@@ -1,10 +1,11 @@
 import logging
 import sys
-from abc import ABC
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
+from enum import Enum, auto
 from typing import ClassVar
 
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 
 import rclpy
@@ -20,7 +21,15 @@ class HMICollabApp(HMIApp):
     NODE_NAME = NodeList.HMINode.value
     DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
 
+    KPI_UPDATE_INTERVAL = 1000  # ms
+
     # region INNER CLASSES *********************************************************************************************
+
+    class STATUS(Enum):
+        """Enum class to implement a state machine of the production state"""
+        IDLE = auto()
+        WORKING = auto()
+        PAUSED = auto()
 
     class InfoWidget(QWidget, Ui_CollabInfoTab):
         """Class for displaying the info QWidget on the info tab"""
@@ -47,10 +56,19 @@ class HMICollabApp(HMIApp):
             self.label_quality_vis.setText("0 %")
             self.label_quality_rob.setText("0 %")
 
-        def display_kpi(self, kpi: KPIC2):
-            self.label_availability_rob.setText(str(kpi.availability) + '%')
-            self.label_quality_rob.setText(str(kpi.quality) + '%')
-            self.label_performance_rob.setText(str(kpi.performance) + '%')
+        def display_kpi(self, box: int, *, availability: float, quality: float, performance: float):
+            if box == self.ROBOTIC:
+                self.label_availability_rob.setText(f"{availability}%")
+                self.label_quality_rob.setText(f"{quality}%")
+                self.label_performance_rob.setText(f"{performance}%")
+
+            elif box == self.VISION:
+                self.label_availability_vis.setText(f"{availability}%")
+                self.label_quality_vis.setText(f"{quality}%")
+                self.label_performance_vis.setText(f"{performance}%")
+
+            else:
+                raise ValueError(f"Invalid input number ({box})")
 
         def set_power(self, box: int, value: bool):
             if box == self.VISION:
@@ -149,57 +167,6 @@ class HMICollabApp(HMIApp):
                     self.button_end_session,
                     self.button_end_session_rob]
 
-    class KPI:
-        """Class for tracking and managing KPIs"""
-
-        def __init__(self):
-            self.__availability = self.Availability()
-
-        @property
-        def availability(self):
-            return self.__availability
-
-        @dataclass
-        class Availability:
-            format = "%H:%M:%S"
-            planned_start: ClassVar[datetime] = datetime.strptime("08:00:00", format)
-            planned_end: ClassVar[datetime] = datetime.strptime("8:03:00", format)
-
-            actual_start: datetime = field(default=None)
-            actual_end: datetime = field(default=None)
-
-            def __str__(self):
-                if self.actual_start is None:
-                    actual_start_str = "Not started yet"
-                else:
-                    actual_start_str = self.actual_start.strftime(self.format)
-
-                if self.actual_end is None:
-                    actual_end_str = "Not ended yet"
-                else:
-                    actual_end_str = self.actual_end.strftime(self.format)
-
-                return f"planned start: {self.planned_start.strftime(self.format)} " \
-                       f"planned start: {self.planned_start.strftime(self.format)} " \
-                       f"actual start: {actual_start_str} " \
-                       f"actual end: {actual_end_str}"
-
-            def start_now(self):
-                self.actual_start = datetime.now()
-
-            def end_now(self):
-                self.actual_end = datetime.now()
-
-            def calculate(self):
-                if self.actual_start is None or self.actual_end is None:
-                    logging.warning("Start or end time not set, do not call calculate yet")
-                    return None
-
-                planned_duration = self.planned_end - self.planned_start
-                actual_duration = self.actual_end - self.actual_start
-
-                return actual_duration / planned_duration
-
     # endregion
 
     def __init__(self):
@@ -219,36 +186,52 @@ class HMICollabApp(HMIApp):
             button.clicked.connect(self.button_clicked_callback)
 
         # connect slots and signals
-        self.ros_worker.signals.kpi.connect(self.kpi_callback)
         self.ros_worker.signals.status.connect(self.status_callback)
         self.ros_worker.signals.dependency_online.connect(self.dependency_callback)
 
-        # lock the systems
-
+        # interface lock variables
         self.__marker_online = False
         self.__robot_online = False
         self.__vision_online = False
+
+        # state machine
+        self.__state_rob = None
+        self.__state_vis = None
+
+        self.state_robot = HMICollabApp.STATUS.IDLE
+
+        # KPI calculation
+        self.__kpi_rob = KPI()
+        self.__kpi_vis = KPI()
+
+        self.kpi_update_timer = QTimer()
+        self.kpi_update_timer.timeout.connect(self.kpi_update_callback)
+        self.kpi_update_timer.start(self.KPI_UPDATE_INTERVAL)
 
     # region OVERRIDES *************************************************************************************************
 
     def ros_node_online_callback(self):
         self.logger.debug("ROS Node online")
 
-        missing = self.ros_worker.missing_dependencies()  # check for missing dependencies
-        if bool(missing):  # the list is not empty
-            if NodeList.MarkerNode.value not in missing:  # marker is online
-                self.__marker_online = True
+        if self.ui_locking:  # if ui locking is not disabled
+            missing = self.ros_worker.missing_dependencies()  # check for missing dependencies
+            if bool(missing):  # the list is not empty
+                if NodeList.MarkerNode.value not in missing:  # marker is online
+                    self.__marker_online = True
 
-            if NodeList.Robot2Node.value not in missing:  # robot is online
-                self.__robot_online = True
+                if NodeList.Robot2Node.value not in missing:  # robot is online
+                    self.__robot_online = True
 
-            if not self.__robot_online or not self.__marker_online:  # if either offline, lock
-                self.control_widget.lock_control_robotic(True)
+                if not self.__robot_online or not self.__marker_online:  # if either offline, lock
+                    self.control_widget.lock_control_robotic(True)
 
-            if not self.__vision_online:
-                self.control_widget.lock_control_vision(True)
+                if not self.__vision_online:
+                    self.control_widget.lock_control_vision(True)
 
-            # todo finish the vision system nodes
+                # todo finish the vision system nodes
+
+        else:
+            logging.info("UI locking is disabled from the command line")
 
     def ros_error_callback(self, node_name: str, msg: str, err_code: int):
         super(HMICollabApp, self).ros_error_callback(node_name, msg, err_code)
@@ -268,21 +251,44 @@ class HMICollabApp(HMIApp):
     def button_clicked_callback(self):
         button_clicked = self.sender()
 
-        if button_clicked == self.control_widget.button_pause_rob:
-            avail = HMICollabApp.KPI.Availability()
-            avail.start_now()
-            from time import sleep
-            sleep(1)
-            avail.end_now()
-            print(avail.calculate())
+        # robotic
+        if button_clicked == self.control_widget.button_start_session_rob:
+            if self.state_robot == HMICollabApp.STATUS.IDLE:
+                self.__kpi_rob.availability.start_now()
+
+            elif self.state_robot == HMICollabApp.STATUS.WORKING:
+                return  # nothing changed, skip
+
+            self.state_robot = HMICollabApp.STATUS.WORKING  # change the state
+
+        elif button_clicked == self.control_widget.button_pause_rob:
+            if self.state_robot == HMICollabApp.STATUS.WORKING:
+                self.__kpi_rob.performance.pause_start()  # start the pause
+
+            elif self.state_robot == HMICollabApp.STATUS.PAUSED:
+                # resuming from pause
+                self.__kpi_rob.performance.pause_end()  # end the pause
+                self.state_robot = HMICollabApp.STATUS.WORKING
+                return
+
+            self.state_robot = HMICollabApp.STATUS.PAUSED  # change the state to paused
+
+        elif button_clicked == self.control_widget.button_end_session_rob:
+            self.__kpi_rob.availability.end_now()
+
+    def kpi_update_callback(self):
+        self.info_widget.display_kpi(
+            self.InfoWidget.ROBOTIC,
+            availability=self.__kpi_rob.availability.calculate(),
+            quality=self.__kpi_rob.quality.calculate(),
+            performance=self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
+        )
+
+        self.kpi_update_timer.start(self.KPI_UPDATE_INTERVAL)  # restart timer
 
     # endregion
 
     # region ROS CALLBACKS *********************************************************************************************
-
-    def kpi_callback(self, msg: KPIC2):
-        assert isinstance(msg, KPIC2)
-        self.info_widget.display_kpi(msg)
 
     def status_callback(self, msg):
         if isinstance(msg, Robot2Status):
@@ -300,45 +306,57 @@ class HMICollabApp(HMIApp):
 
         # todo implement vision system
 
-        if self.__marker_online and self.__robot_online:
-            self.logger.info("Unlocking robot UI")
-            self.control_widget.lock_control_robotic(False)  # unlock the UI
-
-        else:
-            self.logger.info("Locking robot UI")
-            self.control_widget.lock_control_robotic(True)
-
-        if self.__vision_online:
-            self.logger.info("Unlocking vision UI")
+        if not self.ui_locking:
+            self.control_widget.lock_control_robotic(False)
             self.control_widget.lock_control_vision(False)
 
         else:
-            self.logger.info("Locking vision IO")
-            self.control_widget.lock_control_vision(True)
+            if self.__marker_online and self.__robot_online:
+                self.logger.info("Unlocking robot UI")
+                self.control_widget.lock_control_robotic(False)  # unlock the UI
+
+            else:
+                self.logger.info("Locking robot UI")
+                self.control_widget.lock_control_robotic(True)
+
+            if self.__vision_online:
+                self.logger.info("Unlocking vision UI")
+                self.control_widget.lock_control_vision(False)
+
+            else:
+                self.logger.info("Locking vision IO")
+                self.control_widget.lock_control_vision(True)
 
     # endregion
 
     # region PROPERTIES ************************************************************************************************
 
     @property
-    def depends_online(self) -> bool:
-        return self.__depends_online
+    def state_robot(self):
+        return self.__state_rob
 
-    @depends_online.setter
-    def depends_online(self, online: bool):
-        self.__depends_online = online
-        if online:
-            self.control_widget.lock_control_robotic(False)
-            self.control_widget.lock_control_vision(False)
+    @state_robot.setter
+    def state_robot(self, value: STATUS):
+        """Sets the state and locks the buttons accordingly"""
+        self.__state_rob = value
+        logging.info(f"Status set to: {value}")
 
-        else:
-            missing = self.ros_worker.missing_dependencies()
-            if NodeList.MarkerNode.value in missing or NodeList.Robot2Node.value in missing:
-                # marker system missing nodes
-                self.control_widget.lock_control_robotic(True)
+        if value == HMICollabApp.STATUS.IDLE:
+            self.control_widget.button_start_session_rob.setEnabled(True)
+            self.control_widget.button_pause_rob.setEnabled(False)
+            self.control_widget.button_end_session_rob.setEnabled(False)
 
-            elif True:
-                pass  # todo program the vision system
+            self.control_widget.button_pause_rob.setText("PAUSE")
+
+        elif value == HMICollabApp.STATUS.PAUSED:
+            self.control_widget.button_pause_rob.setText("RESUME")
+
+        elif value == HMICollabApp.STATUS.WORKING:
+            self.control_widget.button_start_session_rob.setEnabled(False)
+            self.control_widget.button_pause_rob.setEnabled(True)
+            self.control_widget.button_end_session_rob.setEnabled(True)
+
+            self.control_widget.button_pause_rob.setText("PAUSE")
 
     # endregion
 
@@ -360,13 +378,6 @@ class ROSNodeCollab(QTROSNode):
                                                       topic=MessageList.VisionControl.value[0],
                                                       qos_profile=10
                                                       )
-
-        # subscriptions
-        self.__kpi_subscription = self.create_subscription(msg_type=MessageList.KPIC2.value[1],
-                                                           topic=MessageList.KPIC2.value[0],
-                                                           callback=self.kpi_callback,
-                                                           qos_profile=10
-                                                           )
 
         self.__robot_status_subscription = self.create_subscription(
             msg_type=MessageList.Robot2Status.value[1],
@@ -419,15 +430,207 @@ class ROSNodeCollab(QTROSNode):
         else:
             raise ValueError(f"Invalid cell (number: {cell})")
 
-    def kpi_callback(self, msg: KPIC2):
-        self.signals.kpi.emit(msg)
-
     def robot_status_callback(self, msg: Robot2Status):
         self.signals.status.emit(msg)
 
 
-class SQLManager:
-    pass
+class KPI:
+    """Class for tracking and managing KPIs"""
+
+    PRODUCT_QUOTA = 60
+
+    def __init__(self):
+        self.__availability = KPI.Availability()
+        self.__quality = KPI.Quality(self.PRODUCT_QUOTA)
+        self.__performance = KPI.Performance(self.PRODUCT_QUOTA)
+
+    @property
+    def availability(self):
+        return self.__availability
+
+    @property
+    def quality(self):
+        return self.__quality
+
+    @property
+    def performance(self):
+        return self.__performance
+
+    @dataclass
+    class Availability:
+        format = "%H:%M:%S"
+        __planned_start: ClassVar[datetime] = datetime.strptime("08:00:00", format)
+        __planned_end: ClassVar[datetime] = datetime.strptime("8:03:00", format)
+
+        __actual_start: datetime = field(default=None)
+        __actual_end: datetime = field(default=None)
+
+        def __str__(self):
+            if self.actual_start is None:
+                actual_start_str = "Not started yet"
+            else:
+                actual_start_str = self.__actual_start.strftime(self.format)
+
+            if self.__actual_end is None:
+                actual_end_str = "Not ended yet"
+            else:
+                actual_end_str = self.__actual_end.strftime(self.format)
+
+            return f"planned start: {self.__planned_start.strftime(self.format)} " \
+                   f"planned start: {self.__planned_start.strftime(self.format)} " \
+                   f"actual start: {actual_start_str} " \
+                   f"actual end: {actual_end_str}"
+
+        def start_now(self):
+            self.__actual_start = datetime.now()
+
+        def end_now(self):
+            self.__actual_end = datetime.now()
+
+        def calculate(self):
+            planned_duration = self.__planned_end - self.__planned_start
+
+            return self.actual_duration / planned_duration
+
+        # region PROPERTIES
+
+        @property
+        def actual_start(self):
+            if self.__actual_start is None:
+                return "Not set yet"
+            else:
+                return self.__actual_start.strftime(self.format)
+
+        @property
+        def actual_end(self):
+            if self.__actual_end is None:
+                return "Not set yet"
+            else:
+                return self.__actual_end
+
+        @property
+        def planned_start(self):
+            return self.__planned_start
+
+        @property
+        def planned_end(self):
+            return self.__planned_end
+
+        @property
+        def actual_duration(self) -> timedelta:
+            """Returns the actual duration (A_curM in the documenatation)"""
+            if self.__actual_start is None:
+                return timedelta(0)
+
+            start = self.__actual_start
+
+            if self.__actual_end is None:
+                end = datetime.now()
+
+            else:
+                end = self.__actual_end
+
+            return end - start
+
+        # endregion
+
+    @dataclass
+    class Quality:
+        """Class for calculating and storing quality KPI data
+
+        Reference quality is defined as
+        """
+
+        __product_quota: int
+
+        __product_count: int = field(default=0)
+        __error_count: int = field(default=0)
+
+        def calculate(self):
+            return (self.product_count - self.error_count) / self.__product_quota
+
+        @property
+        def product_count(self):
+            return self.__product_count
+
+        @product_count.setter
+        def product_count(self, value: int):
+            self.__product_count = value
+
+        @property
+        def error_count(self):
+            return self.__error_count
+
+        @error_count.setter
+        def error_count(self, value: int):
+            self.__error_count = value
+
+    @dataclass
+    class Performance:
+        """Class for calculating and storing performance KPIs
+
+        Performance is calculated as {products manufactured} / {manufacturing time}
+        Reference performance is 60 [-] / 10 [h]
+        Actual performance is calculated as {actual products made} / A_curM - {time paused}
+            - where A_curM is the actual working time (see Availability class)
+
+        The performance KPI is calculated like this:
+            - P_M = {Actual performance} / {Reference performance}
+
+        To simplify code performance will be calculated as
+            - {manufacturing time} / {products manufactured}
+        and the performance KPI will be calculated as
+            - 1 / P_M = 1 / ({Actual performance} / {Reference performance})
+        """
+        __product_quota: int
+
+        __work_period: ClassVar[timedelta] = timedelta(hours=10)
+        __reference_performance: timedelta = field(init=False)
+
+        __paused: timedelta = field(default=timedelta(0))
+        __pause_timer: ClassVar[datetime] = None
+
+        __product_count: int = field(default=0)
+
+        def __post_init__(self):
+            self.__reference_performance = self.__work_period / self.__product_quota
+
+        def calculate(self, a_cur_m: timedelta):
+            if self.product_count == 0:
+                return 0
+
+            actual_performance = (a_cur_m - self.paused) / self.product_count
+
+            if actual_performance == timedelta(0):
+                return 0
+
+            return self.__reference_performance / actual_performance
+
+        def pause_start(self):
+            self.__pause_timer = datetime.now()
+
+        def pause_end(self):
+            if self.__pause_timer is None:
+                return
+
+            self.paused += datetime.now() - self.__pause_timer
+            self.__pause_timer = None
+
+        @property
+        def paused(self):
+            return self.__paused
+
+        @paused.setter
+        def paused(self, value: timedelta):
+            self.__paused = value
+
+        @property
+        def product_count(self):
+            return self.__product_count
+
+        @product_count.setter
+        def product_count(self, value: int):
+            self.__product_count = value
 
 
 def main(args=None):
