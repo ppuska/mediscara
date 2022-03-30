@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\ROS\mediscara_ws\src\mediscara\mediscara\scripts\widgets\layout\gui.ui'
+# Form implementation generated from reading ui file '\\wsl$\Ubuntu-20.04\home\ppuska\mediscara_ws\src\mediscara\mediscara\scripts\widgets\layout\gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -257,7 +257,7 @@ class Ui_GUIWindow(object):
         self.label_2.setBuddy(self.line_edit_pass)
 
         self.retranslateUi(GUIWindow)
-        self.tabWidget.setCurrentIndex(4)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(GUIWindow)
         GUIWindow.setTabOrder(self.line_edit_name, self.line_edit_pass)
         GUIWindow.setTabOrder(self.line_edit_pass, self.tabWidget)
