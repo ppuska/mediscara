@@ -1,0 +1,7 @@
+/home/ppuska/mediscara_ws/build/interfaces/rosidl_adapter/interfaces:msg/Error.idl
+/home/ppuska/mediscara_ws/build/interfaces/rosidl_adapter/interfaces:msg/MarkerStatus.idl
+/home/ppuska/mediscara_ws/build/interfaces/rosidl_adapter/interfaces:msg/KPIC1.idl
+/home/ppuska/mediscara_ws/build/interfaces/rosidl_adapter/interfaces:msg/KPIC2.idl
+/home/ppuska/mediscara_ws/build/interfaces/rosidl_adapter/interfaces:msg/Robot2Control.idl
+/home/ppuska/mediscara_ws/build/interfaces/rosidl_adapter/interfaces:msg/Robot2Status.idl
+/home/ppuska/mediscara_ws/build/interfaces/rosidl_adapter/interfaces:msg/VisionControl.idl

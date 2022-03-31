@@ -1,0 +1,49 @@
+---
+version: "3"
+
+services:
+  mongo:
+    image: mongo:latest
+    restart: always
+    command: --nojournal
+
+  orion:
+    image: fiware/orion:latest
+    container_name: orion-container
+    restart: always
+    ports:
+      - "1026:1026"
+    depends_on:
+      - mongo
+    command: -dbhost mongo
+    healthcheck:
+        test: curl --fail -s http://orion:1026/version || exit 1 
+
+  crate-db:
+    image: crate:3.3.2
+    restart: always
+    ports:
+      - "4200:4200"
+      - "4300:4300"
+      - "5432:5432"
+
+  quantum-leap:
+    image: fiware/quantum-leap:latest
+    restart: always
+    ports:
+      - "8668:8668"
+    depends_on:
+      - crate-db
+    environment:
+      CRATE_HOST: crate-db
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - "3003:3000"
+    depends_on:
+      - crate-db
+    environment:
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-worldmap-panel
+

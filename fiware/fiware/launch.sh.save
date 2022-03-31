@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# launch docker containers
+cd ~/fiware
+docker compose up &
+
+# get the container list
+CONTAINERS=`docker ps -q`
+
+while [ -z "$CONTAINERS" ]
+do
+	echo "Containers down"
+	echo "$CONTA"
+	sleep 1s
+	CONTAINERS=`docker ps -q`
+done
+
+echo "$CONTAINERS"
+echo "Launching integration service"
+. ~/is_ws/install/setup.bash
+integration-service ~/is_ws/ros_server.yaml

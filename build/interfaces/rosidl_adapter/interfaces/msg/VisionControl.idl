@@ -1,0 +1,22 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from interfaces/msg/VisionControl.msg
+// generated code does not contain a copyright notice
+
+
+module interfaces {
+  module msg {
+    struct VisionControl {
+      @verbatim (language="comment", text=
+        " home signal")
+      boolean home;
+
+      @verbatim (language="comment", text=
+        " start measurement of pcb")
+      boolean measure_pcb;
+
+      @verbatim (language="comment", text=
+        " start measurement of label")
+      boolean measure_label;
+    };
+  };
+};

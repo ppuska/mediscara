@@ -1,0 +1,45 @@
+[0.606s] Invoking command in '/home/ppuska/mediscara_ws/src/mediscara': PYTHONPATH=/home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/mediscara build --build-base /home/ppuska/mediscara_ws/build/mediscara/build install --prefix /home/ppuska/mediscara_ws/install/mediscara --record /home/ppuska/mediscara_ws/build/mediscara/install.log --single-version-externally-managed
+[0.795s] running egg_info
+[0.795s] writing ../../build/mediscara/mediscara.egg-info/PKG-INFO
+[0.796s] writing dependency_links to ../../build/mediscara/mediscara.egg-info/dependency_links.txt
+[0.796s] writing entry points to ../../build/mediscara/mediscara.egg-info/entry_points.txt
+[0.796s] writing requirements to ../../build/mediscara/mediscara.egg-info/requires.txt
+[0.797s] writing top-level names to ../../build/mediscara/mediscara.egg-info/top_level.txt
+[0.835s] reading manifest file '../../build/mediscara/mediscara.egg-info/SOURCES.txt'
+[0.836s] writing manifest file '../../build/mediscara/mediscara.egg-info/SOURCES.txt'
+[0.836s] running build
+[0.836s] running build_py
+[0.837s] copying mediscara/scripts/widgets/statusbar_widget_ui.py -> /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets
+[0.837s] copying mediscara/scripts/widgets/sql_gui_ui.py -> /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets
+[0.838s] copying mediscara/scripts/widgets/layout/statusbar_ui.py -> /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout
+[0.838s] copying mediscara/scripts/widgets/layout/collab_control_ui.py -> /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout
+[0.838s] copying mediscara/scripts/widgets/layout/error_list_item_ui.py -> /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout
+[0.838s] copying mediscara/scripts/widgets/layout/collab_info_ui.py -> /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout
+[0.839s] copying mediscara/scripts/widgets/layout/node_list_item_ui.py -> /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout
+[0.839s] running install
+[0.840s] running install_lib
+[0.841s] copying /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/statusbar_widget_ui.py -> /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets
+[0.841s] copying /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout/statusbar_ui.py -> /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout
+[0.842s] copying /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout/collab_control_ui.py -> /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout
+[0.842s] copying /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout/error_list_item_ui.py -> /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout
+[0.842s] copying /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout/collab_info_ui.py -> /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout
+[0.842s] copying /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/layout/node_list_item_ui.py -> /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout
+[0.842s] copying /home/ppuska/mediscara_ws/build/mediscara/build/lib/mediscara/scripts/widgets/sql_gui_ui.py -> /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets
+[0.843s] byte-compiling /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/statusbar_widget_ui.py to statusbar_widget_ui.cpython-38.pyc
+[0.845s] byte-compiling /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout/statusbar_ui.py to statusbar_ui.cpython-38.pyc
+[0.846s] byte-compiling /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout/collab_control_ui.py to collab_control_ui.cpython-38.pyc
+[0.848s] byte-compiling /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout/error_list_item_ui.py to error_list_item_ui.cpython-38.pyc
+[0.849s] byte-compiling /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout/collab_info_ui.py to collab_info_ui.cpython-38.pyc
+[0.851s] byte-compiling /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/layout/node_list_item_ui.py to node_list_item_ui.cpython-38.pyc
+[0.851s] byte-compiling /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara/scripts/widgets/sql_gui_ui.py to sql_gui_ui.cpython-38.pyc
+[0.853s] running install_data
+[0.853s] running install_egg_info
+[0.855s] removing '/home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara-0.0.2-py3.8.egg-info' (and everything under it)
+[0.855s] Copying ../../build/mediscara/mediscara.egg-info to /home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages/mediscara-0.0.2-py3.8.egg-info
+[0.856s] running install_scripts
+[0.881s] Installing collab_node script to /home/ppuska/mediscara_ws/install/mediscara/lib/mediscara
+[0.881s] Installing marker_node script to /home/ppuska/mediscara_ws/install/mediscara/lib/mediscara
+[0.882s] Installing robot1_node script to /home/ppuska/mediscara_ws/install/mediscara/lib/mediscara
+[0.882s] Installing robot2_node script to /home/ppuska/mediscara_ws/install/mediscara/lib/mediscara
+[0.885s] writing list of installed files to '/home/ppuska/mediscara_ws/build/mediscara/install.log'
+[0.914s] Invoked command in '/home/ppuska/mediscara_ws/src/mediscara' returned '0': PYTHONPATH=/home/ppuska/mediscara_ws/install/mediscara/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/mediscara build --build-base /home/ppuska/mediscara_ws/build/mediscara/build install --prefix /home/ppuska/mediscara_ws/install/mediscara --record /home/ppuska/mediscara_ws/build/mediscara/install.log --single-version-externally-managed

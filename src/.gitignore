@@ -1,0 +1,6 @@
+*.pyc
+.idea/
+install
+build
+log
+
