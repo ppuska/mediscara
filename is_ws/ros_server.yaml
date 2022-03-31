@@ -1,9 +1,10 @@
 types:
     idls:
       - >
-        struct FiwareStatus {
-            string io_string;
-            double dummy_double;
+        struct KPIC2 {
+            float availability;
+            float quality;
+            float performance;
         };
 
 
@@ -16,5 +17,5 @@ routes:
     fiware_to_ros2: { from: fiware, to: ros2 }
 
 topics:
-    fiware_status: { type: "interfaces/FiwareStatus", route: ros2_to_fiware, remap: {fiware: {type: FiwareStatus}} }
+    kpi_cell2: { type: "interfaces/KPIC2", route: ros2_to_fiware, remap: {fiware: {type: KPIC2}} }
  #   hello_ros2: { type: "std_msgs/String", route: ros2_to_fiware, remap: {fiware: {type: HelloWorld}} }
