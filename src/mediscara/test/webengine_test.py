@@ -23,7 +23,7 @@ class Example(QWidget):
 
         vbox.addWidget(self.webEngineView)
 
-        self.setLayout(vbox)
+        # self.setLayout(vbox)
 
         self.setGeometry(300, 300, 350, 250)
         self.setWindowTitle('QWebEngineView')

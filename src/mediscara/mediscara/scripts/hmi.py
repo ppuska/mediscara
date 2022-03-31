@@ -4,6 +4,7 @@ from typing import List, Type
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl, Qt
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel, QListWidget, QListWidgetItem, QWidget
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 import rclpy
 from mediscara.scripts.ros_node import QTROSNode
@@ -156,7 +157,9 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         self.button_refresh.clicked.connect(self.load_nodes)
 
         # grafana tab
-        # self.web_widget.load(QUrl(IPList.Grafana.value))
+        self.web_widget = QWebEngineView(self.tab_grafana)
+        self.web_widget.load(QUrl(IPList.Grafana.value))
+        self.grafana_layout.addWidget(self.web_widget)
 
         # error tab
         self.button_clear_errors.clicked.connect(self.clear_errors_callback)
