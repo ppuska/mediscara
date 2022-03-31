@@ -31,7 +31,7 @@ class Example(QWidget):
 
     def loadPage(self):
 
-        self.webEngineView.load(QUrl("https://www.google.com"))
+        self.webEngineView.load(QUrl("http://localhost:3003"))
 
 def main():
 

@@ -156,8 +156,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         self.button_refresh.clicked.connect(self.load_nodes)
 
         # grafana tab
-        self.web_widget.load(QUrl(IPList.Grafana.value))
-        self.web_widget.show()
+        # self.web_widget.load(QUrl(IPList.Grafana.value))
 
         # error tab
         self.button_clear_errors.clicked.connect(self.clear_errors_callback)
