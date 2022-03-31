@@ -1,6 +1,0 @@
-source;share/mediscara/hook/pythonpath.ps1
-source;share/mediscara/hook/pythonpath.dsv
-source;share/mediscara/hook/pythonpath.sh
-source;share/mediscara/hook/ament_prefix_path.ps1
-source;share/mediscara/hook/ament_prefix_path.dsv
-source;share/mediscara/hook/ament_prefix_path.sh

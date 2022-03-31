@@ -30,7 +30,7 @@ class MessageList(Enum):
 class IPList(Enum):
     """Enum class for storing ip addresses"""
     MarkerIP = 'localhost'  # todo change to real IP
-    Grafana = 'http://localhost:3003'
+    Grafana = 'https://www.google.com' # 'http://localhost:3003'
     CrateDB = 'http://host.docker.internal:4200'
 
     Robot2 = '192.168.0.22'

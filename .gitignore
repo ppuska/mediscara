@@ -1,6 +1,14 @@
 *.pyc
 .idea/
-install
-build
-log
+install/*
+build/*
+log/*
+is_ws/build/*
+is_ws/install/*
+is_ws/log/*
 
+build/
+
+install/
+
+log/
