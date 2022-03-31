@@ -58,14 +58,14 @@ class HMICollabApp(HMIApp):
 
         def display_kpi(self, box: int, *, availability: float, quality: float, performance: float):
             if box == self.ROBOTIC:
-                self.label_availability_rob.setText(f"{availability}%")
-                self.label_quality_rob.setText(f"{quality}%")
-                self.label_performance_rob.setText(f"{performance}%")
+                self.label_availability_rob.setText(f"{availability:.1f}%")
+                self.label_quality_rob.setText(f"{quality:.1f}%")
+                self.label_performance_rob.setText(f"{performance:.1f}%")
 
             elif box == self.VISION:
-                self.label_availability_vis.setText(f"{availability}%")
-                self.label_quality_vis.setText(f"{quality}%")
-                self.label_performance_vis.setText(f"{performance}%")
+                self.label_availability_vis.setText(f"{availability:.1f}%")
+                self.label_quality_vis.setText(f"{quality:.1f}%")
+                self.label_performance_vis.setText(f"{performance:.1f}%")
 
             else:
                 raise ValueError(f"Invalid input number ({box})")
@@ -275,6 +275,8 @@ class HMICollabApp(HMIApp):
 
         elif button_clicked == self.control_widget.button_end_session_rob:
             self.__kpi_rob.availability.end_now()
+            
+            self.state_robot = HMICollabApp.STATUS.IDLE
 
     def kpi_update_callback(self):
         self.info_widget.display_kpi(
