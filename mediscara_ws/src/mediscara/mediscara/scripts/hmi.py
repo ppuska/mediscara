@@ -1,4 +1,5 @@
 import enum
+import logging
 import sys
 from typing import List, Type
 
@@ -391,11 +392,12 @@ class ROSWorker(QObject):
                                             depends_on=self.__depends_list,
                                             signals=self.signals
                                             )
-        rclpy.spin(self.__ros_node)
 
         self.mutex.lock()
         self.__ready = True
         self.mutex.unlock()
+        
+        rclpy.spin(self.__ros_node)
 
     @pyqtSlot()
     def load_info(self):

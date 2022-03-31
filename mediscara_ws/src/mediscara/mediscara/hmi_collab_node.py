@@ -296,6 +296,7 @@ class HMICollabApp(HMIApp):
         msg.performance = p
         msg.quality = q
 
+        logging.info("Sending ROS MSG")
         self.ros_worker.send_kpi(ROSNodeCollab.ROBOTIC, msg)
 
         self.kpi_update_timer.start(self.KPI_UPDATE_INTERVAL)  # restart timer
@@ -453,6 +454,7 @@ class ROSNodeCollab(QTROSNode):
             raise ValueError(f"Invalid cell (number: {cell})")
 
     def send_kpi(self, cell: int, msg):
+        self.get_logger().info(f"Sending message: {msg}")
         if cell == self.VISION:
             raise NotImplementedError
 
