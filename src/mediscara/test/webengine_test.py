@@ -23,7 +23,7 @@ class Example(QWidget):
 
         vbox.addWidget(self.webEngineView)
 
-        self.setLayout(vbox)
+        # self.setLayout(vbox)
 
         self.setGeometry(300, 300, 350, 250)
         self.setWindowTitle('QWebEngineView')
@@ -31,7 +31,7 @@ class Example(QWidget):
 
     def loadPage(self):
 
-        self.webEngineView.load(QUrl("https://www.google.com"))
+        self.webEngineView.load(QUrl("http://localhost:3003"))
 
 def main():
 

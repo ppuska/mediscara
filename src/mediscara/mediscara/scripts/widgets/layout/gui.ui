@@ -95,7 +95,7 @@ QTabBar::tab:!selected {
          <string notr="true"/>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="tab_info">
          <attribute name="title">
@@ -139,27 +139,7 @@ QTabBar::tab:!selected {
          <attribute name="title">
           <string>GRAFANA</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QWebEngineView" name="web_widget" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>1006</width>
-              <height>435</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <layout class="QVBoxLayout" name="grafana_layout"/>
         </widget>
         <widget class="QWidget" name="tab_error">
          <attribute name="title">
@@ -376,14 +356,6 @@ QPushButton:pressed {
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QWebEngineView</class>
-   <extends>QWidget</extends>
-   <header>qwebengineview.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>line_edit_name</tabstop>
   <tabstop>line_edit_pass</tabstop>
