@@ -410,12 +410,13 @@ class ROSWorker(QObject):
 
     @pyqtSlot()
     def send_control(self, *args, **kwargs):
-        assert isinstance(self.__ros_node, QTROSNode)
-        self.__ros_node.send_control(*args, **kwargs)
+        if self.__ready:
+            self.__ros_node.send_control(*args, **kwargs)
 
     @pyqtSlot()
     def send_kpi(self, *args, **kwargs):
-        self.__ros_node.send_kpi(*args, **kwargs)
+        if self.__ready:
+            self.__ros_node.send_kpi(*args, **kwargs)
 
     @pyqtSlot()
     def stop(self):
