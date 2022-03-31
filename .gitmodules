@@ -1,0 +1,4 @@
+[submodule "is_ws/src/ROS2-SH"]
+	url = https://github.com/eProsima/ROS1-SH.git
+[submodule "is_ws/src/Integration-Service"]
+	url = https://github.com/eProsima/Integration-Service.git
