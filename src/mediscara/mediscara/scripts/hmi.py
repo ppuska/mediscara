@@ -414,6 +414,10 @@ class ROSWorker(QObject):
         self.__ros_node.send_control(*args, **kwargs)
 
     @pyqtSlot()
+    def send_kpi(self, *args, **kwargs):
+        self.__ros_node.send_kpi(*args, **kwargs)
+
+    @pyqtSlot()
     def stop(self):
         self.__ros_node.get_logger().info("Shutting down ROS node")
         rclpy.shutdown()

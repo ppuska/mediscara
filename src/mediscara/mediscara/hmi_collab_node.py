@@ -1,4 +1,5 @@
 import logging
+from multiprocessing.sharedctypes import Value
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -279,12 +280,23 @@ class HMICollabApp(HMIApp):
             self.state_robot = HMICollabApp.STATUS.IDLE
 
     def kpi_update_callback(self):
+        a = self.__kpi_rob.availability.calculate()
+        p = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
+        q = self.__kpi_rob.quality.calculate()
+
         self.info_widget.display_kpi(
             self.InfoWidget.ROBOTIC,
             availability=self.__kpi_rob.availability.calculate(),
             quality=self.__kpi_rob.quality.calculate(),
             performance=self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
         )
+
+        msg = KPIC2()
+        msg.availability = a
+        msg.performance = p
+        msg.quality = q
+
+        self.ros_worker.send_kpi(ROSNodeCollab.ROBOTIC, msg)
 
         self.kpi_update_timer.start(self.KPI_UPDATE_INTERVAL)  # restart timer
 
@@ -381,12 +393,20 @@ class ROSNodeCollab(QTROSNode):
                                                       qos_profile=10
                                                       )
 
+        self.__kpi_robotic = self.create_publisher(
+            msg_type=MessageList.KPIC2.value[1],
+            topic=MessageList.KPIC2.value[0],
+            qos_profile=10
+            )
+
+        # subscribers
         self.__robot_status_subscription = self.create_subscription(
             msg_type=MessageList.Robot2Status.value[1],
             topic=MessageList.Robot2Status.value[0],
             callback=self.robot_status_callback,
             qos_profile=10
         )
+
 
         self.get_logger().info("ROS node online")
         self.signals.started.emit()
@@ -431,6 +451,16 @@ class ROSNodeCollab(QTROSNode):
 
         else:
             raise ValueError(f"Invalid cell (number: {cell})")
+
+    def send_kpi(self, cell: int, msg):
+        if cell == self.VISION:
+            raise NotImplementedError
+
+        elif cell == self.ROBOTIC:
+            self.__kpi_robotic.publish(msg)
+
+        else:
+            raise ValueError(f"Invalid cell (numer: {cell})")
 
     def robot_status_callback(self, msg: Robot2Status):
         self.signals.status.emit(msg)
@@ -599,12 +629,12 @@ class KPI:
 
         def calculate(self, a_cur_m: timedelta):
             if self.product_count == 0:
-                return 0
+                return 0.00
 
             actual_performance = (a_cur_m - self.paused) / self.product_count
 
             if actual_performance == timedelta(0):
-                return 0
+                return 0.0
 
             return self.__reference_performance / actual_performance
 

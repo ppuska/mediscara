@@ -180,6 +180,10 @@ class QTROSNode(ROSNode, ABC):
         """Send messages to the respective control topics"""
         pass
 
+    @abstractmethod
+    def send_kpi(self, *args, **kwargs):
+        pass
+
     @property
     def signals(self):
         return self.__signals
