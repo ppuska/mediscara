@@ -17,17 +17,21 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/RobotStatus.msg"
-  "msg/FiwareStatus.msg"
-  "msg/MarkerStatus.msg"
-  "msg/Error.msg"
-)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Error.msg"
+  "msg/MarkerStatus.msg"
+  "msg/KPIC1.msg"
+  "msg/KPIC2.msg"
+  "msg/Robot2Control.msg"
+  "msg/Robot2Status.msg"
+  "msg/VisionControl.msg"
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

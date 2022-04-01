@@ -24,4 +24,4 @@ waitForOrion
 
 echo "Launching integration service"
 . ${start_dir}/is_ws/install/setup.bash
-integration-service ${start_dir}/is_ws/ros_server.yaml
+integration-service ${start_dir}/is_ws/ros_server.yaml || docker compose stop
