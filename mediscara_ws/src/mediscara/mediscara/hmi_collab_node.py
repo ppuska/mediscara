@@ -4,6 +4,7 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum, auto
+from telnetlib import STATUS
 from typing import ClassVar
 
 from PyQt5.QtCore import QTimer
@@ -142,17 +143,64 @@ class HMICollabApp(HMIApp):
         def __init__(self, parent=None):
             super(HMICollabApp.ControlWidget, self).__init__(parent=parent)
             self.setupUi(self)
+            
+            self.__locked_vision = False
+            self.__locked_robotic = False
 
         def lock_control_vision(self, lock: bool):
             self.button_start_session.setEnabled(not lock)
             self.button_home.setEnabled(not lock)
             self.button_measure_label.setEnabled(not lock)
             self.button_measure_pcb.setEnabled(not lock)
+            
+            self.__locked_vision = lock
 
         def lock_control_robotic(self, lock: bool):
             self.button_start_session_rob.setEnabled(not lock)
             self.button_home_rob.setEnabled(not lock)
             self.button_start_marking.setEnabled(not lock)
+            
+            self.__locked_robotic = lock
+            
+            
+
+        def set_state_vision(self, state: STATUS):
+            if not self.__locked_vision:  # only update it if it is not locked
+                if state == HMICollabApp.STATUS.IDLE:
+                    self.control_widget.button_start_session.setEnabled(True)
+                    self.control_widget.button_pause.setEnabled(False)
+                    self.control_widget.button_end_session.setEnabled(False)
+
+                    self.control_widget.button_pause.setText("PAUSE")
+
+                elif state == HMICollabApp.STATUS.PAUSED:
+                    self.control_widget.button_pause.setText("RESUME")
+
+                elif state == HMICollabApp.STATUS.WORKING:
+                    self.control_widget.button_start_session.setEnabled(False)
+                    self.control_widget.button_pause.setEnabled(True)
+                    self.control_widget.button_end_session.setEnabled(True)
+
+                    self.control_widget.button_pause.setText("PAUSE")
+        
+        def set_state_robotic(self, state: STATUS):
+            if not self.__locked_robotic:
+                if state == HMICollabApp.STATUS.IDLE:
+                    self.control_widget.button_start_session_rob.setEnabled(True)
+                    self.control_widget.button_pause_rob.setEnabled(False)
+                    self.control_widget.button_end_session_rob.setEnabled(False)
+
+                    self.control_widget.button_pause_rob.setText("PAUSE")
+
+                elif state == HMICollabApp.STATUS.PAUSED:
+                    self.control_widget.button_pause_rob.setText("RESUME")
+
+                elif state == HMICollabApp.STATUS.WORKING:
+                    self.control_widget.button_start_session_rob.setEnabled(False)
+                    self.control_widget.button_pause_rob.setEnabled(True)
+                    self.control_widget.button_end_session_rob.setEnabled(True)
+
+                    self.control_widget.button_pause_rob.setText("PAUSE")
 
         @property
         def buttons(self):
@@ -279,6 +327,10 @@ class HMICollabApp(HMIApp):
             
             self.state_robot = HMICollabApp.STATUS.IDLE
 
+        # vision
+        if button_clicked == self.control_widget.button_start_session:
+            pass
+
     def kpi_update_callback(self):
         a = self.__kpi_rob.availability.calculate()
         p = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
@@ -356,22 +408,18 @@ class HMICollabApp(HMIApp):
         self.__state_rob = value
         logging.info(f"Status set to: {value}")
 
-        if value == HMICollabApp.STATUS.IDLE:
-            self.control_widget.button_start_session_rob.setEnabled(True)
-            self.control_widget.button_pause_rob.setEnabled(False)
-            self.control_widget.button_end_session_rob.setEnabled(False)
+        self.control_widget.set_state_robotic(value)
 
-            self.control_widget.button_pause_rob.setText("PAUSE")
-
-        elif value == HMICollabApp.STATUS.PAUSED:
-            self.control_widget.button_pause_rob.setText("RESUME")
-
-        elif value == HMICollabApp.STATUS.WORKING:
-            self.control_widget.button_start_session_rob.setEnabled(False)
-            self.control_widget.button_pause_rob.setEnabled(True)
-            self.control_widget.button_end_session_rob.setEnabled(True)
-
-            self.control_widget.button_pause_rob.setText("PAUSE")
+    @property
+    def state_vision(self):
+        return self.__state_vis
+    
+    @state_vision.setter
+    def state_vision(self, value: STATUS):
+        """Gets the state and locks the buttons accordingly"""
+        self.__state_vis = value
+        
+        self.control_widget.set_state_vision(value)
 
     # endregion
 
