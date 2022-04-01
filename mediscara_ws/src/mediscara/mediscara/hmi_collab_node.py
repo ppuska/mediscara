@@ -1,5 +1,4 @@
 import logging
-from multiprocessing.sharedctypes import Value
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -20,6 +19,10 @@ from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlW
 
 
 class HMICollabApp(HMIApp):
+    """Subclass of HMIApp
+    
+    Implements a custom info and control widget for the collaborative cell
+    """
     NODE_NAME = NodeList.HMINode.value
     DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
 
@@ -297,6 +300,7 @@ class HMICollabApp(HMIApp):
     # region CALLBACKS *************************************************************************************************
 
     def button_clicked_callback(self):
+        """Callback method for when a button gets clicked"""
         button_clicked = self.sender()
 
         # robotic
@@ -328,24 +332,62 @@ class HMICollabApp(HMIApp):
 
         # vision
         if button_clicked == self.control_widget.button_start_session:
-            pass
+            if self.state_vision == HMICollabApp.STATUS.IDLE:
+                self.__kpi_rob.availability.start_now()
+                
+            elif self.state_vision == HMICollabApp.STATUS.WORKING:
+                return 
+            
+            self.state_vision = HMICollabApp.STATUS.WORKING  # change the state
+            
+        elif button_clicked == self.control_widget.button_pause:
+            if self.state_vision == HMICollabApp.STATUS.WORKING:
+                self.__kpi_vis.performance.pause_start()  # start the pause
+            
+            elif self.state_vision == HMICollabApp.STATUS.PAUSED:
+                # resuming from pause
+                self.__kpi_vis.performance.pause_end()
+                self.state_vision = HMICollabApp.STATUS.WORKING
+                return
+            
+            self.state_vision = HMICollabApp.STATUS.PAUSED
+            
+        elif button_clicked == self.control_widget.button_end_session:
+            self.__kpi_vis.availability.end_now()
+            
+            self.state_robot = HMICollabApp.STATUS.IDLE
 
     def kpi_update_callback(self):
-        a = self.__kpi_rob.availability.calculate()
-        p = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
-        q = self.__kpi_rob.quality.calculate()
+        """Sends ROS messages about the KPIs of the cells periodically"""
+        # robotic
+        a_rob = self.__kpi_rob.availability.calculate()
+        p_rob = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
+        q_rob = self.__kpi_rob.quality.calculate()
 
-        self.info_widget.display_kpi(
-            self.InfoWidget.ROBOTIC,
-            availability=self.__kpi_rob.availability.calculate(),
-            quality=self.__kpi_rob.quality.calculate(),
-            performance=self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
-        )
-
+        self.info_widget.display_kpi(self.InfoWidget.ROBOTIC,
+                                     availability=a_rob,
+                                     quality=q_rob,
+                                     performance=p_rob
+                                     )
+        
+        # vision
+        a_vis = self.__kpi_vis.availability.calculate()
+        p_vis = self.__kpi_vis.performance.calculate(self.__kpi_vis.availability.actual_duration)
+        q_vis = self.__kpi_vis.quality.calculate()
+        
+        self.info_widget.display_kpi(ROSNodeCollab.VISION,
+                                     availability=a_vis,
+                                     quality=q_vis,
+                                     performance=p_vis
+                                     )
+        
         msg = KPIC2()
-        msg.availability = a
-        msg.performance = p
-        msg.quality = q
+        msg.availability_robotic = a_rob
+        msg.performance_robotic = p_rob
+        msg.quality_robotic = q_rob
+        msg.availability_vision = a_vis
+        msg.performance_vision = p_vis
+        msg.quality_vision = q_vis
 
         self.ros_worker.send_kpi(ROSNodeCollab.ROBOTIC, msg)
 
