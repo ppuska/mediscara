@@ -160,47 +160,45 @@ class HMICollabApp(HMIApp):
             self.button_home_rob.setEnabled(not lock)
             self.button_start_marking.setEnabled(not lock)
             
-            self.__locked_robotic = lock
-            
-            
+            self.__locked_robotic = lock   
 
         def set_state_vision(self, state: STATUS):
             if not self.__locked_vision:  # only update it if it is not locked
                 if state == HMICollabApp.STATUS.IDLE:
-                    self.control_widget.button_start_session.setEnabled(True)
-                    self.control_widget.button_pause.setEnabled(False)
-                    self.control_widget.button_end_session.setEnabled(False)
+                    self.button_start_session.setEnabled(True)
+                    self.button_pause.setEnabled(False)
+                    self.button_end_session.setEnabled(False)
 
-                    self.control_widget.button_pause.setText("PAUSE")
+                    self.button_pause.setText("PAUSE")
 
                 elif state == HMICollabApp.STATUS.PAUSED:
-                    self.control_widget.button_pause.setText("RESUME")
+                    self.button_pause.setText("RESUME")
 
                 elif state == HMICollabApp.STATUS.WORKING:
-                    self.control_widget.button_start_session.setEnabled(False)
-                    self.control_widget.button_pause.setEnabled(True)
-                    self.control_widget.button_end_session.setEnabled(True)
+                    self.button_start_session.setEnabled(False)
+                    self.button_pause.setEnabled(True)
+                    self.button_end_session.setEnabled(True)
 
-                    self.control_widget.button_pause.setText("PAUSE")
+                    self.button_pause.setText("PAUSE")
         
         def set_state_robotic(self, state: STATUS):
             if not self.__locked_robotic:
                 if state == HMICollabApp.STATUS.IDLE:
-                    self.control_widget.button_start_session_rob.setEnabled(True)
-                    self.control_widget.button_pause_rob.setEnabled(False)
-                    self.control_widget.button_end_session_rob.setEnabled(False)
+                    self.button_start_session_rob.setEnabled(True)
+                    self.button_pause_rob.setEnabled(False)
+                    self.button_end_session_rob.setEnabled(False)
 
-                    self.control_widget.button_pause_rob.setText("PAUSE")
+                    self.button_pause_rob.setText("PAUSE")
 
                 elif state == HMICollabApp.STATUS.PAUSED:
-                    self.control_widget.button_pause_rob.setText("RESUME")
+                    self.button_pause_rob.setText("RESUME")
 
                 elif state == HMICollabApp.STATUS.WORKING:
-                    self.control_widget.button_start_session_rob.setEnabled(False)
-                    self.control_widget.button_pause_rob.setEnabled(True)
-                    self.control_widget.button_end_session_rob.setEnabled(True)
+                    self.button_start_session_rob.setEnabled(False)
+                    self.button_pause_rob.setEnabled(True)
+                    self.button_end_session_rob.setEnabled(True)
 
-                    self.control_widget.button_pause_rob.setText("PAUSE")
+                    self.button_pause_rob.setText("PAUSE")
 
         @property
         def buttons(self):
@@ -248,6 +246,7 @@ class HMICollabApp(HMIApp):
         self.__state_vis = None
 
         self.state_robot = HMICollabApp.STATUS.IDLE
+        self.state_vision = HMICollabApp.STATUS.IDLE
 
         # KPI calculation
         self.__kpi_rob = KPI()
@@ -348,7 +347,6 @@ class HMICollabApp(HMIApp):
         msg.performance = p
         msg.quality = q
 
-        logging.info("Sending ROS MSG")
         self.ros_worker.send_kpi(ROSNodeCollab.ROBOTIC, msg)
 
         self.kpi_update_timer.start(self.KPI_UPDATE_INTERVAL)  # restart timer
@@ -371,7 +369,9 @@ class HMICollabApp(HMIApp):
         elif name == NodeList.Robot2Node.value:
             self.__robot_online = online
 
-        # todo implement vision system
+        # todo: implement vision system
+        elif name == NodeList.VisionNode.value:
+            self.__vision_online = online
 
         if not self.ui_locking:
             self.control_widget.lock_control_robotic(False)
@@ -502,7 +502,6 @@ class ROSNodeCollab(QTROSNode):
             raise ValueError(f"Invalid cell (number: {cell})")
 
     def send_kpi(self, cell: int, msg):
-        self.get_logger().info(f"Sending message: {msg}")
         if cell == self.VISION:
             raise NotImplementedError
 
@@ -724,15 +723,6 @@ def main(args=None):
         sys.exit(app.exec())
     except KeyboardInterrupt:
         print("Stopping")
-
-
-def t():
-    import time
-    avail = HMICollabApp.KPI.Availability()
-    avail.start_now()
-    time.sleep(1)
-    avail.end_now()
-    print(avail)
 
 
 if __name__ == '__main__':

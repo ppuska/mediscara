@@ -12,6 +12,7 @@ class NodeList(Enum):
     SensorNode = 'sensor'
     MarkerNode = 'marker'
     LaserNode = 'laser'
+    VisionNode = 'vision'
     HMINode = 'hmi'
     FIWARENode = "is_ros2"
 
