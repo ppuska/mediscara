@@ -42,17 +42,5 @@ services:
     environment:
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-worldmap-panel
 
-  mysql:
-    image: mysql:latest
-    environment:
-      MYSQL_DATABASE: 'db'
-      MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'user'
-      MYSQL_ROOT_PASSWORD: 'root'
 
-    volumes:
-      - my-db:/var/lib/mysql
-
-volumes:
-  my-db:
 
