@@ -7,7 +7,7 @@ package_name = 'mediscara'
 
 setup(
     name=package_name,
-    version='0.0.2',
+    version='0.1.0',
     packages=find_packages(),
     data_files=[
         ('share/ament_index/resource_index/packages',
