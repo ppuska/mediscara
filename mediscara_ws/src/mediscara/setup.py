@@ -16,7 +16,7 @@ setup(
         # Include all launch files. This is the most important line here!
         (os.path.join('share', package_name), glob('launch/*.launch.py'))
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'mysql-connector-python'],
     zip_safe=True,
     maintainer='Peter Puska',
     maintainer_email='p.puska@lasram.hu',

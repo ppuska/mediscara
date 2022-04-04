@@ -1,5 +1,7 @@
 #!/bin/bash
 
+start_dir=$(pwd)
+
 waitForOrion () {
 	# ' echo -e "\n⏳ Waiting for \033[1;34mOrion\033[0m to be available\n" '
 
@@ -10,13 +12,24 @@ waitForOrion () {
 	done
 }
 
+stop_containers () {
+	cd ${start_dir}/mysql
+	docker compose stop
+
+	cd ${start_dir}/fiware
+	docker compose stop 
+}
+
 # increase vm map max size
 sysctl -w vm.max_map_count=262144  # if not wsl, remove
 
-start_dir=$(pwd)
-echo $start_dir
+# launch MySQL container
+echo "Launching MySQL"
+cd ${start_dir}/mysql
+docker compose up &
 
 # launch docker containers
+echo "Launching Fiware"
 cd ${start_dir}/fiware
 docker compose up &
 
@@ -24,4 +37,4 @@ waitForOrion
 
 echo "Launching integration service"
 . ${start_dir}/is_ws/install/setup.bash
-integration-service ${start_dir}/is_ws/ros_server.yaml || docker compose stop
+integration-service ${start_dir}/is_ws/ros_server.yaml || stop_containers

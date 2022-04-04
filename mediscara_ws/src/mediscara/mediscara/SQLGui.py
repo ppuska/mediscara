@@ -4,16 +4,18 @@ import threading
 from typing import Tuple
 
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtCore import QObject, QTimer
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QHeaderView, QTableWidgetItem, QMessageBox
 
-from widgets.sql_gui_ui import Ui_MainWindow
-from widgets.statusbar_widget_ui import Ui_StatusBarWidget
+from scripts.widgets.sql_gui_ui import Ui_MainWindow
+from scripts.widgets.statusbar_widget_ui import Ui_StatusBarWidget
 
-from mediscara.scripts.logger import Logger
-from mediscara.scripts.sql import SQLManager, Bell, SQLDataClass, Cell2Data
-from mediscara.scripts.thread_manager import WorkerThread
-from mediscara.config import SQLTableNames
+from scripts.logger import Logger
+from scripts.sql import SQLManager, Bell, SQLDataClass, Cell2Data
+from scripts.thread_manager import WorkerThread
+from config import SQLTableNames
+
+from mysql.connector import CMySQLConnection
 
 
 class SQLGuiApp(QMainWindow, Ui_MainWindow):
