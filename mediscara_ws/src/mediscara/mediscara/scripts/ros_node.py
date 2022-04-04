@@ -1,11 +1,13 @@
+"""Library module for the Base ROS Node class"""
 from typing import List
+from abc import ABC, abstractmethod
 
 from rclpy.node import Node
 
 from interfaces.msg import Error
 from mediscara.scripts.utils import ErrorClass as UtilsError
 
-from abc import ABC, abstractmethod
+
 
 
 class ROSNode(Node, ABC):
@@ -24,7 +26,7 @@ class ROSNode(Node, ABC):
         """
         super(ROSNode, self).__init__(f"{node_name}_node")
 
-        """Create dependency check"""
+        # Create dependency check
         self.__dependencies = depends_on
         self.__missing_depends_prev_state = None
         self.__missing_depends_prev = None
@@ -40,7 +42,7 @@ class ROSNode(Node, ABC):
             self.__missing_depends_prev_state = False
             self.__missing_depends_prev = []
 
-        """Create error and status subscription on dependencies"""
+        # Create error and status subscription on dependencies
         if self.__dependencies is not None:
             for node in self.__dependencies:
                 # error
@@ -53,14 +55,14 @@ class ROSNode(Node, ABC):
 
                 self.get_logger().debug(f'Error subscription for node "{node}" created')
 
-        """Create error publisher"""
+        # Create error publisher
         self.__error_publisher = self.create_publisher(
             msg_type=Error,
             topic=f'{node_name}_error',
             qos_profile=10
         )
 
-    """ CALLBACKS ---------------------------------------------------------------------------------------------------"""
+    # region CALLBACKS -------------------------------------------------------------------------------------------------
 
     def __depends_callback(self):
         """Checks is the missing dependencies have come online"""
@@ -96,8 +98,10 @@ class ROSNode(Node, ABC):
         The child class must override this method
         """
         raise NotImplementedError("A subclass must implement this method if it has dependency nodes")
+    
+    # endregion
 
-    """ METHODS -----------------------------------------------------------------------------------------------------"""
+    # region METHODS ---------------------------------------------------------------------------------------------------
 
     def dependency_online(self, name: str, online: bool):
         """Method to notify subclass that a dependency has come online"""
@@ -123,8 +127,10 @@ class ROSNode(Node, ABC):
         error.error_code = e.error_code
 
         self.__error_publisher.publish(error)
+        
+    # endregion
 
-    """ PROPERTIES --------------------------------------------------------------------------------------------------"""
+    # region PROPERTIES ------------------------------------------------------------------------------------------------
 
     @property
     def missing_dependencies(self):
@@ -156,6 +162,8 @@ class ROSNode(Node, ABC):
     def dependencies(self):
         """Returns the dependencies of the node"""
         return self.__dependencies
+    
+    # endregion
 
 
 class QTROSNode(ROSNode, ABC):
@@ -168,22 +176,20 @@ class QTROSNode(ROSNode, ABC):
     @abstractmethod
     def load_info(self):
         """Load info about the KPI"""
-        pass
 
     @abstractmethod
     def load_nodes(self):
         """Load info about the online nodes"""
-        pass
 
     @abstractmethod
     def send_control(self, *args, **kwargs):
         """Send messages to the respective control topics"""
-        pass
 
     @abstractmethod
     def send_kpi(self, *args, **kwargs):
-        pass
+        """Send KPI messages to the server"""
 
     @property
     def signals(self):
+        """Returns the signals of the object"""
         return self.__signals
