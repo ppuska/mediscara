@@ -1,10 +1,11 @@
+"""Module for the HMI Collaborative App"""
 import logging
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum, auto
 from telnetlib import STATUS
-from typing import ClassVar
+from typing import ClassVar, List
 
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
@@ -20,8 +21,6 @@ from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlW
 
 class HMICollabApp(HMIApp):
     """Subclass of HMIApp
-    
-    Implements a custom info and control widget for the collaborative cell
     """
     NODE_NAME = NodeList.HMINode.value
     DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
@@ -62,6 +61,7 @@ class HMICollabApp(HMIApp):
             self.label_quality_rob.setText("0 %")
 
         def display_kpi(self, box: int, *, availability: float, quality: float, performance: float):
+            """Displays the KPI data to the widget"""
             if box == self.ROBOTIC:
                 self.label_availability_rob.setText(f"{availability:.1f}%")
                 self.label_quality_rob.setText(f"{quality:.1f}%")
@@ -76,6 +76,15 @@ class HMICollabApp(HMIApp):
                 raise ValueError(f"Invalid input number ({box})")
 
         def set_power(self, box: int, value: bool):
+            """Sets the power value of the selected widget
+
+            Args:
+                box (int): Number of the cell, use InfoWidget.VISION or InfoWidget.ROBOTIC
+                value (bool): On or OFF
+
+            Raises:
+                ValueError: If the box argument is invalid
+            """
             if box == self.VISION:
                 label = self.label_power_vis
 
@@ -94,6 +103,15 @@ class HMICollabApp(HMIApp):
                 label.setStyleSheet("")
 
         def set_running(self, box: int, value: bool):
+            """Sets the running value of the selected widget
+
+            Args:
+                box (int): Number of the cell, use InfoWidget.VISION or InfoWidget.ROBOTIC
+                value (bool): On or OFF
+
+            Raises:
+                ValueError: If the box argument is invalid
+            """
             if box == self.VISION:
                 label = self.label_running_vis
 
@@ -110,6 +128,15 @@ class HMICollabApp(HMIApp):
                 label.setStyleSheet("")
 
         def set_waiting(self, box: int, value: bool):
+            """Sets the waiting value of the selected widget
+
+            Args:
+                box (int): Number of the cell, use InfoWidget.VISION or InfoWidget.ROBOTIC
+                value (bool): On or OFF
+
+            Raises:
+                ValueError: If the box argument is invalid
+            """
             if box == self.VISION:
                 label = self.label_waiting_vis
 
@@ -126,6 +153,15 @@ class HMICollabApp(HMIApp):
                 label.setStyleSheet("")
 
         def set_error(self, box: int, value: bool):
+            """Sets the error value of the selected widget
+
+            Args:
+                box (int): Number of the cell, use InfoWidget.VISION or InfoWidget.ROBOTIC
+                value (bool): On or OFF
+
+            Raises:
+                ValueError: If the box argument is invalid
+            """
             if box == self.VISION:
                 label = self.label_error_vis
 
@@ -142,6 +178,8 @@ class HMICollabApp(HMIApp):
                 label.setStyleSheet("")
 
     class ControlWidget(QWidget, Ui_CollabControlWidget):
+        """Class for the Control Widget in the Collaborative HMI App
+        """
 
         def __init__(self, parent=None):
             super(HMICollabApp.ControlWidget, self).__init__(parent=parent)
@@ -151,6 +189,7 @@ class HMICollabApp(HMIApp):
             self.__locked_robotic = False
 
         def lock_control_vision(self, lock: bool):
+            """Locks the controls of the vision system"""
             self.button_start_session.setEnabled(not lock)
             self.button_home.setEnabled(not lock)
             self.button_measure_label.setEnabled(not lock)
@@ -159,6 +198,7 @@ class HMICollabApp(HMIApp):
             self.__locked_vision = lock
 
         def lock_control_robotic(self, lock: bool):
+            """Locks the controls of the robotic system"""
             self.button_start_session_rob.setEnabled(not lock)
             self.button_home_rob.setEnabled(not lock)
             self.button_start_marking.setEnabled(not lock)
@@ -166,6 +206,7 @@ class HMICollabApp(HMIApp):
             self.__locked_robotic = lock   
 
         def set_state_vision(self, state: STATUS):
+            """Sets the button states according to the input state"""
             if not self.__locked_vision:  # only update it if it is not locked
                 if state == HMICollabApp.STATUS.IDLE:
                     self.button_start_session.setEnabled(True)
@@ -185,6 +226,7 @@ class HMICollabApp(HMIApp):
                     self.button_pause.setText("PAUSE")
         
         def set_state_robotic(self, state: STATUS):
+            """Sets the button states according to the input state"""
             if not self.__locked_robotic:
                 if state == HMICollabApp.STATUS.IDLE:
                     self.button_start_session_rob.setEnabled(True)
@@ -205,6 +247,7 @@ class HMICollabApp(HMIApp):
 
         @property
         def buttons(self):
+            """Returns all the buttons in the layout"""
             return [self.button_home,
                     self.button_home_rob,
                     self.button_measure_label,
@@ -262,7 +305,7 @@ class HMICollabApp(HMIApp):
     # region OVERRIDES *************************************************************************************************
 
     def ros_node_online_callback(self):
-        self.logger.debug("ROS Node online")
+        """This method gets called whenever a ROS node in the dependency list comes online"""
 
         if self.ui_locking:  # if ui locking is not disabled
             missing = self.ros_worker.missing_dependencies()  # check for missing dependencies
@@ -285,12 +328,14 @@ class HMICollabApp(HMIApp):
             logging.info("UI locking is disabled from the command line")
 
     def ros_error_callback(self, node_name: str, msg: str, err_code: int):
+        """This method gets called whenever a ROS node is producing an error"""
         super(HMICollabApp, self).ros_error_callback(node_name, msg, err_code)
 
         # todo differentiate between vision system and robot
         self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, True)
 
     def clear_errors_callback(self):
+        """This method gets called when the 'CLEAR ERRORS' button gets pressed"""
         super(HMICollabApp, self).clear_errors_callback()
 
         self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, False)
@@ -333,10 +378,10 @@ class HMICollabApp(HMIApp):
         # vision
         if button_clicked == self.control_widget.button_start_session:
             if self.state_vision == HMICollabApp.STATUS.IDLE:
-                self.__kpi_rob.availability.start_now()
+                self.__kpi_vis.availability.start_now()
                 
             elif self.state_vision == HMICollabApp.STATUS.WORKING:
-                return 
+                return
             
             self.state_vision = HMICollabApp.STATUS.WORKING  # change the state
             
@@ -398,6 +443,7 @@ class HMICollabApp(HMIApp):
     # region ROS CALLBACKS *********************************************************************************************
 
     def status_callback(self, msg):
+        """Callback method for the Robot2Status topic messages"""
         if isinstance(msg, Robot2Status):
             self.info_widget.set_error(HMICollabApp.InfoWidget.ROBOTIC, msg.error)
             self.info_widget.set_power(HMICollabApp.InfoWidget.ROBOTIC, msg.power)
@@ -405,6 +451,7 @@ class HMICollabApp(HMIApp):
             self.info_widget.set_running(HMICollabApp.InfoWidget.ROBOTIC, msg.running)
 
     def dependency_callback(self, name: str, online: bool):
+        """Callback method for when a ROS dependency comes online of goes offline"""
         if name == NodeList.MarkerNode.value:
             self.__marker_online = online
 
@@ -442,6 +489,7 @@ class HMICollabApp(HMIApp):
 
     @property
     def state_robot(self):
+        """Returns the state of the robotic cell"""
         return self.__state_rob
 
     @state_robot.setter
@@ -454,6 +502,7 @@ class HMICollabApp(HMIApp):
 
     @property
     def state_vision(self):
+        """Returns the state of the vision cell"""
         return self.__state_vis
     
     @state_vision.setter
@@ -467,10 +516,13 @@ class HMICollabApp(HMIApp):
 
 
 class ROSNodeCollab(QTROSNode):
+    """Class for the ROS Node in the HMI application
+    """
+
     VISION = 0
     ROBOTIC = 1
 
-    def __init__(self, node_name, depends_on, signals: ROSWorker.Signals):
+    def __init__(self, node_name: str, depends_on: List[str], signals: ROSWorker.Signals):
         super(ROSNodeCollab, self).__init__(node_name=node_name, depends_on=depends_on, signals=signals)
 
         # publishers
@@ -484,7 +536,7 @@ class ROSNodeCollab(QTROSNode):
                                                       qos_profile=10
                                                       )
 
-        self.__kpi_robotic = self.create_publisher(
+        self.__kpi = self.create_publisher(
             msg_type=MessageList.KPIC2.value[1],
             topic=MessageList.KPIC2.value[0],
             qos_profile=10
@@ -543,17 +595,15 @@ class ROSNodeCollab(QTROSNode):
         else:
             raise ValueError(f"Invalid cell (number: {cell})")
 
-    def send_kpi(self, cell: int, msg):
-        if cell == self.VISION:
-            raise NotImplementedError
-
-        elif cell == self.ROBOTIC:
-            self.__kpi_robotic.publish(msg)
-
-        else:
-            raise ValueError(f"Invalid cell (numer: {cell})")
+    def send_kpi(self, msg):
+        self.__kpi.publish(msg)
 
     def robot_status_callback(self, msg: Robot2Status):
+        """Callback method for the Robot2Status subscription
+
+        Args:
+            msg (Robot2Status): The incoming message
+        """
         self.signals.status.emit(msg)
 
 
@@ -569,18 +619,35 @@ class KPI:
 
     @property
     def availability(self):
+        """Returns the availability member of the class
+
+        Returns:
+            KPI.Availability: Availability
+        """
         return self.__availability
 
     @property
     def quality(self):
+        """Returns the quality member of the class
+
+        Returns:
+            KPI.Quality: Quality
+        """
         return self.__quality
 
     @property
     def performance(self):
+        """Returns the performance member of the class
+
+        Returns:
+            KPI.Performance: Performance
+        """
         return self.__performance
 
     @dataclass
     class Availability:
+        """Dataclass to manage and store the availability KPI value
+        """
         format = "%H:%M:%S"
         __planned_start: ClassVar[datetime] = datetime.strptime("08:00:00", format)
         __planned_end: ClassVar[datetime] = datetime.strptime("8:03:00", format)
@@ -605,12 +672,21 @@ class KPI:
                    f"actual end: {actual_end_str}"
 
         def start_now(self):
+            """Sets the actual start time to the current time
+            """
             self.__actual_start = datetime.now()
 
         def end_now(self):
+            """Sets the actual end time to the current time
+            """
             self.__actual_end = datetime.now()
 
         def calculate(self):
+            """Calculates the Availabilty KPI
+
+            Returns:
+                float: Availability KPI
+            """
             planned_duration = self.__planned_end - self.__planned_start
 
             return self.actual_duration / planned_duration
@@ -619,6 +695,11 @@ class KPI:
 
         @property
         def actual_start(self):
+            """Returns the actual start value in a None safe way
+
+            Returns:
+                str: the actual start value as a formatted string
+            """
             if self.__actual_start is None:
                 return "Not set yet"
             else:
@@ -626,6 +707,11 @@ class KPI:
 
         @property
         def actual_end(self):
+            """Returns the actual end value as a formatted string
+
+            Returns:
+                str: The actual end time as a formatted string
+            """
             if self.__actual_end is None:
                 return "Not set yet"
             else:
@@ -633,10 +719,20 @@ class KPI:
 
         @property
         def planned_start(self):
+            """Returns the planned start time
+
+            Returns:
+                datetime: The planned start time
+            """
             return self.__planned_start
 
         @property
         def planned_end(self):
+            """Returns the planned end time
+
+            Returns:
+                datetim: The planned end time
+            """
             return self.__planned_end
 
         @property
@@ -670,22 +766,47 @@ class KPI:
         __error_count: int = field(default=0)
 
         def calculate(self):
+            """Calculates the Quality KPI number
+
+            Returns:
+                float: the Quality KPI
+            """
             return (self.product_count - self.error_count) / self.__product_quota
 
         @property
         def product_count(self):
+            """Product count getter
+
+            Returns:
+                int: product count
+            """
             return self.__product_count
 
         @product_count.setter
         def product_count(self, value: int):
+            """Product count setter
+
+            Args:
+                value (int): the value to be set
+            """
             self.__product_count = value
 
         @property
         def error_count(self):
+            """Error count getter
+
+            Returns:
+                int: the number of errors
+            """
             return self.__error_count
 
         @error_count.setter
         def error_count(self, value: int):
+            """Error count setter
+
+            Args:
+                value (int): the number of errors to be set
+            """
             self.__error_count = value
 
     @dataclass
@@ -757,6 +878,7 @@ class KPI:
 
 
 def main(args=None):
+    """Entry point for the main function"""
     rclpy.init(args=args)
     try:
         app = QApplication(sys.argv)
