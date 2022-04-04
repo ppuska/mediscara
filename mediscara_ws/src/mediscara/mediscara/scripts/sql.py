@@ -6,10 +6,10 @@ from functools import wraps
 from typing import ClassVar, Type, List, Tuple
 
 import mysql.connector
-from mediscara.scripts.logger import Logger
 from mysql.connector import MySQLConnection, CMySQLConnection
 from mysql.connector.errors import ProgrammingError, DatabaseError
 
+from scripts.logger import Logger
 
 class Decorator:
     SQL_ATTR = 'sql_method'
@@ -49,7 +49,7 @@ class Decorator:
 
 
 # region SQL Error
-class SQLError(Exception):
+class SQLError(Exception, ABC):
     def __init__(self, text: str):
         super(SQLError, self).__init__(text)
 
@@ -292,6 +292,9 @@ class SQLManager:
     @Decorator.sql_method
     def get_next_element(self, table_name: str):
         """Returns the first element ordered by the id value"""
+        if not self.connected:
+            return
+ 
         assert isinstance(self.__db, (CMySQLConnection, MySQLConnection))
 
         dm = self.dm(table_name)
@@ -484,10 +487,9 @@ class SQLManager:
 
 
 if __name__ == '__main__':
-    # sm = SQLManager(Bell, table_name='sc1')
-    # sm.connect_to_database()
-    # # sm.insert_element(Bell(type="1", count=1))
-    # b = sm.get_next_element()
-    # print(b)
+    sm = SQLManager(table=[('sc2', Cell2Data)])
+    sm.connect_to_database()
+    b = sm.get_next_element("sc2")
+    print(b)
 
     print(Cell2Data.field_names())
