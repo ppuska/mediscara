@@ -536,7 +536,7 @@ class ROSNodeCollab(QTROSNode):
                                                       qos_profile=10
                                                       )
 
-        self.__kpi_robotic = self.create_publisher(
+        self.__kpi = self.create_publisher(
             msg_type=MessageList.KPIC2.value[1],
             topic=MessageList.KPIC2.value[0],
             qos_profile=10
@@ -595,15 +595,8 @@ class ROSNodeCollab(QTROSNode):
         else:
             raise ValueError(f"Invalid cell (number: {cell})")
 
-    def send_kpi(self, cell: int, msg):
-        if cell == self.VISION:
-            raise NotImplementedError
-
-        elif cell == self.ROBOTIC:
-            self.__kpi_robotic.publish(msg)
-
-        else:
-            raise ValueError(f"Invalid cell (numer: {cell})")
+    def send_kpi(self, msg):
+        self.__kpi.publish(msg)
 
     def robot_status_callback(self, msg: Robot2Status):
         """Callback method for the Robot2Status subscription
@@ -885,6 +878,7 @@ class KPI:
 
 
 def main(args=None):
+    """Entry point for the main function"""
     rclpy.init(args=args)
     try:
         app = QApplication(sys.argv)
