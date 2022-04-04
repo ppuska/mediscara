@@ -1,3 +1,6 @@
-float64 availability
-float64 performance
-float64 quality
+float64 availability_robotic
+float64 performance_robotic
+float64 quality_robotic
+float64 availability_vision
+float64 performance_vision
+float64 quality_vision

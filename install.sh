@@ -8,12 +8,11 @@ usage() {
 
 error_result() {
     echo "Error installing ROS packages"
-    exit 1;
 }
 
 mediscara_install() {
     if test $allow_overriding; then
-        echo "\tOverriding packages"
+        echo "Overriding packages"
         colcon build --allow-overriding $(ls src) || return 1
     else
         colcon build || return 1
@@ -26,7 +25,7 @@ is_install() {
 
     cmd="colcon build "
     if test $allow_overriding; then
-        cmd+="allow_overriding $(ls src) "
+        cmd+="--allow-overriding $(ls src) "
     fi
 
     if test ${#msg_packages[@]} -ne 0; then
@@ -83,6 +82,8 @@ done
 cd is_ws
 
 is_install || error_result
+
+cd ..
 
 echo "Packages successfully installed"
 

@@ -2,13 +2,12 @@ types:
     idls:
       - >
         struct KPIC2 {
-            float availability_robotic;
-            float quality_robotic;
-            float performance_robotic;
-
-            float availability_vision;
-            float quality_vision;
-            float performance_vision;
+            double availability_robotic;
+            double quality_robotic;
+            double performance_robotic;
+            double availability_vision;
+            double quality_vision;
+            double performance_vision;
         };
 
 
