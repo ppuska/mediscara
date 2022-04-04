@@ -1,9 +1,9 @@
 import logging
-from multiprocessing.sharedctypes import Value
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum, auto
+from telnetlib import STATUS
 from typing import ClassVar
 
 from PyQt5.QtCore import QTimer
@@ -19,6 +19,10 @@ from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlW
 
 
 class HMICollabApp(HMIApp):
+    """Subclass of HMIApp
+    
+    Implements a custom info and control widget for the collaborative cell
+    """
     NODE_NAME = NodeList.HMINode.value
     DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
 
@@ -142,17 +146,62 @@ class HMICollabApp(HMIApp):
         def __init__(self, parent=None):
             super(HMICollabApp.ControlWidget, self).__init__(parent=parent)
             self.setupUi(self)
+            
+            self.__locked_vision = False
+            self.__locked_robotic = False
 
         def lock_control_vision(self, lock: bool):
             self.button_start_session.setEnabled(not lock)
             self.button_home.setEnabled(not lock)
             self.button_measure_label.setEnabled(not lock)
             self.button_measure_pcb.setEnabled(not lock)
+            
+            self.__locked_vision = lock
 
         def lock_control_robotic(self, lock: bool):
             self.button_start_session_rob.setEnabled(not lock)
             self.button_home_rob.setEnabled(not lock)
             self.button_start_marking.setEnabled(not lock)
+            
+            self.__locked_robotic = lock   
+
+        def set_state_vision(self, state: STATUS):
+            if not self.__locked_vision:  # only update it if it is not locked
+                if state == HMICollabApp.STATUS.IDLE:
+                    self.button_start_session.setEnabled(True)
+                    self.button_pause.setEnabled(False)
+                    self.button_end_session.setEnabled(False)
+
+                    self.button_pause.setText("PAUSE")
+
+                elif state == HMICollabApp.STATUS.PAUSED:
+                    self.button_pause.setText("RESUME")
+
+                elif state == HMICollabApp.STATUS.WORKING:
+                    self.button_start_session.setEnabled(False)
+                    self.button_pause.setEnabled(True)
+                    self.button_end_session.setEnabled(True)
+
+                    self.button_pause.setText("PAUSE")
+        
+        def set_state_robotic(self, state: STATUS):
+            if not self.__locked_robotic:
+                if state == HMICollabApp.STATUS.IDLE:
+                    self.button_start_session_rob.setEnabled(True)
+                    self.button_pause_rob.setEnabled(False)
+                    self.button_end_session_rob.setEnabled(False)
+
+                    self.button_pause_rob.setText("PAUSE")
+
+                elif state == HMICollabApp.STATUS.PAUSED:
+                    self.button_pause_rob.setText("RESUME")
+
+                elif state == HMICollabApp.STATUS.WORKING:
+                    self.button_start_session_rob.setEnabled(False)
+                    self.button_pause_rob.setEnabled(True)
+                    self.button_end_session_rob.setEnabled(True)
+
+                    self.button_pause_rob.setText("PAUSE")
 
         @property
         def buttons(self):
@@ -200,6 +249,7 @@ class HMICollabApp(HMIApp):
         self.__state_vis = None
 
         self.state_robot = HMICollabApp.STATUS.IDLE
+        self.state_vision = HMICollabApp.STATUS.IDLE
 
         # KPI calculation
         self.__kpi_rob = KPI()
@@ -250,6 +300,7 @@ class HMICollabApp(HMIApp):
     # region CALLBACKS *************************************************************************************************
 
     def button_clicked_callback(self):
+        """Callback method for when a button gets clicked"""
         button_clicked = self.sender()
 
         # robotic
@@ -279,24 +330,65 @@ class HMICollabApp(HMIApp):
             
             self.state_robot = HMICollabApp.STATUS.IDLE
 
+        # vision
+        if button_clicked == self.control_widget.button_start_session:
+            if self.state_vision == HMICollabApp.STATUS.IDLE:
+                self.__kpi_rob.availability.start_now()
+                
+            elif self.state_vision == HMICollabApp.STATUS.WORKING:
+                return 
+            
+            self.state_vision = HMICollabApp.STATUS.WORKING  # change the state
+            
+        elif button_clicked == self.control_widget.button_pause:
+            if self.state_vision == HMICollabApp.STATUS.WORKING:
+                self.__kpi_vis.performance.pause_start()  # start the pause
+            
+            elif self.state_vision == HMICollabApp.STATUS.PAUSED:
+                # resuming from pause
+                self.__kpi_vis.performance.pause_end()
+                self.state_vision = HMICollabApp.STATUS.WORKING
+                return
+            
+            self.state_vision = HMICollabApp.STATUS.PAUSED
+            
+        elif button_clicked == self.control_widget.button_end_session:
+            self.__kpi_vis.availability.end_now()
+            
+            self.state_robot = HMICollabApp.STATUS.IDLE
+
     def kpi_update_callback(self):
-        a = self.__kpi_rob.availability.calculate()
-        p = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
-        q = self.__kpi_rob.quality.calculate()
+        """Sends ROS messages about the KPIs of the cells periodically"""
+        # robotic
+        a_rob = self.__kpi_rob.availability.calculate()
+        p_rob = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
+        q_rob = self.__kpi_rob.quality.calculate()
 
-        self.info_widget.display_kpi(
-            self.InfoWidget.ROBOTIC,
-            availability=self.__kpi_rob.availability.calculate(),
-            quality=self.__kpi_rob.quality.calculate(),
-            performance=self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
-        )
-
+        self.info_widget.display_kpi(self.InfoWidget.ROBOTIC,
+                                     availability=a_rob,
+                                     quality=q_rob,
+                                     performance=p_rob
+                                     )
+        
+        # vision
+        a_vis = self.__kpi_vis.availability.calculate()
+        p_vis = self.__kpi_vis.performance.calculate(self.__kpi_vis.availability.actual_duration)
+        q_vis = self.__kpi_vis.quality.calculate()
+        
+        self.info_widget.display_kpi(ROSNodeCollab.VISION,
+                                     availability=a_vis,
+                                     quality=q_vis,
+                                     performance=p_vis
+                                     )
+        
         msg = KPIC2()
-        msg.availability = a
-        msg.performance = p
-        msg.quality = q
+        msg.availability_robotic = a_rob
+        msg.performance_robotic = p_rob
+        msg.quality_robotic = q_rob
+        msg.availability_vision = a_vis
+        msg.performance_vision = p_vis
+        msg.quality_vision = q_vis
 
-        logging.info("Sending ROS MSG")
         self.ros_worker.send_kpi(ROSNodeCollab.ROBOTIC, msg)
 
         self.kpi_update_timer.start(self.KPI_UPDATE_INTERVAL)  # restart timer
@@ -319,7 +411,9 @@ class HMICollabApp(HMIApp):
         elif name == NodeList.Robot2Node.value:
             self.__robot_online = online
 
-        # todo implement vision system
+        # todo: implement vision system
+        elif name == NodeList.VisionNode.value:
+            self.__vision_online = online
 
         if not self.ui_locking:
             self.control_widget.lock_control_robotic(False)
@@ -356,22 +450,18 @@ class HMICollabApp(HMIApp):
         self.__state_rob = value
         logging.info(f"Status set to: {value}")
 
-        if value == HMICollabApp.STATUS.IDLE:
-            self.control_widget.button_start_session_rob.setEnabled(True)
-            self.control_widget.button_pause_rob.setEnabled(False)
-            self.control_widget.button_end_session_rob.setEnabled(False)
+        self.control_widget.set_state_robotic(value)
 
-            self.control_widget.button_pause_rob.setText("PAUSE")
-
-        elif value == HMICollabApp.STATUS.PAUSED:
-            self.control_widget.button_pause_rob.setText("RESUME")
-
-        elif value == HMICollabApp.STATUS.WORKING:
-            self.control_widget.button_start_session_rob.setEnabled(False)
-            self.control_widget.button_pause_rob.setEnabled(True)
-            self.control_widget.button_end_session_rob.setEnabled(True)
-
-            self.control_widget.button_pause_rob.setText("PAUSE")
+    @property
+    def state_vision(self):
+        return self.__state_vis
+    
+    @state_vision.setter
+    def state_vision(self, value: STATUS):
+        """Gets the state and locks the buttons accordingly"""
+        self.__state_vis = value
+        
+        self.control_widget.set_state_vision(value)
 
     # endregion
 
@@ -454,7 +544,6 @@ class ROSNodeCollab(QTROSNode):
             raise ValueError(f"Invalid cell (number: {cell})")
 
     def send_kpi(self, cell: int, msg):
-        self.get_logger().info(f"Sending message: {msg}")
         if cell == self.VISION:
             raise NotImplementedError
 
@@ -676,15 +765,6 @@ def main(args=None):
         sys.exit(app.exec())
     except KeyboardInterrupt:
         print("Stopping")
-
-
-def t():
-    import time
-    avail = HMICollabApp.KPI.Availability()
-    avail.start_now()
-    time.sleep(1)
-    avail.end_now()
-    print(avail)
 
 
 if __name__ == '__main__':

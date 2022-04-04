@@ -85,6 +85,5 @@ cd is_ws
 is_install || error_result
 
 echo "Packages successfully installed"
-exit 0
 
 
