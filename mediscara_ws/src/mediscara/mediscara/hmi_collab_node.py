@@ -374,7 +374,21 @@ class HMICollabApp(HMIApp):
             self.__kpi_rob.availability.end_now()
             
             self.state_robot = HMICollabApp.STATUS.IDLE
+            
+        elif button_clicked == self.control_widget.button_home_rob:
+            msg = Robot2Control()
+            msg.home = True
+            msg.start_marking = False
+            
+            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
 
+        elif button_clicked == self.control_widget.button_start_marking:
+            msg = Robot2Control()
+            msg.home = False
+            msg.start_marking = True
+            
+            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
+            
         # vision
         if button_clicked == self.control_widget.button_start_session:
             if self.state_vision == HMICollabApp.STATUS.IDLE:
@@ -401,6 +415,30 @@ class HMICollabApp(HMIApp):
             self.__kpi_vis.availability.end_now()
             
             self.state_robot = HMICollabApp.STATUS.IDLE
+
+        elif button_clicked == self.control_widget.button_home:
+            msg = VisionControl()
+            msg.home = True
+            msg.measure_label = False
+            msg.measure_pcb = False
+            
+            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
+            
+        elif button_clicked == self.control_widget.button_measure_pcb:
+            msg = VisionControl()
+            msg.home = False
+            msg.measure_label = False
+            msg.measure_pcb = True
+
+            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
+
+        elif button_clicked == self.control_widget.button_measure_label:
+            msg = VisionControl()
+            msg.home = False
+            msg.measure_label = True
+            msg.measure_pcb = False
+            
+            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)      
 
     def kpi_update_callback(self):
         """Sends ROS messages about the KPIs of the cells periodically"""
@@ -434,7 +472,7 @@ class HMICollabApp(HMIApp):
         msg.performance_vision = p_vis
         msg.quality_vision = q_vis
 
-        self.ros_worker.send_kpi(ROSNodeCollab.ROBOTIC, msg)
+        self.ros_worker.send_kpi(msg)
 
         self.kpi_update_timer.start(self.KPI_UPDATE_INTERVAL)  # restart timer
 
