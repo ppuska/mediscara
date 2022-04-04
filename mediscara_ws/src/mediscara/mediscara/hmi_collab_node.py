@@ -378,7 +378,7 @@ class HMICollabApp(HMIApp):
         # vision
         if button_clicked == self.control_widget.button_start_session:
             if self.state_vision == HMICollabApp.STATUS.IDLE:
-                self.__kpi_rob.availability.start_now()
+                self.__kpi_vis.availability.start_now()
                 
             elif self.state_vision == HMICollabApp.STATUS.WORKING:
                 return
