@@ -1,15 +1,16 @@
 import dataclasses
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from functools import wraps
+from sqlite3 import Timestamp
 from typing import ClassVar, Type, List, Tuple
 
 import mysql.connector
 from mysql.connector import MySQLConnection, CMySQLConnection
 from mysql.connector.errors import ProgrammingError, DatabaseError
 
-from scripts.logger import Logger
+from .logger import Logger
 
 class Decorator:
     SQL_ATTR = 'sql_method'
@@ -104,9 +105,12 @@ class SQLDataClass(ABC):
     }
     COL_ID: ClassVar[str] = 'id'
 
-    id: str = Timestamp.now()
-    in_production: bool = False
-    remaining: int = 0
+    id: str = field(init=False)
+    in_production: bool = field(default=False)
+    remaining: int = field(default=0)
+
+    def __post_init__(self):
+        self.id = Timestamp.now()
 
     @classmethod
     def from_query(cls, query_result: tuple):
@@ -294,7 +298,7 @@ class SQLManager:
         """Returns the first element ordered by the id value"""
         if not self.connected:
             return
- 
+
         assert isinstance(self.__db, (CMySQLConnection, MySQLConnection))
 
         dm = self.dm(table_name)
@@ -484,12 +488,3 @@ class SQLManager:
     @property
     def connected(self):
         return self.__connected
-
-
-if __name__ == '__main__':
-    sm = SQLManager(table=[('sc2', Cell2Data)])
-    sm.connect_to_database()
-    b = sm.get_next_element("sc2")
-    print(b)
-
-    print(Cell2Data.field_names())

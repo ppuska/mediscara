@@ -269,6 +269,8 @@ class SQLGuiApp(QMainWindow, Ui_MainWindow):
         data.marker_count = self.spinbox_marker_count.value()
         data.remaining = data.marker_count
 
+        print(data.id)
+
         self.sql_manager.insert_element(data=data, table_name=SQLTableNames.CELL2.value)  # insert the new element
         self.load_data()  # reload the new data list
         self.clear_inputs()  # clear the input fields
@@ -291,5 +293,6 @@ def except_hook(cls, exception, traceback):
 
 
 if __name__ == '__main__':
+    print(SQLDataClass.Timestamp.now())
     main()
     sys.excepthook = except_hook

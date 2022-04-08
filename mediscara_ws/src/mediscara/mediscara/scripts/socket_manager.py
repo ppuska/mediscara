@@ -152,7 +152,7 @@ class SocketManager:
 
     @Decorator.socket_check
     def send(self, msg: str):
-        self.__client_socket.sendall(msg.encode('utf-8'))
+        self.__client_socket.sendall(f'{msg}\n'.encode('utf-8'))
 
     def start_receive(self):
         """Starts the receiver thread that listens to incoming communication on the socket

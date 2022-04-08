@@ -184,7 +184,7 @@ class HMICollabApp(HMIApp):
         def __init__(self, parent=None):
             super(HMICollabApp.ControlWidget, self).__init__(parent=parent)
             self.setupUi(self)
-            
+
             self.__locked_vision = False
             self.__locked_robotic = False
 
@@ -194,7 +194,7 @@ class HMICollabApp(HMIApp):
             self.button_home.setEnabled(not lock)
             self.button_measure_label.setEnabled(not lock)
             self.button_measure_pcb.setEnabled(not lock)
-            
+
             self.__locked_vision = lock
 
         def lock_control_robotic(self, lock: bool):
@@ -202,8 +202,8 @@ class HMICollabApp(HMIApp):
             self.button_start_session_rob.setEnabled(not lock)
             self.button_home_rob.setEnabled(not lock)
             self.button_start_marking.setEnabled(not lock)
-            
-            self.__locked_robotic = lock   
+
+            self.__locked_robotic = lock
 
         def set_state_vision(self, state: STATUS):
             """Sets the button states according to the input state"""
@@ -224,7 +224,7 @@ class HMICollabApp(HMIApp):
                     self.button_end_session.setEnabled(True)
 
                     self.button_pause.setText("PAUSE")
-        
+
         def set_state_robotic(self, state: STATUS):
             """Sets the button states according to the input state"""
             if not self.__locked_robotic:
@@ -359,6 +359,14 @@ class HMICollabApp(HMIApp):
             self.state_robot = HMICollabApp.STATUS.WORKING  # change the state
 
         elif button_clicked == self.control_widget.button_pause_rob:
+            msg = Robot2Control()
+            msg.home = False
+            msg.start_marking = False
+            msg.pause = True
+
+            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
+
+
             if self.state_robot == HMICollabApp.STATUS.WORKING:
                 self.__kpi_rob.performance.pause_start()  # start the pause
 
@@ -372,48 +380,49 @@ class HMICollabApp(HMIApp):
 
         elif button_clicked == self.control_widget.button_end_session_rob:
             self.__kpi_rob.availability.end_now()
-            
+
             self.state_robot = HMICollabApp.STATUS.IDLE
-            
+
         elif button_clicked == self.control_widget.button_home_rob:
             msg = Robot2Control()
             msg.home = True
             msg.start_marking = False
-            
+            msg.pause = False
+
             self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
 
         elif button_clicked == self.control_widget.button_start_marking:
             msg = Robot2Control()
             msg.home = False
             msg.start_marking = True
-            
+
             self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
-            
+
         # vision
         if button_clicked == self.control_widget.button_start_session:
             if self.state_vision == HMICollabApp.STATUS.IDLE:
                 self.__kpi_vis.availability.start_now()
-                
+
             elif self.state_vision == HMICollabApp.STATUS.WORKING:
                 return
-            
+
             self.state_vision = HMICollabApp.STATUS.WORKING  # change the state
-            
+
         elif button_clicked == self.control_widget.button_pause:
             if self.state_vision == HMICollabApp.STATUS.WORKING:
                 self.__kpi_vis.performance.pause_start()  # start the pause
-            
+
             elif self.state_vision == HMICollabApp.STATUS.PAUSED:
                 # resuming from pause
                 self.__kpi_vis.performance.pause_end()
                 self.state_vision = HMICollabApp.STATUS.WORKING
                 return
-            
+
             self.state_vision = HMICollabApp.STATUS.PAUSED
-            
+
         elif button_clicked == self.control_widget.button_end_session:
             self.__kpi_vis.availability.end_now()
-            
+
             self.state_robot = HMICollabApp.STATUS.IDLE
 
         elif button_clicked == self.control_widget.button_home:
@@ -421,9 +430,9 @@ class HMICollabApp(HMIApp):
             msg.home = True
             msg.measure_label = False
             msg.measure_pcb = False
-            
+
             self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
-            
+
         elif button_clicked == self.control_widget.button_measure_pcb:
             msg = VisionControl()
             msg.home = False
@@ -437,8 +446,8 @@ class HMICollabApp(HMIApp):
             msg.home = False
             msg.measure_label = True
             msg.measure_pcb = False
-            
-            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)      
+
+            self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
 
     def kpi_update_callback(self):
         """Sends ROS messages about the KPIs of the cells periodically"""
@@ -452,18 +461,18 @@ class HMICollabApp(HMIApp):
                                      quality=q_rob,
                                      performance=p_rob
                                      )
-        
+
         # vision
         a_vis = self.__kpi_vis.availability.calculate()
         p_vis = self.__kpi_vis.performance.calculate(self.__kpi_vis.availability.actual_duration)
         q_vis = self.__kpi_vis.quality.calculate()
-        
+
         self.info_widget.display_kpi(ROSNodeCollab.VISION,
                                      availability=a_vis,
                                      quality=q_vis,
                                      performance=p_vis
                                      )
-        
+
         msg = KPIC2()
         msg.availability_robotic = a_rob
         msg.performance_robotic = p_rob
@@ -542,12 +551,12 @@ class HMICollabApp(HMIApp):
     def state_vision(self):
         """Returns the state of the vision cell"""
         return self.__state_vis
-    
+
     @state_vision.setter
     def state_vision(self, value: STATUS):
         """Gets the state and locks the buttons accordingly"""
         self.__state_vis = value
-        
+
         self.control_widget.set_state_vision(value)
 
     # endregion

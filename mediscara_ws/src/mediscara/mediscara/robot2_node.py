@@ -1,3 +1,4 @@
+"""Module for the ROS Node in Robotic Cell 2"""
 import enum
 
 import rclpy
@@ -25,6 +26,7 @@ class Robot2Node(ROSNode):
     ROBOT_JOB_FAILED_ERROR = ErrorClass(error_msg="The robot job has failed", error_code=0)
 
     class MarkerState(enum.Enum):  # todo remove this from code
+        """Enum class for a state machine storing the Marker's state"""
         WAITING = enum.auto()
         MARKING = enum.auto()
 
@@ -72,7 +74,7 @@ class Robot2Node(ROSNode):
         )
         self.__socket_client.connect()
 
-        """Initializing MySQL database client"""
+        # Initializing MySQL database client
         self.__db_handler = SQLManager(table=[(self.SQL_TABLE_NAME, Cell2Data)])
         self.__sql_timer = None
 
@@ -85,8 +87,6 @@ class Robot2Node(ROSNode):
             self.get_logger().info(msg)
 
         self.get_logger().info(f"{self.__class__.__name__} is online")
-
-        # self.dt = self.create_timer(timer_period_sec=5, callback=self.dummy_timer_cb)  # todo remove this
 
     # region OVERRIDES *************************************************************************************************
 
@@ -138,15 +138,22 @@ class Robot2Node(ROSNode):
     JOB_REQUEST = "JOB_REQUEST"
     # homing
     HOME = "HOME"
+    # pausing
+    PAUSE = "PAUSE"
 
     # endregion
 
     def control_callback(self, msg: Robot2Control):
+        """Callback method for the Robot2Control message"""
         if msg.home:
             self.__socket_client.send(self.HOME)
 
         elif msg.start_marking:
             self.__socket_client.send(self.START_MARKING)
+            self.send_job()
+
+        elif msg.pause:
+            self.__socket_client.send(self.PAUSE)
 
         # if msg.data:
         #     self.send_job()
@@ -159,6 +166,7 @@ class Robot2Node(ROSNode):
         #           )
 
     def status_callback(self, msg: MarkerStatus):
+        """Callback method for the MarkerStatus messages"""
         if msg.marking_successful:
             self.get_logger().info("Marking successful")
             self.__socket_client.send(self.MARKING_SUCCESS)
@@ -169,7 +177,7 @@ class Robot2Node(ROSNode):
             self.__socket_client.connect()
 
         else:
-            """ PROCESSING THE INCOMING MESSAGE """
+            # PROCESSING THE INCOMING MESSAGE
             if msg.startswith("J|"):  # joint values
                 joints = msg[2:].split('|')
                 self.get_logger().debug(f"Joint values: {joints}")
@@ -244,19 +252,6 @@ class Robot2Node(ROSNode):
         self.__marker_control_pub.publish(msg)
         self.__marker_state = self.MarkerState.WAITING
 
-    def dummy_timer_cb(self):
-        # todo remove this
-
-        msg = Bool()
-        msg.data = True
-
-        self.__marker_control_pub.publish(msg)
-        self.__marker_state = self.MarkerState.MARKING
-
-        self.__socket_client.send("JS:JOB1")
-
-        self.dt.destroy()
-
     # endregion
 
     # region METHODS ***************************************************************************************************
@@ -278,7 +273,7 @@ class Robot2Node(ROSNode):
                      f"{self.__current_item.remaining}"
 
         self.get_logger().info(f"Sending job select command: {job_string}")
-        self.__socket_client.send(job_string)
+        self.__socket_client.send(job_string)  # todo update database
 
     def decrement_remaining_count(self):
         """Decrements the current item's 'remaining' count by one"""
@@ -330,6 +325,7 @@ class Robot2Node(ROSNode):
 
 
 def main(args=None):
+    """Main function and entry point of the Node"""
     rclpy.init(args=args)
 
     robot2_node = Robot2Node()
