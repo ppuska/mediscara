@@ -2,6 +2,12 @@
 version: "3"
 
 services:
+  integration-service:
+    image: integration_service:v1
+    network_mode: "host"
+    depends_on:
+      - orion
+
   mongo:
     image: mongo:latest
     command: --nojournal
@@ -15,7 +21,7 @@ services:
       - mongo
     command: -dbhost mongo
     healthcheck:
-        test: curl --fail -s http://orion:1026/version || exit 1 
+        test: curl --fail -s http://orion:1026/version || exit 1
 
   crate-db:
     image: crate:3.3.2
@@ -41,6 +47,3 @@ services:
       - crate-db
     environment:
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-worldmap-panel
-
-
-
