@@ -174,10 +174,6 @@ class QTROSNode(ROSNode, ABC):
         self.__signals = signals
 
     @abstractmethod
-    def load_info(self):
-        """Load info about the KPI"""
-
-    @abstractmethod
     def load_nodes(self):
         """Load info about the online nodes"""
 

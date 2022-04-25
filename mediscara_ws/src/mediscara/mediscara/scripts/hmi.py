@@ -142,7 +142,6 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         # connect the signals and slots
         self.ros_worker.signals.started.connect(self.ros_node_online_callback)
         self.ros_worker.signals.nodes_loaded.connect(self.nodes_loaded_callback)
-        self.ros_worker.signals.info_loaded.connect(self.info_loaded_callback)
         self.ros_worker.signals.new_error.connect(self.ros_error_callback)
 
         self.ros_thread.start()  # start the thread
@@ -361,7 +360,6 @@ class ROSWorker(QObject):
     class Signals(QObject):
         started = pyqtSignal()
         nodes_loaded = pyqtSignal(list, list)
-        info_loaded = pyqtSignal()
         new_error = pyqtSignal(str, str, int)
         dependency_online = pyqtSignal(str, bool)
         status = pyqtSignal(object)

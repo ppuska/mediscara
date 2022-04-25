@@ -620,9 +620,6 @@ class ROSNodeCollab(QTROSNode):
         self.signals.dependency_online.emit("", False)
         self.signals.new_error.emit("Internal error", "A dependency node has gone offline", 0)
 
-    def load_info(self):
-        pass
-
     def load_nodes(self):
         self.get_logger().debug("Loading nodes")
         all_nodes = self.dependencies
