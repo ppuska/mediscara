@@ -119,12 +119,12 @@ class ROSNode(Node, ABC):
         """
         raise NotImplementedError("A subclass must implement this method if it has dependency nodes")
 
-    def publish_error(self, e: UtilsError):
+    def publish_error(self, error_: UtilsError):
         """Method for publishing error messages to the generated topic"""
         error = Error()
         error.node_name = self.get_name()
-        error.error_msg = e.error_msg
-        error.error_code = e.error_code
+        error.error_msg = error_.error_msg
+        error.error_code = error_.error_code
 
         self.__error_publisher.publish(error)
 

@@ -1,10 +1,10 @@
+"""Module for the HMI base class"""
 import enum
-import logging
 import sys
 from typing import List, Type
 
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl, Qt
-from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QLabel, QListWidget, QListWidgetItem, QWidget
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl
+from PyQt5.QtWidgets import QMainWindow, QListWidgetItem, QWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 import rclpy
@@ -64,6 +64,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     # region INNER CLASSES *********************************************************************************************
 
     class ErrorListItem(Ui_ErrorListItem, QWidget):
+        """Class for a custom ListWidgetItem for displaying errors"""
         def __init__(self, node_name: str, error_msg: str, error_code: int):
             super(HMIApp.ErrorListItem, self).__init__()
             self.setupUi(self)
@@ -72,6 +73,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             self.label_error_code.setText(str(error_code))
 
     class NodeListItem(Ui_NodeListItem, QWidget):
+        """Class for a custom ListItem for displaying nodes"""
 
         __STYLESHEET = "padding: 12px; border: 1px solid black; border-radius: 7px; "
 
@@ -90,6 +92,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
             return f"{self.__class__.__name__}({self.label_node_name.text()}, {self.missing})"
 
     class StatusbarWidget(Ui_StatusBar, QWidget):
+        """Custom widget class for the StatusBar"""
         def __init__(self):
             super(HMIApp.StatusbarWidget, self).__init__()
             self.setupUi(self)
@@ -144,10 +147,10 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
         self.ros_thread.start()  # start the thread
 
-        """ Create callbacks """
+        # Create callbacks
         self.tabWidget.currentChanged.connect(self.tab_changed_callback)
 
-        """ Tabs initialization """
+        # Tabs initialization
         self.tabWidget.setCurrentIndex(self.__TAB_LOGIN)  # login screen
 
         # login tab
@@ -165,11 +168,11 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         # error tab
         self.button_clear_errors.clicked.connect(self.clear_errors_callback)
 
-        """Set up the statusbar widget for login info"""
+        # Set up the statusbar widget for login info
         self.statusbar_widget = HMIApp.StatusbarWidget()
         self.statusbar.addPermanentWidget(self.statusbar_widget, stretch=1)
 
-        """Set up login level"""
+        # Set up login level
         # command line arguments
         if sys.argv is not None:
             print(sys.argv)
@@ -190,7 +193,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     # region OVERRIDES *************************************************************************************************
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, _) -> None:
         self.ros_worker.stop()
         self.ros_thread.quit()
         self.ros_thread.wait()
@@ -200,14 +203,14 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     # region ROS CALLBACKS *********************************************************************************************
 
     def ros_node_online_callback(self):
-        pass
+        """Callback method for when a ROS node comes online"""
 
     def nodes_loaded_callback(self, dependencies: List[str], missing: List[str]):
         """Callback method for displaying the loaded nodes"""
 
         self.list_nodes.clear()  # clear the nodes list
 
-        for row, node in enumerate(dependencies):  # iterate through the dependency nodes
+        for _, node in enumerate(dependencies):  # iterate through the dependency nodes
             item_widget = HMIApp.NodeListItem(node, missing=(node in missing))
             list_widget_item = QListWidgetItem(self.list_nodes)  # add a new list widget item
             list_widget_item.setSizeHint(item_widget.sizeHint())  # copy the size hint from the item widget
@@ -216,9 +219,9 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     def info_loaded_callback(self):
         """Callback method for consuming the KPI info returned by the ROS thread"""
-        pass
 
     def ros_error_callback(self, node_name: str, msg: str, err_code: int):
+        """Callback emthod for consuming the error info returned by the ROS thread"""
         item_widget = HMIApp.ErrorListItem(node_name=node_name, error_msg=msg, error_code=err_code)
         list_widget_item = QListWidgetItem(self.list_error)  # add a new list widget item
         list_widget_item.setSizeHint(item_widget.sizeHint())  # copy the size hint from the item widget

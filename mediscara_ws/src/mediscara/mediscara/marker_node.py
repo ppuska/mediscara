@@ -1,3 +1,4 @@
+"""Module for the marker ROS node"""
 import enum
 from time import time
 
@@ -14,19 +15,20 @@ from mediscara.scripts.utils import ErrorClass as UtilsError
 class MarkerNode(ROSNode): # todo fix error spamming issue
     """Class for the ROS node of the laser marker"""
 
-    """ Marker status """
+    # Marker status
     class MarkerStatus(enum.Enum):
+        """Enum class for storing marker status values"""
         WAITING_FOR_CONNECTION = 0
         IDLE = 1
         MARKING = 2
         ERROR = 3
 
-    """ Error messages """
+    # Error messages
     MARKING_START_ERROR = UtilsError(error_msg="Could not start marking", error_code=61)
     MARKER_CONNECTION_ERROR = UtilsError(error_msg="Could not connect to marker", error_code=62)
     MARKER_BUSY_ERROR = UtilsError(error_msg="Marker is busy", error_code=63)
 
-    """ Messages for the socket communication """
+    # Messages for the socket communication
     INFO_MESSAGE = 'info'
     START_LASER_MSG = 'start_laser'
     LASER_STARTED_MSG = 'laser_started'
@@ -68,16 +70,8 @@ class MarkerNode(ROSNode): # todo fix error spamming issue
 
         self.get_logger().info(f"{self.__class__.__name__} started")
 
-    def marker_control_callback(self, msg: Bool):
-        if msg.data:
-            self.get_logger().info("Starting marking")
-            self.__marker_socket.send(self.START_LASER_MSG)
 
-        else:
-            self.get_logger().info("Stopping marking")
-            self.__marker_socket.send(self.TOP_LASER_MSG)
-
-    """ OVERRIDES ***************************************************************************************************"""
+    # region OVERRIDES *************************************************************************************************
 
     def error_callback(self, msg: Error):
         pass
@@ -88,11 +82,35 @@ class MarkerNode(ROSNode): # todo fix error spamming issue
     def depends_offline(self):
         pass
 
-    """ NODE CALLBACKS **********************************************************************************************"""
+    def all_depends_online(self):
+        pass
 
-    """ SOCKET CALLBACKS ********************************************************************************************"""
+    def dependency_online(self, name: str, online: bool):
+        pass
 
-    def __socket_connected_callback(self, message):
+    # endregion
+
+    # region NODE CALLBACKS ********************************************************************************************
+
+
+    def marker_control_callback(self, msg: Bool):
+        """Callback method for the marker control ROS message
+            Args:
+                msg (Bool): The incoming message
+        """
+        if msg.data:
+            self.get_logger().info("Starting marking")
+            self.__marker_socket.send(self.START_LASER_MSG)
+
+        else:
+            self.get_logger().info("Stopping marking")
+            self.__marker_socket.send(self.TOP_LASER_MSG)
+
+    # endregion
+
+    # region SOCKET CALLBACKS ******************************************************************************************
+
+    def __socket_connected_callback(self, _):
         self.__marker_socket.start_receive()
 
     def __socket_received_callback(self, success: bool, message: str):
@@ -127,6 +145,8 @@ class MarkerNode(ROSNode): # todo fix error spamming issue
             elif message == self.LASER_BUSY_MSG:
                 self.get_logger().warn("Marker is busy")
                 self.publish_error(self.MARKER_BUSY_ERROR)
+
+    # endregion
 
 
 def main(args=None):
