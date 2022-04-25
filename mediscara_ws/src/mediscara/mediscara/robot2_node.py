@@ -9,7 +9,8 @@ from std_msgs.msg import Bool
 from mediscara.scripts.ros_node import ROSNode
 from mediscara.scripts.socket_manager import SocketManager
 from mediscara.scripts.sql import SQLManager, Cell2Data
-from mediscara.config import NodeList, MessageList, PortList, IPList, SQLTableNames
+from mediscara.config import PortList, IPList, SQLTableNames
+from mediscara.config_ros import NodeList, MessageList
 from mediscara.scripts.utils import ErrorClass
 
 

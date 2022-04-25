@@ -14,7 +14,7 @@ import rclpy
 from interfaces.msg import Error, Robot2Status, Robot2Control, VisionControl, KPIC2
 from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.ros_node import QTROSNode
-from mediscara.config import NodeList, MessageList
+from mediscara.config_ros import NodeList, MessageList
 from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
 from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlWidget
 
