@@ -396,7 +396,7 @@ class ROSWorker(QObject):
         self.mutex.lock()
         self.__ready = True
         self.mutex.unlock()
-        
+
         rclpy.spin(self.__ros_node)
 
     @pyqtSlot()

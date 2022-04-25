@@ -629,7 +629,7 @@ class ROSNodeCollab(QTROSNode):
         missing_nodes = self.missing_dependencies
         self.signals.nodes_loaded.emit(all_nodes, missing_nodes)
 
-    def send_control(self, cell: int, msg: Robot2Control or VisionControl):
+    def send_control(self, cell: int, msg: object):
         self.get_logger().debug(f"Sending command: {msg}")
         if cell == self.VISION:
             assert isinstance(msg, VisionControl)

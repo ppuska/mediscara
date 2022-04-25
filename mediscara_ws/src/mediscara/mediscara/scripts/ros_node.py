@@ -98,7 +98,7 @@ class ROSNode(Node, ABC):
         The child class must override this method
         """
         raise NotImplementedError("A subclass must implement this method if it has dependency nodes")
-    
+
     # endregion
 
     # region METHODS ---------------------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ class ROSNode(Node, ABC):
         error.error_code = e.error_code
 
         self.__error_publisher.publish(error)
-        
+
     # endregion
 
     # region PROPERTIES ------------------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ class ROSNode(Node, ABC):
     def dependencies(self):
         """Returns the dependencies of the node"""
         return self.__dependencies
-    
+
     # endregion
 
 
@@ -182,11 +182,11 @@ class QTROSNode(ROSNode, ABC):
         """Load info about the online nodes"""
 
     @abstractmethod
-    def send_control(self, *args, **kwargs):
+    def send_control(self, cell: int, msg: object):
         """Send messages to the respective control topics"""
 
     @abstractmethod
-    def send_kpi(self, *args, **kwargs):
+    def send_kpi(self, msg):
         """Send KPI messages to the server"""
 
     @property
