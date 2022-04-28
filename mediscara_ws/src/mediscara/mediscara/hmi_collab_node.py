@@ -7,7 +7,7 @@ from enum import Enum, auto
 from telnetlib import STATUS
 from typing import ClassVar, List
 
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 
 import rclpy
@@ -301,6 +301,9 @@ class HMICollabApp(HMIApp):
         self.kpi_update_timer = QTimer()
         self.kpi_update_timer.timeout.connect(self.kpi_update_callback)
         self.kpi_update_timer.start(self.KPI_UPDATE_INTERVAL)
+
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.showMaximized()
 
     # region OVERRIDES *************************************************************************************************
 
