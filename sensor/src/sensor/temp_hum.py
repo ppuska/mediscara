@@ -4,7 +4,6 @@ from time import time
 
 from pigpio_dht import DHT11
 
-from ngsi import DataModel
 
 class DHTSensor:
     """Class for interfacing with the DHT sensor"""
@@ -22,8 +21,6 @@ class DHTSensor:
         humidity: float = field(default=0.0)
         valid: bool = field(default=False)
 
-    class SensorData(DataModel):
-        
 
     def __init__(self, pin_number: int) -> None:
         self.__sensor = DHT11(pin_number)
