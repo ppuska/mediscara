@@ -1,2 +1,4 @@
 requests >= 2.22.0
 pigpio_dht >= 0.3.6
+coloredlogs >= 15.0.1
+RPi.GPIO >= 0.7.1

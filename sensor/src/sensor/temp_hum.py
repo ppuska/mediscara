@@ -1,6 +1,7 @@
 """Module for reading the temperature and humidity values from the sensor"""
 from dataclasses import dataclass, field
 from time import time
+import logging
 
 from pigpio_dht import DHT11
 
@@ -36,12 +37,23 @@ class DHTSensor:
         data = DHTSensor.Data()
 
         if time() - self.__last_read > 1:
-            result = self.__sensor.read()
+            try:
+                result = self.__sensor.read()
 
-            data.temperature_c = result[self.__TEMP_C]
-            data.temperature_f = result[self.__TEMP_F]
-            data.humidity = result[self.__HUMIDITY]
-            data.valid = result[self.__VALID]
+                data.temperature_c = result[self.__TEMP_C]
+                data.temperature_f = result[self.__TEMP_F]
+                data.humidity = result[self.__HUMIDITY]
+                data.valid = result[self.__VALID]
+
+                self.__last_read = time()
+
+            except TimeoutError:
+                logging.warning("Sensor timed out")
+
+                data.temperature_c = 0
+                data.temperature_f = 0
+                data.humidity = 0
+                data.valid = False
 
         return data
 

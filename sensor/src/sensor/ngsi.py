@@ -1,6 +1,7 @@
 """Module for structuring the data according to the NGSi V2 standard"""
 
-from dataclasses import dataclass, fields, asdict
+from dataclasses import fields, asdict, is_dataclass
+from typing import Any
 
 class NGSI:
     """Data class for storing the sensor data in the NGSI V2 format
@@ -20,7 +21,10 @@ class NGSI:
 
         self.__attributes = list()
 
-    def add_attribute(self, attribute_name: str, attribute: dataclass):
+    def __str__(self):
+        return str(self.to_dict())
+
+    def add_attribute(self, attribute_name: str, attribute: Any):
         """Add a field to the NGSI object
 
         Args:
@@ -41,25 +45,45 @@ class NGSI:
         for attr_name, attr in self.__attributes:
             attribute_dict = {}  # create a dictionary for each attribute
 
-            attr_fields = fields(attr)  # get the fields of the dataclass
-            value_dict = asdict(attr)
+            if is_dataclass(attr):
 
-            for field in attr_fields:
-                if field.type == float or field.type == int:
+                attr_fields = fields(attr)  # get the fields of the dataclass
+                value_dict = asdict(attr)
+
+                for field in attr_fields:
+                    if field.type == float or field.type == int:
+                        data_type = NGSI.NUMBER
+
+                    elif field.type == bool:
+                        data_type = NGSI.BOOL
+
+                    elif field.type == str:
+                        data_type = NGSI.STRING
+
+                    else:
+                        raise TypeError(f"Unsupported type of {field.type}")
+
+                    attribute_dict[field.name] = {
+                        NGSI.TYPE: data_type,
+                        NGSI.VALUE: value_dict[field.name]
+                    }
+
+            else:
+                if isinstance(attr, float) or isinstance(attr, int):
                     data_type = NGSI.NUMBER
 
-                elif field.type == bool:
+                elif isinstance(attr, bool):
                     data_type = NGSI.BOOL
 
-                elif field.type == str:
+                elif isinstance(attr, str):
                     data_type = NGSI.STRING
 
                 else:
                     raise TypeError(f"Unsupported type of {field.type}")
 
-                attribute_dict[field.name] = {
+                attribute_dict = {
                     NGSI.TYPE: data_type,
-                    NGSI.VALUE: value_dict[field.name]
+                    NGSI.VALUE: attr
                 }
 
             result[attr_name] = attribute_dict
