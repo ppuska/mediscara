@@ -1,27 +1,7 @@
-"""Module for the Sensor Node in the cell"""
-import json
-from random import random
-import sys
-import time
 import logging
-from dataclasses import dataclass, field
-import re
-
 import requests
-import simplejson
 
-from ngsi import DataModel, JSONContent
-
-
-@dataclass
-class SensorData(DataModel):
-    """Class for managing sensor data in the cell"""
-
-    content: JSONContent = field(default=JSONContent("temperature", "humidity"))
-
-    def update(self):
-        self.content.temperature.value = 23 + random() * 5
-        self.content.humidity.value = 65 + random() * 10
+from sensor import Sensor
 
 class FiwareCommunicator:
     """Class for communicating with the FIWARE Orion Context Broker"""
@@ -31,7 +11,7 @@ class FiwareCommunicator:
     def __init__(self) -> None:
         logging.basicConfig(level=logging.INFO)
 
-        self.sensor = SensorData()
+        self.sensor = Sensor()
         self.sensor.update()
 
         # check if entity exists
