@@ -35,12 +35,13 @@ class NGSI:
 
         return self
 
-    def to_dict(self):
+    def to_dict(self, header: bool = True):
         """Returns the object as a dict"""
         result = {}
 
-        result[NGSI.ID] = self.__id
-        result[NGSI.TYPE] = self.__type
+        if header:
+            result[NGSI.ID] = self.__id
+            result[NGSI.TYPE] = self.__type
 
         for attr_name, attr in self.__attributes:
             attribute_dict = {}  # create a dictionary for each attribute
