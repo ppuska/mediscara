@@ -3,21 +3,13 @@
 from time import sleep
 import logging
 
-try:
-    from sensor.temp_hum import DHTSensor
-    from sensor import shock
-    from sensor.ngsi import NGSI
-    from sensor.communication import Comm
-    from sensor.config import SERVER_ADDRESS
-
-except ImportError:
-    from temp_hum import DHTSensor
-    import shock
-    from ngsi import NGSI
-    from communication import Comm
-    from config import SERVER_ADDRESS
+from sensor.temp_hum import DHTSensor
+from sensor import shock
+from sensor.ngsi import NGSI
+from sensor.communication import Comm
 
 UPDATE_INTERVAL = 5
+
 
 class Sensor:
     """Class for managing sensor data in the cell"""
@@ -60,6 +52,7 @@ class Sensor:
         Returns:
             dict: The sensor data formatted to the NGSI v2 format
         """
+        # calculate the sensor data results
         dht_data = self.__dht.read_data()
 
         result = self.__data
@@ -71,21 +64,7 @@ class Sensor:
 
         self.__shock = False
 
+        # upload the data to the OCB
+        self.__comm.update_entity(Sensor.ID, result.to_dict(header=False))
+
         return result.to_dict()
-
-
-def main():
-    sensor = Sensor(14, SERVER_ADDRESS)
-
-    try:
-        while True:
-            print(sensor.update())
-            sleep(UPDATE_INTERVAL)
-
-
-    except KeyboardInterrupt:
-        print("\nExiting")
-
-
-if __name__ == "__main__":
-    main()

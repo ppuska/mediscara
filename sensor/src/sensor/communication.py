@@ -1,8 +1,8 @@
 """Module to implement the sensor-FIWARE communication"""
 
 import logging
-import requests
 from enum import Enum
+import requests
 
 class Comm:
     """Class to implement communication to the Orion Context Broker"""
@@ -74,7 +74,12 @@ class Comm:
             return True
 
         else:
-            logging.debug("Failed to update entity: %s, response: %s (%x)", entity_id, response.content, response.status_code)
+            logging.debug("Failed to update entity: %s, response: %s (%x)",
+                          entity_id,
+                          response.content,
+                          response.status_code
+                          )
+            return False
 
     def delete_entity(self, entity_id: str) -> bool:
         """Deletes the entity"""
@@ -84,5 +89,9 @@ class Comm:
             return True
 
         else:
-            logging.debug("Failed to delete entity: %s, response was %x: %s", entity_id, response.status_code, response.content)
+            logging.debug("Failed to delete entity: %s, response was %x: %s",
+                          entity_id,
+                          response.status_code,
+                          response.content
+                          )
             return False

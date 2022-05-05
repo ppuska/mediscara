@@ -1,3 +1,4 @@
+"""Module to test the communication scripts"""
 
 from sensor.communication import Comm
 
