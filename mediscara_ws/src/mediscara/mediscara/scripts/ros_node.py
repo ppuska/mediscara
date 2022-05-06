@@ -8,8 +8,6 @@ from interfaces.msg import Error
 from mediscara.scripts.utils import ErrorClass as UtilsError
 
 
-
-
 class ROSNode(Node, ABC):
     """Class for a ROS node for a robot cell"""
 
@@ -34,7 +32,7 @@ class ROSNode(Node, ABC):
 
         if not self.dependencies_ok:
             missing = self.missing_dependencies
-            self.get_logger().warn(f"Missing dependency nodes: \n{missing}")
+            self.get_logger().warn(f"Missing dependency nodes: {missing}")
             self.__missing_depends_prev_state = True
             self.__missing_depends_prev = missing
 

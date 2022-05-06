@@ -3,6 +3,7 @@ from enum import Enum
 
 from interfaces.msg import KPIC1 as kpi_c1, KPIC2 as kpi_c2, VisionControl as Vc, MarkerStatus as Ms
 from interfaces.msg import Robot2Status as r2s, Robot2Control as r2c
+from interfaces.msg import Robot1Control as r1c
 from std_msgs.msg import Bool
 
 class NodeList(Enum):
@@ -13,7 +14,8 @@ class NodeList(Enum):
     MarkerNode = 'marker'
     LaserNode = 'laser'
     VisionNode = 'vision'
-    HMINode = 'hmi'
+    HMICollabNode = 'hmi_collaborative'
+    HMIRoboticNode = 'hmi_robotic'
     FIWARENode = "is_ros2"
 
 
@@ -21,6 +23,7 @@ class MessageList(Enum):
     """Enum class for storing message topics and their respective message types"""
     MarkerStatus = 'marker_status', Ms
     MarkerControl = 'marker_control', Bool
+    Robot1Control = 'robot1_control', r1c
     Robot2Status = 'robot2_status', r2s
     Robot2Control = 'robot2_control', r2c
     VisionControl = 'vision_control', Vc
