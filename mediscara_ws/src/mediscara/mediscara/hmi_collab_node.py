@@ -22,7 +22,7 @@ from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlW
 class HMICollabApp(HMIApp):
     """Subclass of HMIApp
     """
-    NODE_NAME = NodeList.HMINode.value
+    NODE_NAME = NodeList.HMICollabNode.value
     DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
 
     KPI_UPDATE_INTERVAL = 1000  # ms
@@ -319,10 +319,11 @@ class HMICollabApp(HMIApp):
                 if not self.__robot_online or not self.__marker_online:  # if either offline, lock
                     self.control_widget.lock_control_robotic(True)
 
+                if NodeList.VisionNode.value not in missing:  # vision is online
+                    self.__vision_online = True
+
                 if not self.__vision_online:
                     self.control_widget.lock_control_vision(True)
-
-                # todo finish the vision system nodes
 
         else:
             logging.info("UI locking is disabled from the command line")
@@ -505,7 +506,6 @@ class HMICollabApp(HMIApp):
         elif name == NodeList.Robot2Node.value:
             self.__robot_online = online
 
-        # todo: implement vision system
         elif name == NodeList.VisionNode.value:
             self.__vision_online = online
 
@@ -543,7 +543,7 @@ class HMICollabApp(HMIApp):
     def state_robot(self, value: STATUS):
         """Sets the state and locks the buttons accordingly"""
         self.__state_rob = value
-        logging.info(f"Status set to: {value}")
+        logging.info("Status set to: %s", value)
 
         self.control_widget.set_state_robotic(value)
 

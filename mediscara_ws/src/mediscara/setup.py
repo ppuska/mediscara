@@ -29,6 +29,7 @@ setup(
             'robot1_node = mediscara.robot1_node:main',
             "robot2_node = mediscara.robot2_node:main",
             'collab_node = mediscara.hmi_collab_node:main',
+            'robotic_node = mediscara.hmi_robotic_node:main'
         ],
     },
 )
