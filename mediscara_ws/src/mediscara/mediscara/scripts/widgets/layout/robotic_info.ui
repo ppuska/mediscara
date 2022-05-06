@@ -230,7 +230,7 @@
         <string notr="true">QFrame {
 	border: 1px solid black;
 	border-radius: 15px;
-	
+
 	background-color: rgba(85, 170, 255, 128);
 }</string>
        </property>
@@ -400,7 +400,7 @@ QLabel {
       <string notr="true">QLabel {
 	border: 1px solid black;
 	border-radius: 7px;
-	
+
 	background-color: rgba(157, 157, 157, 128);
 }</string>
      </property>
