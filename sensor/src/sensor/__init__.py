@@ -1,6 +1,8 @@
 """Init module for the sensor package"""
 import coloredlogs
 
+__version__ = "0.0.1"
+
 LOG_LEVEL = "DEBUG"
 
 coloredlogs.install(level=LOG_LEVEL,
