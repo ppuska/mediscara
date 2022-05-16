@@ -349,7 +349,7 @@ class HMICollabApp(HMIApp):
         """Callback method for when a button gets clicked"""
         button_clicked = self.sender()
 
-        # robotic
+        # region robotic
         if button_clicked == self.control_widget.button_start_session_rob:
             if self.state_robot == HMICollabApp.STATUS.IDLE:
                 self.__kpi_rob.availability.start_now()
@@ -399,7 +399,9 @@ class HMICollabApp(HMIApp):
 
             self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
 
-        # vision
+        # endregion
+
+        # region vision
         if button_clicked == self.control_widget.button_start_session:
             if self.state_vision == HMICollabApp.STATUS.IDLE:
                 self.__kpi_vis.availability.start_now()
@@ -424,7 +426,7 @@ class HMICollabApp(HMIApp):
         elif button_clicked == self.control_widget.button_end_session:
             self.__kpi_vis.availability.end_now()
 
-            self.state_robot = HMICollabApp.STATUS.IDLE
+            self.state_vision = HMICollabApp.STATUS.IDLE
 
         elif button_clicked == self.control_widget.button_home:
             msg = VisionControl()
@@ -449,6 +451,8 @@ class HMICollabApp(HMIApp):
             msg.measure_pcb = False
 
             self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
+
+        # endregion
 
     def kpi_update_callback(self):
         """Sends ROS messages about the KPIs of the cells periodically"""
@@ -543,7 +547,6 @@ class HMICollabApp(HMIApp):
     def state_robot(self, value: STATUS):
         """Sets the state and locks the buttons accordingly"""
         self.__state_rob = value
-        logging.info("Status set to: %s", value)
 
         self.control_widget.set_state_robotic(value)
 
@@ -694,8 +697,7 @@ class KPI:
         """
         format = "%H:%M:%S"
         __planned_start: ClassVar[datetime] = datetime.strptime("08:00:00", format)
-        __planned_end: ClassVar[datetime] = datetime.strptime("8:03:00", format)
-
+        __planned_end: ClassVar[datetime] = datetime.strptime("8:03:00", format)  # todo set to 16:00:00
         __actual_start: datetime = field(default=None)
         __actual_end: datetime = field(default=None)
 
