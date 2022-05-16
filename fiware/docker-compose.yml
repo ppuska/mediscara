@@ -11,6 +11,8 @@ services:
     container_name: orion-container
     ports:
       - "1026:1026"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - mongo
     command: -dbhost mongo
@@ -23,6 +25,8 @@ services:
       - "4200:4200"
       - "4300:4300"
       - "5432:5432"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   quantum-leap:
     image: fiware/quantum-leap:latest
@@ -37,6 +41,8 @@ services:
     image: grafana/grafana:latest
     ports:
       - "3003:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - crate-db
     environment:
