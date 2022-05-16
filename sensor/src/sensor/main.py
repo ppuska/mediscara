@@ -34,8 +34,8 @@ def parse_args(args):
 
 def main():
     opts = vars(parse_args(sys.argv[1:]))
-    server_address = opts[SERVER_ADDRESS]
-    update_interval = opts[UPDATE_INTERVAL]
+    server_address = opts.get(SERVER_ADDRESS)
+    update_interval = opts.get(UPDATE_INTERVAL)
 
     sensor = Sensor(14, server_address)
 
