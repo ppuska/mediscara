@@ -41,7 +41,7 @@ def main():
 
     try:
         while True:
-            print(sensor.update())
+            sensor.update()
             sleep(update_interval)
 
     except KeyboardInterrupt:

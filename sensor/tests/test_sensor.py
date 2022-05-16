@@ -1,10 +1,18 @@
 """Module to test the sensor class"""
 
-from sensor.sensor import Sensor
+import time
+from sensor.temp_hum import DHTSensor
+from sensor.config import DHT_PIN
 
 def test_sensor():
-    sensor = Sensor(14, server_address="localhost:1025")
+    sensor = DHTSensor(pin_number=DHT_PIN)
+    try:
+        while True:
+            print(sensor.read_data())
+            time.sleep(1)
 
+    except KeyboardInterrupt:
+        pass
 
 def main():
     test_sensor()

@@ -37,7 +37,7 @@ class Sensor:
         # check if the OCB has the entity already
         if self.__comm.get_entity(self.ID) is None:
             logging.debug("Entity does not exist in Orion Context Broker")
-            self.__comm.create_entity(json=self.__data.to_dict())
+            self.__comm.create_entity_later()
 
         else:
             logging.debug("Entity exists in Orion Context Broker")
@@ -65,6 +65,10 @@ class Sensor:
         self.__shock = False
 
         # upload the data to the OCB
-        self.__comm.update_entity(Sensor.ID, result.to_dict(header=False))
+        success = self.__comm.update_entity(result)
+
+        if success:
+            logging.info("Successfully updated entity:")
+            logging.info(result.to_dict())
 
         return result.to_dict()

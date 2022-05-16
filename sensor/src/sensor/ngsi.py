@@ -52,11 +52,11 @@ class NGSI:
                 value_dict = asdict(attr)
 
                 for field in attr_fields:
-                    if field.type == float or field.type == int:
-                        data_type = NGSI.NUMBER
-
-                    elif field.type == bool:
+                    if field.type == bool:
                         data_type = NGSI.BOOL
+
+                    elif field.type == float or field.type == int:
+                        data_type = NGSI.NUMBER
 
                     elif field.type == str:
                         data_type = NGSI.STRING
@@ -70,11 +70,11 @@ class NGSI:
                     }
 
             else:
-                if isinstance(attr, float) or isinstance(attr, int):
-                    data_type = NGSI.NUMBER
-
-                elif isinstance(attr, bool):
+                if isinstance(attr, bool):
                     data_type = NGSI.BOOL
+
+                elif isinstance(attr, float) or isinstance(attr, int):
+                    data_type = NGSI.NUMBER
 
                 elif isinstance(attr, str):
                     data_type = NGSI.STRING
@@ -90,3 +90,7 @@ class NGSI:
             result[attr_name] = attribute_dict
 
         return result
+
+    @property
+    def id(self):
+        return self.__id

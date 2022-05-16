@@ -4,6 +4,8 @@ import logging
 from enum import Enum
 import requests
 
+from .ngsi import NGSI
+
 class Comm:
     """Class to implement communication to the Orion Context Broker"""
 
@@ -19,6 +21,8 @@ class Comm:
     def __init__(self, server_address: str):
         self.__server_address = server_address
 
+        self.__create_entity = False
+
         try:
 
             response = requests.get(f"http://{self.__server_address}/v2")
@@ -29,9 +33,9 @@ class Comm:
             else:
                 logging.warning("Communication initialized, server offline (response: %x)", response.status_code)
 
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as error:
             logging.fatal("Failed to establish connection to server")
-            raise ConnectionError()
+            raise ConnectionError from error
 
     def get_entity(self, entity_id: str):
         """Tries to get the entity with the given id from the OCB"""
@@ -44,19 +48,24 @@ class Comm:
         else:
             return response.json()
 
-    def create_entity(self, json: dict) -> bool:
+    def create_entity_later(self):
+        """Use this method if the next update call should create the entity"""
+        self.__create_entity = True
+
+    def create_entity(self, entity: NGSI) -> bool:
         """Creates the entity with the given parameters"""
 
-        response = requests.post(f"http://{self.__server_address}/v2/entities", json=json)
+        response = requests.post(f"http://{self.__server_address}/v2/entities", json=entity.to_dict(header=True))
 
         if response.status_code == Comm.StatusCodes.CREATED.value:
+            self.__create_entity = False
             return True
 
         else:
             logging.debug("Unable to create entity: (%x) [%s]", response.status_code, response.content)
             return False
 
-    def update_entity(self, entity_id: str, json: dict) -> bool:
+    def update_entity(self, entity: NGSI) -> bool:
         """Updates the entity
 
         Args:
@@ -66,8 +75,15 @@ class Comm:
         Returns:
             bool: True if the operation was successful
         """
-        response = requests.patch(f'http://{self.__server_address}/v2/entities/{entity_id}/attrs',
-                                  json=json
+
+        if self.__create_entity:
+            result = self.create_entity(entity=entity)
+
+            if not result:
+                return False
+
+        response = requests.patch(f'http://{self.__server_address}/v2/entities/{entity.id}/attrs',
+                                  json=entity.to_dict(header=False)
                                   )
 
         if response.status_code == Comm.StatusCodes.NO_CONTENT.value:

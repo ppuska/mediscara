@@ -2,7 +2,8 @@ from sensor.ngsi import NGSI
 from sensor.temp_hum import DHTSensor
 
 def test():
-    ngsi = NGSI(id_="sensor_data", type_="Sensor").add_attribute("temperature", DHTSensor.Data(humidity=15, temperature_c=23))
+    ngsi = NGSI(id_="sensor_data", type_="Sensor").add_attribute("temperature", DHTSensor.Data(humidity=15, temperature_c=23))\
+        .add_attribute("shock", True)
     print(ngsi.to_dict())
 
 def test_no_header():

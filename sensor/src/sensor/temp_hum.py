@@ -50,11 +50,6 @@ class DHTSensor:
             except TimeoutError:
                 logging.warning("Sensor timed out")
 
-                data.temperature_c = 0
-                data.temperature_f = 0
-                data.humidity = 0
-                data.valid = False
-
         return data
 
 
