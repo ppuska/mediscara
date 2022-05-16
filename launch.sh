@@ -21,7 +21,7 @@ stop_containers () {
 }
 
 # increase vm map max size
-sysctl -w vm.max_map_count=262144  # if not wsl, remove
+# sysctl -w vm.max_map_count=262144  # if not wsl, remove
 
 # launch MySQL container
 echo "Launching MySQL"
@@ -38,3 +38,7 @@ waitForOrion
 echo "Launching integration service"
 . ${start_dir}/is_ws/install/setup.bash
 integration-service ${start_dir}/is_ws/ros_server.yaml || stop_containers
+
+stop_containers
+
+cd $start_dir
