@@ -26,7 +26,7 @@ def parse_args(args):
     arg_parser.add_argument('-i', '--interval',
                             dest=UPDATE_INTERVAL,
                             type=int,
-                            default=config.SERVER_ADDRESS,
+                            default=config.UPDATE_INTERVAL,
                             help="The sensor's update interval in seconds"
                             )
 
