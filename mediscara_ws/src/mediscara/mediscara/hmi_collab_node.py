@@ -367,19 +367,18 @@ class HMICollabApp(HMIApp):
             msg.start_marking = False
             msg.pause = True
 
-            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
-
-
             if self.state_robot == HMICollabApp.STATUS.WORKING:
                 self.__kpi_rob.performance.pause_start()  # start the pause
+
+                self.state_robot = HMICollabApp.STATUS.PAUSED  # change the state to paused
 
             elif self.state_robot == HMICollabApp.STATUS.PAUSED:
                 # resuming from pause
                 self.__kpi_rob.performance.pause_end()  # end the pause
                 self.state_robot = HMICollabApp.STATUS.WORKING
-                return
+                msg.pause = False
 
-            self.state_robot = HMICollabApp.STATUS.PAUSED  # change the state to paused
+            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
 
         elif button_clicked == self.control_widget.button_end_session_rob:
             self.__kpi_rob.availability.end_now()
