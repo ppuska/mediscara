@@ -1,11 +1,9 @@
 """Module for the HMI Collaborative App"""
 import logging
 import sys
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
 from enum import Enum, auto
 from telnetlib import STATUS
-from typing import ClassVar, List
+from typing import List
 
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton

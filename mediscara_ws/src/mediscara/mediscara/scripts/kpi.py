@@ -1,3 +1,4 @@
+"""Module for managing KPI"""
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import ClassVar
@@ -238,6 +239,14 @@ class KPI:
             self.__reference_performance = self.__work_period / self.__product_quota
 
         def calculate(self, a_cur_m: timedelta):
+            """Calculates the Performace KPI based on the input and stored data
+
+            Args:
+                a_cur_m (timedelta): The current availability time delta (A_cur_m in the docs)
+
+            Returns:
+                float: The performance KPI
+            """
             if self.product_count == 0:
                 return 0.00
 
@@ -249,9 +258,12 @@ class KPI:
             return self.__reference_performance / actual_performance
 
         def pause_start(self):
+            """Starts the pause timer
+            """
             self.__pause_timer = datetime.now()
 
         def pause_end(self):
+            """Ends the pause timer"""
             if self.__pause_timer is None:
                 return
 
@@ -260,6 +272,7 @@ class KPI:
 
         @property
         def paused(self):
+            """Returns whether the Performance counting is currently paused or not"""
             return self.__paused
 
         @paused.setter
@@ -268,8 +281,14 @@ class KPI:
 
         @property
         def product_count(self):
+            """Returns the current product count"""
             return self.__product_count
 
         @product_count.setter
         def product_count(self, value: int):
+            """Sets the current product count
+
+            Args:
+                value (int): The current product count
+            """
             self.__product_count = value

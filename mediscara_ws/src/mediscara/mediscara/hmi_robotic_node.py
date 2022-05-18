@@ -1,11 +1,9 @@
 """Module for the HMI Robotic ROS Node"""
 
 from enum import Enum, auto
-import logging
 import sys
 from telnetlib import STATUS
 from typing import List
-from xmlrpc.client import TRANSPORT_ERROR
 
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 from PyQt5.QtCore import QTimer
@@ -287,7 +285,8 @@ class HMIRoboticApp(HMIApp):
     def ros_status_callback(self, msg):
         """Callback method for the Robot1Status topic messages"""
         if isinstance(msg, Robot1Status):
-            self.info_widget
+            # todo finish this
+            pass
 
     # endregion
 
