@@ -61,7 +61,7 @@ class FIWARE:
         if response.status_code == StatusCodes.CREATED.value:
             return True
 
-        logging.warning("Could not create new entity (response: %s)", response.content)
+        logging.debug("Could not create new entity (response: %s)", response.content)
         return False
 
     def get_entity(self, entity_id: str) -> dict or None:
@@ -77,6 +77,7 @@ class FIWARE:
         response = requests.get(f"http://{self.__server_address}/v2/entities/{entity_id}")
 
         if response.status_code == StatusCodes.NOT_FOUND.value:
+            logging.debug("%s not found.", entity_id)
             return None
 
         return response.json()
@@ -96,7 +97,7 @@ class FIWARE:
         if response.status_code == StatusCodes.NO_CONTENT.value:
             return True
 
-        logging.warning("Unable to update entity '%s'. (response %s)", entity_id, response.content)
+        logging.debug("Unable to update entity '%s'. (response %s)", entity_id, response.content)
         return False
 
     def delete_entity(self, entity_id: str):
@@ -113,5 +114,5 @@ class FIWARE:
         if response.status_code == StatusCodes.NO_CONTENT.value:
             return True
 
-        logging.warning("Unable to delete entity '%s'. (response %s'", entity_id, response.content)
+        logging.debug("Unable to delete entity '%s'. (response %s'", entity_id, response.content)
         return False

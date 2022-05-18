@@ -2,7 +2,7 @@
 
 import logging
 
-from manager.interfaces import FIWARE
+from manager.fiware import FIWARE
 
 
 def test_connection():
