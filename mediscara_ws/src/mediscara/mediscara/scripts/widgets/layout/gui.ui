@@ -24,7 +24,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true">/* 
+    <string notr="true">/*
 	primary color: #6CD2F0
 	primary color dark: #398AA3
 	alternate color: #F0E454
@@ -40,7 +40,7 @@ QPushButton {
 	border-color: black;
 	background-color: #F0E454;
 	background-color: rgb(240, 228, 84);
-	
+
 	background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 228, 84, 255), stop:1 rgba(255, 255, 255, 255));
 }
 QPushButton:pressed {
@@ -56,10 +56,10 @@ QTabWidget::pane {
 	border: 1px solid black;
 }
 
-QTabBar::tab { 
+QTabBar::tab {
 	border: 1px solid black;
 	border-radius: 7px;
-	height: 100px; 
+	height: 100px;
 	width: 140px;
 	margin: 6 px;
 	margin-left: 6px;

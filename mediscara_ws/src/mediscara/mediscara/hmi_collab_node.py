@@ -5,22 +5,21 @@ from enum import Enum, auto
 from telnetlib import STATUS
 from typing import List
 
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
-
 import rclpy
-from interfaces.msg import Error, Robot2Status, Robot2Control, VisionControl, KPIC2
+from interfaces.msg import KPIC2, Error, Robot2Control, Robot2Status, VisionControl
+from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.hmi import HMIApp, ROSWorker
-from mediscara.scripts.ros_node import QTROSNode
 from mediscara.scripts.kpi import KPI
-from mediscara.config_ros import NodeList, MessageList
-from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
+from mediscara.scripts.ros_node import QTROSNode
 from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlWidget
+from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
 
 
 class HMICollabApp(HMIApp):
-    """Subclass of HMIApp
-    """
+    """Subclass of HMIApp"""
+
     NODE_NAME = NodeList.HMICollabNode.value
     DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
 
@@ -31,6 +30,7 @@ class HMICollabApp(HMIApp):
 
     class STATUS(Enum):
         """Enum class to implement a state machine of the production state"""
+
         IDLE = auto()
         WORKING = auto()
         PAUSED = auto()
@@ -178,8 +178,7 @@ class HMICollabApp(HMIApp):
                 label.setStyleSheet("")
 
     class ControlWidget(QWidget, Ui_CollabControlWidget):
-        """Class for the Control Widget in the Collaborative HMI App
-        """
+        """Class for the Control Widget in the Collaborative HMI App"""
 
         def __init__(self, parent=None):
             super(HMICollabApp.ControlWidget, self).__init__(parent=parent)
@@ -248,17 +247,19 @@ class HMICollabApp(HMIApp):
         @property
         def buttons(self):
             """Returns all the buttons in the layout"""
-            return [self.button_home,
-                    self.button_home_rob,
-                    self.button_measure_label,
-                    self.button_measure_pcb,
-                    self.button_start_session,
-                    self.button_start_session_rob,
-                    self.button_start_marking,
-                    self.button_pause,
-                    self.button_pause_rob,
-                    self.button_end_session,
-                    self.button_end_session_rob]
+            return [
+                self.button_home,
+                self.button_home_rob,
+                self.button_measure_label,
+                self.button_measure_pcb,
+                self.button_start_session,
+                self.button_start_session_rob,
+                self.button_start_marking,
+                self.button_pause,
+                self.button_pause_rob,
+                self.button_end_session,
+                self.button_end_session_rob,
+            ]
 
     # endregion
 
@@ -460,22 +461,19 @@ class HMICollabApp(HMIApp):
         p_rob = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
         q_rob = self.__kpi_rob.quality.calculate()
 
-        self.info_widget.display_kpi(self.InfoWidget.ROBOTIC,
-                                     availability=a_rob,
-                                     quality=q_rob,
-                                     performance=p_rob
-                                     )
+        self.info_widget.display_kpi(
+            self.InfoWidget.ROBOTIC,
+            availability=a_rob,
+            quality=q_rob,
+            performance=p_rob,
+        )
 
         # vision
         a_vis = self.__kpi_vis.availability.calculate()
         p_vis = self.__kpi_vis.performance.calculate(self.__kpi_vis.availability.actual_duration)
         q_vis = self.__kpi_vis.quality.calculate()
 
-        self.info_widget.display_kpi(ROSNodeCollab.VISION,
-                                     availability=a_vis,
-                                     quality=q_vis,
-                                     performance=p_vis
-                                     )
+        self.info_widget.display_kpi(ROSNodeCollab.VISION, availability=a_vis, quality=q_vis, performance=p_vis)
 
         msg = KPIC2()
         msg.availability_robotic = a_rob
@@ -565,8 +563,7 @@ class HMICollabApp(HMIApp):
 
 
 class ROSNodeCollab(QTROSNode):
-    """Class for the ROS Node in the HMI application
-    """
+    """Class for the ROS Node in the HMI application"""
 
     VISION = 0
     ROBOTIC = 1
@@ -575,30 +572,31 @@ class ROSNodeCollab(QTROSNode):
         super(ROSNodeCollab, self).__init__(node_name=node_name, depends_on=depends_on, signals=signals)
 
         # publishers
-        self.__robot_control = self.create_publisher(msg_type=MessageList.Robot2Control.value[1],
-                                                     topic=MessageList.Robot2Control.value[0],
-                                                     qos_profile=10
-                                                     )
+        self.__robot_control = self.create_publisher(
+            msg_type=MessageList.Robot2Control.value[1],
+            topic=MessageList.Robot2Control.value[0],
+            qos_profile=10,
+        )
 
-        self.__vision_control = self.create_publisher(msg_type=MessageList.VisionControl.value[1],
-                                                      topic=MessageList.VisionControl.value[0],
-                                                      qos_profile=10
-                                                      )
+        self.__vision_control = self.create_publisher(
+            msg_type=MessageList.VisionControl.value[1],
+            topic=MessageList.VisionControl.value[0],
+            qos_profile=10,
+        )
 
         self.__kpi = self.create_publisher(
             msg_type=MessageList.KPIC2.value[1],
             topic=MessageList.KPIC2.value[0],
-            qos_profile=10
-            )
+            qos_profile=10,
+        )
 
         # subscribers
         self.__robot_status_subscription = self.create_subscription(
             msg_type=MessageList.Robot2Status.value[1],
             topic=MessageList.Robot2Status.value[0],
             callback=self.robot_status_callback,
-            qos_profile=10
+            qos_profile=10,
         )
-
 
         self.get_logger().info("ROS node online")
         self.signals.started.emit()
@@ -665,6 +663,6 @@ def main(args=None):
         print("Stopping")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # main()
     main()

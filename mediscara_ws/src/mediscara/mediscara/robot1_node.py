@@ -1,8 +1,8 @@
+"""Module for the Robot 1 cell"""
 import rclpy
 from interfaces.msg import Error
-
-from mediscara.scripts.ros_node import ROSNode
 from mediscara.config_ros import NodeList
+from mediscara.scripts.ros_node import ROSNode
 
 
 class Robot1Node(ROSNode):
@@ -12,24 +12,26 @@ class Robot1Node(ROSNode):
     """
 
     def __init__(self):
-        super(Robot1Node, self).__init__(
-            node_name=NodeList.Robot1Node.value,
-            depends_on=[NodeList.LaserNode.value]
-        )
+        super().__init__(node_name=NodeList.Robot1Node.value, depends_on=[NodeList.LaserNode.value])
 
         self.get_logger().info(f"{self.__class__.__name__} is online")
 
     def error_callback(self, msg: Error):
         self.get_logger().error(f"ERROR: {msg.node_name}\t{msg.error_msg}\t{msg.error_code}")  # TODO implement this
 
-    def depends_online(self):
+    def dependency_online(self, name: str, online: bool):
         pass
 
-    def depends_offline(self):
+    def dependency_offline(self):
         pass
 
 
 def main(args=None):
+    """Entry point for the ROS Node
+
+    Args:
+        args (List[str], optional): arguments for the rclpy runtime. Defaults to None.
+    """
     rclpy.init(args=args)
 
     robot1_node = Robot1Node()
@@ -42,5 +44,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -15,10 +15,9 @@ class Ui_RoboticControlWidget(object):
     def setupUi(self, RoboticControlWidget):
         RoboticControlWidget.setObjectName("RoboticControlWidget")
         RoboticControlWidget.resize(746, 536)
-        RoboticControlWidget.setStyleSheet("QLabel {\n"
-"    border: 1px solid black;\n"
-"    border-radius: 7px;\n"
-"}")
+        RoboticControlWidget.setStyleSheet(
+            "QLabel {\n" "    border: 1px solid black;\n" "    border-radius: 7px;\n" "}"
+        )
         self.gridLayout = QtWidgets.QGridLayout(RoboticControlWidget)
         self.gridLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
         self.gridLayout.setObjectName("gridLayout")
@@ -29,13 +28,15 @@ class Ui_RoboticControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_home.sizePolicy().hasHeightForWidth())
         self.button_home.setSizePolicy(sizePolicy)
         self.button_home.setMinimumSize(QtCore.QSize(0, 100))
-        self.button_home.setStyleSheet("QPushButton {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(81, 186, 246, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(34, 142, 204, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
+        self.button_home.setStyleSheet(
+            "QPushButton {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(81, 186, 246, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(34, 142, 204, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}"
+        )
         self.button_home.setObjectName("button_home")
         self.gridLayout.addWidget(self.button_home, 1, 0, 1, 1)
         self.button_pause = QtWidgets.QPushButton(RoboticControlWidget)
@@ -45,14 +46,16 @@ class Ui_RoboticControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_pause.sizePolicy().hasHeightForWidth())
         self.button_pause.setSizePolicy(sizePolicy)
         self.button_pause.setMinimumSize(QtCore.QSize(0, 100))
-        self.button_pause.setStyleSheet("QPushButton {\n"
-"    background-color: rgb(246, 223, 134);\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(246, 223, 146, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 179, 41, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
+        self.button_pause.setStyleSheet(
+            "QPushButton {\n"
+            "    background-color: rgb(246, 223, 134);\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(246, 223, 146, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 179, 41, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}"
+        )
         self.button_pause.setObjectName("button_pause")
         self.gridLayout.addWidget(self.button_pause, 0, 1, 1, 1)
         self.button_end_session = QtWidgets.QPushButton(RoboticControlWidget)
@@ -62,14 +65,16 @@ class Ui_RoboticControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_end_session.sizePolicy().hasHeightForWidth())
         self.button_end_session.setSizePolicy(sizePolicy)
         self.button_end_session.setMinimumSize(QtCore.QSize(0, 100))
-        self.button_end_session.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"")
+        self.button_end_session.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            ""
+        )
         self.button_end_session.setObjectName("button_end_session")
         self.gridLayout.addWidget(self.button_end_session, 0, 2, 1, 1)
         self.button_start_session = QtWidgets.QPushButton(RoboticControlWidget)
@@ -79,13 +84,15 @@ class Ui_RoboticControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_start_session.sizePolicy().hasHeightForWidth())
         self.button_start_session.setSizePolicy(sizePolicy)
         self.button_start_session.setMinimumSize(QtCore.QSize(0, 100))
-        self.button_start_session.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
+        self.button_start_session.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}"
+        )
         self.button_start_session.setObjectName("button_start_session")
         self.gridLayout.addWidget(self.button_start_session, 0, 0, 1, 1)
         self.button_start_cutting = QtWidgets.QPushButton(RoboticControlWidget)
@@ -95,14 +102,16 @@ class Ui_RoboticControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_start_cutting.sizePolicy().hasHeightForWidth())
         self.button_start_cutting.setSizePolicy(sizePolicy)
         self.button_start_cutting.setMinimumSize(QtCore.QSize(0, 100))
-        self.button_start_cutting.setStyleSheet("QPushButton {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(246, 148, 81, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(224, 111, 34, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"\n"
-"}")
+        self.button_start_cutting.setStyleSheet(
+            "QPushButton {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(246, 148, 81, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(224, 111, 34, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "\n"
+            "}"
+        )
         self.button_start_cutting.setObjectName("button_start_cutting")
         self.gridLayout.addWidget(self.button_start_cutting, 2, 0, 1, 1)
         self.label_cutting = QtWidgets.QLabel(RoboticControlWidget)

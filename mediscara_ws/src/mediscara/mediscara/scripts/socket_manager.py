@@ -31,15 +31,16 @@ class SocketManager:
 
     MAX_RETRIES = 5
 
-    def __init__(self,
-                 parent,
-                 is_server: bool,
-                 host: str = 'localhost',
-                 port: int = 65432,
-                 blocking: bool = True,
-                 received_callback: Callable[[bool, str], None] = None,
-                 connected_callback: Callable[[str], None] = None
-                 ):
+    def __init__(
+        self,
+        parent,
+        is_server: bool,
+        host: str = "localhost",
+        port: int = 65432,
+        blocking: bool = True,
+        received_callback: Callable[[bool, str], None] = None,
+        connected_callback: Callable[[str], None] = None,
+    ):
         """
         Constructor method
 
@@ -104,9 +105,7 @@ class SocketManager:
 
         else:
             self.__connect_thread = WorkerThread(  # create socket thread
-                worker_function=self._socket_connect,
-                result_callback=self._connected_callback_internal,
-                loop=True
+                worker_function=self._socket_connect, result_callback=self._connected_callback_internal, loop=True
             )
             self.__connect_thread.start()
 
@@ -134,9 +133,7 @@ class SocketManager:
                 raise Exception(f"Client cannot bind to socket, use '{self.connect.__name__}' method")
 
             self.__connect_thread = WorkerThread(
-                worker_function=self._bind_and_accept,
-                result_callback=self._bound_callback_internal,
-                loop=False
+                worker_function=self._bind_and_accept, result_callback=self._bound_callback_internal, loop=False
             )
             self.__connect_thread.start()
 
@@ -148,11 +145,11 @@ class SocketManager:
         """
         if not self.__blocking:
             raise Warning(f"In non-blocking mode use the '{self.start_receive.__name__}' method")
-        return self.__socket.recv(1024).decode('utf-8')
+        return self.__socket.recv(1024).decode("utf-8")
 
     @Decorator.socket_check
     def send(self, msg: str):
-        self.__client_socket.sendall(f'{msg}\n'.encode('utf-8'))
+        self.__client_socket.sendall(f"{msg}\n".encode("utf-8"))
 
     def start_receive(self):
         """Starts the receiver thread that listens to incoming communication on the socket
@@ -165,9 +162,7 @@ class SocketManager:
             raise Exception("In blocking mode cannot start listening threads")
 
         self.__listen_thread = WorkerThread(
-            worker_function=self._listen,
-            result_callback=self._received_callback_internal,
-            loop=True
+            worker_function=self._listen, result_callback=self._received_callback_internal, loop=True
         )
         self.__listen_thread.start()
 
@@ -181,8 +176,7 @@ class SocketManager:
             self.__socket.close()
 
     def _socket_connect(self, _):
-        """Private method for connecting to the socket
-        """
+        """Private method for connecting to the socket"""
         error_msg = ""
         for i in range(self.MAX_RETRIES):
             try:
@@ -236,7 +230,7 @@ class SocketManager:
         """
         if success:
             if message == "":
-                """ Empty message as a client means disconnected server"""
+                """Empty message as a client means disconnected server"""
                 self.__logger.warn("Socket disconnected")
                 self.__listen_thread.stop()  # stop the listen thread
                 self.__client_socket.close()
@@ -277,14 +271,14 @@ class SocketManager:
 
             else:
                 self.__socket_connected = True
-                return True, 'Socket bound and listening...'
+                return True, "Socket bound and listening..."
 
         return False, error_msg
 
     def _listen(self, _):
         """Private method for listening to the communication"""
         try:
-            response = self.__client_socket.recv(1024).decode('utf-8')
+            response = self.__client_socket.recv(1024).decode("utf-8")
             return True, response
 
         except ConnectionRefusedError:
@@ -297,14 +291,12 @@ class SocketManager:
             return False, "Connection reset"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import time
-
 
     def rec_callback(success, message):
         if not success:
             server.connect()
-
 
     def connect_cb(success, _):
         if success:
@@ -312,15 +304,15 @@ if __name__ == '__main__':
         else:
             server.connect()
 
-
-    server = SocketManager(parent=None,
-                           host='localhost',
-                           port=65432,
-                           connected_callback=connect_cb,
-                           received_callback=rec_callback,
-                           is_server=False,
-                           blocking=False
-                           )
+    server = SocketManager(
+        parent=None,
+        host="localhost",
+        port=65432,
+        connected_callback=connect_cb,
+        received_callback=rec_callback,
+        is_server=False,
+        blocking=False,
+    )
 
     try:
         server.connect()

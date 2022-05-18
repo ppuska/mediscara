@@ -34,13 +34,12 @@ class Ui_CollabInfoTab(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
         self.frame.setSizePolicy(sizePolicy)
-        self.frame.setStyleSheet("QLabel {\n"
-"}")
+        self.frame.setStyleSheet("QLabel {\n" "}")
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
         self.formLayout_2 = QtWidgets.QFormLayout(self.frame)
-        self.formLayout_2.setFormAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.formLayout_2.setFormAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self.formLayout_2.setContentsMargins(16, -1, -1, 0)
         self.formLayout_2.setVerticalSpacing(0)
         self.formLayout_2.setObjectName("formLayout_2")
@@ -81,10 +80,7 @@ class Ui_CollabInfoTab(object):
         self.line.setObjectName("line")
         self.verticalLayout.addWidget(self.line)
         self.frame_2 = QtWidgets.QFrame(self.box_vision)
-        self.frame_2.setStyleSheet("QLabel {\n"
-"    border: 1px solid black;\n"
-"    border-radius: 7px;\n"
-"}")
+        self.frame_2.setStyleSheet("QLabel {\n" "    border: 1px solid black;\n" "    border-radius: 7px;\n" "}")
         self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_2.setObjectName("frame_2")
@@ -167,10 +163,7 @@ class Ui_CollabInfoTab(object):
         self.line_3.setObjectName("line_3")
         self.verticalLayout_3.addWidget(self.line_3)
         self.frame_4 = QtWidgets.QFrame(self.box_robotic)
-        self.frame_4.setStyleSheet("QLabel {\n"
-"    border: 1px solid black;\n"
-"    border-radius: 7px;\n"
-"}")
+        self.frame_4.setStyleSheet("QLabel {\n" "    border: 1px solid black;\n" "    border-radius: 7px;\n" "}")
         self.frame_4.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_4.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_4.setObjectName("frame_4")

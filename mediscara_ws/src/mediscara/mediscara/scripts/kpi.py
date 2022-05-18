@@ -46,8 +46,8 @@ class KPI:
 
     @dataclass
     class Availability:
-        """Dataclass to manage and store the availability KPI value
-        """
+        """Dataclass to manage and store the availability KPI value"""
+
         format = "%H:%M:%S"
         __planned_start: ClassVar[datetime] = datetime.strptime("08:00:00", format)
         __planned_end: ClassVar[datetime] = datetime.strptime("8:03:00", format)  # todo set to 16:00:00
@@ -65,19 +65,19 @@ class KPI:
             else:
                 actual_end_str = self.__actual_end.strftime(self.format)
 
-            return f"planned start: {self.__planned_start.strftime(self.format)} " \
-                   f"planned end: {self.__planned_end.strftime(self.format)} " \
-                   f"actual start: {actual_start_str} " \
-                   f"actual end: {actual_end_str}"
+            return (
+                f"planned start: {self.__planned_start.strftime(self.format)} "
+                f"planned end: {self.__planned_end.strftime(self.format)} "
+                f"actual start: {actual_start_str} "
+                f"actual end: {actual_end_str}"
+            )
 
         def start_now(self):
-            """Sets the actual start time to the current time
-            """
+            """Sets the actual start time to the current time"""
             self.__actual_start = datetime.now()
 
         def end_now(self):
-            """Sets the actual end time to the current time
-            """
+            """Sets the actual end time to the current time"""
             self.__actual_end = datetime.now()
 
         def calculate(self):
@@ -225,6 +225,7 @@ class KPI:
         and the performance KPI will be calculated as
             - 1 / P_M = 1 / ({Actual performance} / {Reference performance})
         """
+
         __product_quota: int
 
         __work_period: ClassVar[timedelta] = timedelta(hours=10)
@@ -258,8 +259,7 @@ class KPI:
             return self.__reference_performance / actual_performance
 
         def pause_start(self):
-            """Starts the pause timer
-            """
+            """Starts the pause timer"""
             self.__pause_timer = datetime.now()
 
         def pause_end(self):

@@ -56,10 +56,7 @@ class Ui_RoboticInfoTab(object):
         self.gridLayout.addWidget(self.label_oee, 1, 2, 1, 1)
         self.verticalLayout.addWidget(self.groupBox)
         self.frame = QtWidgets.QFrame(RoboticInfoTab)
-        self.frame.setStyleSheet("QLabel {\n"
-"    border: 1px solid black;\n"
-"    border-radius: 7px;\n"
-"}")
+        self.frame.setStyleSheet("QLabel {\n" "    border: 1px solid black;\n" "    border-radius: 7px;\n" "}")
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
@@ -94,27 +91,31 @@ class Ui_RoboticInfoTab(object):
         self.line.setObjectName("line")
         self.horizontalLayout.addWidget(self.line)
         self.frame_2 = QtWidgets.QFrame(RoboticInfoTab)
-        self.frame_2.setStyleSheet("QFrame {\n"
-"    border: 1px solid black;\n"
-"    border-radius: 15px;\n"
-"\n"
-"    background-color: rgba(85, 170, 255, 128);\n"
-"}")
+        self.frame_2.setStyleSheet(
+            "QFrame {\n"
+            "    border: 1px solid black;\n"
+            "    border-radius: 15px;\n"
+            "\n"
+            "    background-color: rgba(85, 170, 255, 128);\n"
+            "}"
+        )
         self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_2.setObjectName("frame_2")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.frame_2)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.frame_3 = QtWidgets.QFrame(self.frame_2)
-        self.frame_3.setStyleSheet("QFrame {\n"
-"    background-color: rgba(85, 170, 127, 128);\n"
-"}\n"
-"\n"
-"QLabel {\n"
-"    border: \"\";\n"
-"    background-color: rgba(255, 255, 255, 0);\n"
-"}\n"
-"")
+        self.frame_3.setStyleSheet(
+            "QFrame {\n"
+            "    background-color: rgba(85, 170, 127, 128);\n"
+            "}\n"
+            "\n"
+            "QLabel {\n"
+            '    border: "";\n'
+            "    background-color: rgba(255, 255, 255, 0);\n"
+            "}\n"
+            ""
+        )
         self.frame_3.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_3.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_3.setObjectName("frame_3")
@@ -144,14 +145,16 @@ class Ui_RoboticInfoTab(object):
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
         self.frame_4 = QtWidgets.QFrame(self.frame_2)
-        self.frame_4.setStyleSheet("QFrame {\n"
-"    background-color: rgba(255, 255, 255, 128);\n"
-"}\n"
-"\n"
-"QLabel {\n"
-"    border: \"\";\n"
-"    background-color: rgba(255, 255, 255, 0);\n"
-"}")
+        self.frame_4.setStyleSheet(
+            "QFrame {\n"
+            "    background-color: rgba(255, 255, 255, 128);\n"
+            "}\n"
+            "\n"
+            "QLabel {\n"
+            '    border: "";\n'
+            "    background-color: rgba(255, 255, 255, 0);\n"
+            "}"
+        )
         self.frame_4.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_4.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_4.setObjectName("frame_4")
@@ -183,12 +186,14 @@ class Ui_RoboticInfoTab(object):
         self.horizontalLayout.setStretch(2, 1)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.label_global_error = QtWidgets.QLabel(RoboticInfoTab)
-        self.label_global_error.setStyleSheet("QLabel {\n"
-"    border: 1px solid black;\n"
-"    border-radius: 7px;\n"
-"\n"
-"    background-color: rgba(157, 157, 157, 128);\n"
-"}")
+        self.label_global_error.setStyleSheet(
+            "QLabel {\n"
+            "    border: 1px solid black;\n"
+            "    border-radius: 7px;\n"
+            "\n"
+            "    background-color: rgba(157, 157, 157, 128);\n"
+            "}"
+        )
         self.label_global_error.setAlignment(QtCore.Qt.AlignCenter)
         self.label_global_error.setObjectName("label_global_error")
         self.verticalLayout_3.addWidget(self.label_global_error)

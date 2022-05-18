@@ -1,26 +1,26 @@
 """Module for the HMI Robotic ROS Node"""
 
-from enum import Enum, auto
 import sys
+from enum import Enum, auto
 from telnetlib import STATUS
 from typing import List
 
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
-from PyQt5.QtCore import QTimer
-
 import rclpy
-from interfaces.msg import Error, Robot1Control, Robot1Status, KPIC1
-
-from mediscara.scripts.hmi import HMIApp, ROSWorker
-from mediscara.scripts.ros_node import QTROSNode
+from interfaces.msg import KPIC1, Error, Robot1Control, Robot1Status
+from manager.message.interface import Messenger
 from mediscara.config_ros import MessageList, NodeList
+from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.kpi import KPI
-
-from mediscara.scripts.widgets.layout.robotic_info import Ui_RoboticInfoTab
+from mediscara.scripts.ros_node import QTROSNode
 from mediscara.scripts.widgets.layout.robotic_control import Ui_RoboticControlWidget
+from mediscara.scripts.widgets.layout.robotic_info import Ui_RoboticInfoTab
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
+
 
 class HMIRoboticApp(HMIApp):
     """A PyQt5 App to display the HMI interface to the user"""
+
     NODE_NAME = NodeList.HMIRoboticNode.value
     DEPENDS = [NodeList.Robot1Node.value]
 
@@ -31,6 +31,7 @@ class HMIRoboticApp(HMIApp):
 
     class STATUS(Enum):
         """Ebzm class to store the values of a state machine"""
+
         IDLE = auto()
         WORKING = auto()
         PAUSED = auto()
@@ -48,7 +49,7 @@ class HMIRoboticApp(HMIApp):
         __BG_COLOR_RED = "background-color: red"
 
         def __init__(self, parent=None):
-            super(HMIRoboticApp.InfoWidget, self).__init__(parent)
+            super().__init__(parent)
             self.setupUi(self)
 
             self.label_availability.setText("0 %")
@@ -56,6 +57,8 @@ class HMIRoboticApp(HMIApp):
             self.label_quality.setText("0 %")
 
             self.label_oee.setText("0 %")
+
+            self.__messenger = Messenger("25.18.161.28")
 
         def display_kpi(self, availability: float, quality: float, performance: float):
             """Displays the KPI information on the widget"""
@@ -117,7 +120,7 @@ class HMIRoboticApp(HMIApp):
         """Class for displaying and interfacing with the Control Widget on the control Tab"""
 
         def __init__(self, parent: None):
-            super(HMIRoboticApp.ControlWidget, self).__init__(parent)
+            super().__init__(parent)
             self.setupUi(self)  # show ui
 
             self.__locked = False
@@ -163,16 +166,13 @@ class HMIRoboticApp(HMIApp):
                 self.button_end_session,
                 self.button_pause,
                 self.button_home,
-                self.button_start_cutting
+                self.button_start_cutting,
             ]
 
     # endregion
 
     def __init__(self):
-        super(HMIRoboticApp, self).__init__(name=self.NODE_NAME,
-                                            depends_list=self.DEPENDS,
-                                            node_class=ROSNodeRobotic
-                                            )
+        super().__init__(name=self.NODE_NAME, depends_list=self.DEPENDS, node_class=ROSNodeRobotic)
 
         # add info widget
         self.info_widget = HMIRoboticApp.InfoWidget(self.tab_info)
@@ -264,10 +264,7 @@ class HMIRoboticApp(HMIApp):
         performance = self.__kpi.performance.calculate(self.__kpi.availability.actual_duration)
         quality = self.__kpi.quality.calculate()
 
-        self.info_widget.display_kpi(availability=availability,
-                                     quality=quality,
-                                     performance=performance
-                                     )
+        self.info_widget.display_kpi(availability=availability, quality=quality, performance=performance)
 
         msg = KPIC1()
         msg.availability = availability
@@ -309,18 +306,20 @@ class ROSNodeRobotic(QTROSNode):
     """Class for the Robotic ROS Node in the HMI Application"""
 
     def __init__(self, node_name: str, depends_on: List[str], signals: ROSWorker.Signals):
-        super(ROSNodeRobotic, self).__init__(node_name=node_name, depends_on=depends_on, signals=signals)
+        super().__init__(node_name=node_name, depends_on=depends_on, signals=signals)
 
         # publishers
-        self.__control = self.create_publisher(msg_type=MessageList.Robot1Control.value[1],
-                                               topic=MessageList.Robot1Control.value[0],
-                                               qos_profile=10
-                                               )
+        self.__control = self.create_publisher(
+            msg_type=MessageList.Robot1Control.value[1],
+            topic=MessageList.Robot1Control.value[0],
+            qos_profile=10,
+        )
 
-        self.__kpi = self.create_publisher(msg_type=MessageList.KPIC1.value[1],
-                                           topic=MessageList.KPIC1.value[0],
-                                           qos_profile=10
-                                           )
+        self.__kpi = self.create_publisher(
+            msg_type=MessageList.KPIC1.value[1],
+            topic=MessageList.KPIC1.value[0],
+            qos_profile=10,
+        )
 
     def error_callback(self, msg: Error):
         self.signals.new_error.emit(msg.node_name, msg.errir_msg, msg.error_code)
@@ -370,5 +369,5 @@ def main(args=None):
         print("\nStopping")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

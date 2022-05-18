@@ -4,20 +4,23 @@ from enum import Enum
 
 class IPList(Enum):
     """Enum class for storing ip addresses"""
-    MarkerIP = 'localhost'  # todo change to real IP
-    Grafana = 'http://localhost:3003'
-    CrateDB = 'http://host.docker.internal:4200'
 
-    Robot2 = '192.168.0.22'
+    MARKER_IP = "localhost"  # todo change to real IP
+    GRAFANA = "http://localhost:3003"
+    CRATE_DB = "http://host.docker.internal:4200"
+
+    ROBOT2 = "192.168.0.22"
 
 
 class PortList(Enum):
     """Enum class for storing ports"""
-    Marker = 65432
-    Robot2 = 65432
+
+    MARKER = 65432
+    ROBOT2 = 65432
 
 
 class SQLTableNames(Enum):
     """Enum class for storing SQL database table names"""
-    CELL1 = 'sc1'
-    CELL2 = 'sc2'
+
+    CELL1 = "sc1"
+    CELL2 = "sc2"

@@ -1,16 +1,20 @@
+"""This is a module containing the thread management code"""
+
 import threading
 from typing import Callable, Tuple
 
 
 class WorkerThread(threading.Thread):
     """Worker thread class for managing long-running processes on a separate daemon thread"""
+
     lock = threading.Lock()
 
-    def __init__(self,
-                 worker_function: Callable[[threading.Lock], Tuple[bool, str]],
-                 result_callback: Callable[[bool, str], None],
-                 loop: bool
-                 ):
+    def __init__(
+        self,
+        worker_function: Callable[[threading.Lock], Tuple[bool, str]],
+        result_callback: Callable[[bool, str], None],
+        loop: bool,
+    ):
         """
         Constructor method
             :param worker_function:
@@ -39,23 +43,19 @@ class WorkerThread(threading.Thread):
 
         if not self.__loop:
             success, msg = self.__worker(self.lock)
-            self.lock.acquire()
-            self.__result_callback(success, msg)
-            self.lock.release()
+            with self.lock:
+                self.__result_callback(success, msg)
 
         else:
             while True:
-                self.lock.acquire()
-                if not self.__is_running:
-                    self.lock.release()
-                    return
-                self.lock.release()
+                with self.lock:
+                    if not self.__is_running:
+                        return
 
                 success, msg = self.__worker(self.lock)
 
-                self.lock.acquire()
-                self.__result_callback(success, msg)
-                self.lock.release()
+                with self.lock:
+                    self.__result_callback(success, msg)
 
         self.__is_running = False
 
@@ -63,8 +63,7 @@ class WorkerThread(threading.Thread):
         if not self.__loop:
             raise Warning("Cannot stop a non-looping thread")
 
-        else:
-            self.__is_running = False
+        self.__is_running = False
 
     @property
     def running(self):

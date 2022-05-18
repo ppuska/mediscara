@@ -1,11 +1,10 @@
 """Library module for the Base ROS Node class"""
-from typing import List
 from abc import ABC, abstractmethod
-
-from rclpy.node import Node
+from typing import List
 
 from interfaces.msg import Error
 from mediscara.scripts.utils import ErrorClass as UtilsError
+from rclpy.node import Node
 
 
 class ROSNode(Node, ABC):
@@ -45,20 +44,13 @@ class ROSNode(Node, ABC):
             for node in self.__dependencies:
                 # error
                 self.create_subscription(
-                    msg_type=Error,
-                    topic=f"{node}_error",
-                    callback=self.error_callback,
-                    qos_profile=10
+                    msg_type=Error, topic=f"{node}_error", callback=self.error_callback, qos_profile=10
                 )
 
                 self.get_logger().debug(f'Error subscription for node "{node}" created')
 
         # Create error publisher
-        self.__error_publisher = self.create_publisher(
-            msg_type=Error,
-            topic=f'{node_name}_error',
-            qos_profile=10
-        )
+        self.__error_publisher = self.create_publisher(msg_type=Error, topic=f"{node_name}_error", qos_profile=10)
 
     # region CALLBACKS -------------------------------------------------------------------------------------------------
 
@@ -75,7 +67,8 @@ class ROSNode(Node, ABC):
 
             if len(self.__missing_depends_prev) < len(self.missing_dependencies):
                 new_nodes_offline = set(self.missing_dependencies).symmetric_difference(
-                    set(self.__missing_depends_prev))
+                    set(self.__missing_depends_prev)
+                )
 
                 for new in new_nodes_offline:
                     self.dependency_online(new, False)
@@ -88,7 +81,7 @@ class ROSNode(Node, ABC):
             self.all_depends_online()
 
         elif not self.dependencies_ok and not self.__missing_depends_prev_state:
-            self.depends_offline()
+            self.dependency_offline()
             self.__missing_depends_prev_state = True
 
     def error_callback(self, msg: Error):
@@ -111,7 +104,7 @@ class ROSNode(Node, ABC):
         """
         raise NotImplementedError("A subclass must implement this method if it has dependency nodes")
 
-    def depends_offline(self):
+    def dependency_offline(self):
         """Method to notify subclass that the dependencies have gone offline
         The child class must override this method
         """
@@ -154,7 +147,7 @@ class ROSNode(Node, ABC):
             return True
 
         node_names = self.get_node_names()
-        return all(f'{node_name}_node' in node_names for node_name in self.__dependencies)
+        return all(f"{node_name}_node" in node_names for node_name in self.__dependencies)
 
     @property
     def dependencies(self):

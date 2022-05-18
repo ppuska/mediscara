@@ -4,16 +4,17 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from functools import wraps
 from sqlite3 import Timestamp
-from typing import ClassVar, Type, List, Tuple
+from typing import ClassVar, List, Tuple, Type
 
 import mysql.connector
-from mysql.connector import MySQLConnection, CMySQLConnection
-from mysql.connector.errors import ProgrammingError, DatabaseError
+from mysql.connector import CMySQLConnection, MySQLConnection
+from mysql.connector.errors import DatabaseError, ProgrammingError
 
 from .logger import Logger
 
+
 class Decorator:
-    SQL_ATTR = 'sql_method'
+    SQL_ATTR = "sql_method"
     logger = Logger(parent=None, tag="SQL")
 
     @staticmethod
@@ -68,6 +69,8 @@ class SQLTableNotExistsError(SQLError):
 class SQLInvalidTableNameError(SQLError):
     def __init__(self):
         super(SQLInvalidTableNameError, self).__init__("Invalid table name")
+
+
 # endregion
 
 
@@ -78,6 +81,7 @@ class SQLDataClass(ABC):
 
     class Timestamp(ABC):
         """Data class for storing timestamp information"""
+
         FORMAT = "%Y-%m-%d %H:%M:%S"
 
         @classmethod
@@ -98,12 +102,12 @@ class SQLDataClass(ABC):
                 return cls.now()
 
     PYTHON_SQL_DATA_TYPES: ClassVar[dict] = {
-        int.__name__: 'integer',
-        str.__name__: 'varchar(20)',
-        bool.__name__: 'bool',
-        Timestamp.__name__: 'timestamp'
+        int.__name__: "integer",
+        str.__name__: "varchar(20)",
+        bool.__name__: "bool",
+        Timestamp.__name__: "timestamp",
     }
-    COL_ID: ClassVar[str] = 'id'
+    COL_ID: ClassVar[str] = "id"
 
     id: str = field(init=False)
     in_production: bool = field(default=False)
@@ -116,7 +120,7 @@ class SQLDataClass(ABC):
     def from_query(cls, query_result: tuple):
         data = cls()
         for i, (field_name, field_type) in enumerate(zip(cls.field_names(), cls.field_types())):
-            setattr(data, f'{field_name}', field_type(query_result[i]))
+            setattr(data, f"{field_name}", field_type(query_result[i]))
 
         return data
 
@@ -183,6 +187,8 @@ class Cell2Data(SQLDataClass):
     inc_type: str = ""  # incubator type
     part_type: str = ""  # part type
     marker_count: int = 0  # count of parts to be marked
+
+
 # endregion
 
 
@@ -219,12 +225,7 @@ class SQLManager:
     def connect_to_database(self):
         """Attempts to connect to the MySQL database"""
         try:
-            self.__db = mysql.connector.connect(
-                host=self.HOST,
-                user=self.USER,
-                password=self.PASSWORD,
-                database="db"
-            )
+            self.__db = mysql.connector.connect(host=self.HOST, user=self.USER, password=self.PASSWORD, database="db")
 
         except ProgrammingError as e:
             raise e
@@ -272,7 +273,7 @@ class SQLManager:
         """Creates a new MySQL table"""
 
         assert isinstance(self.__db, (CMySQLConnection, MySQLConnection))
-        sql = f'CREATE TABLE {table_name} ('
+        sql = f"CREATE TABLE {table_name} ("
 
         dm = self.dm(table_name)  # type: Type[SQLDataClass]
 
@@ -280,10 +281,10 @@ class SQLManager:
             assert isinstance(column_name, str), isinstance(column_type, str)
 
             if column_name == self.COL_ID:
-                sql += f'{column_name.upper()} {column_type.upper()} PRIMARY KEY, '
+                sql += f"{column_name.upper()} {column_type.upper()} PRIMARY KEY, "
 
             else:
-                sql += f'{column_name.upper()} {column_type.upper()}, '
+                sql += f"{column_name.upper()} {column_type.upper()}, "
 
         sql = sql[:-2] + ");"
         print(sql)
@@ -305,7 +306,7 @@ class SQLManager:
         if dm is None:
             return SQLTableNotExistsError()
 
-        columns_string = ', '.join(column for column in dm.field_names())
+        columns_string = ", ".join(column for column in dm.field_names())
 
         sql = f"SELECT {columns_string} FROM {table_name} ORDER BY {self.COL_ID} LIMIT 1"
         cursor = self.__db.cursor()
@@ -330,7 +331,7 @@ class SQLManager:
         if dm is None:
             return SQLTableNotExistsError()
 
-        columns_string = ', '.join(column for column in dm.field_names())
+        columns_string = ", ".join(column for column in dm.field_names())
 
         sql = f"SELECT {columns_string} FROM {table_name} WHERE {self.COL_ID} = '{id_}' ORDER BY {self.COL_ID}"
         cursor = self.__db.cursor()
@@ -355,7 +356,7 @@ class SQLManager:
         if dm is None:
             return SQLTableNotExistsError()
 
-        columns_string = ', '.join(column for column in dm.field_names())
+        columns_string = ", ".join(column for column in dm.field_names())
 
         sql = f"SELECT {columns_string} FROM {table_name} ORDER BY {self.COL_ID}"
         cursor = self.__db.cursor()
@@ -468,7 +469,7 @@ class SQLManager:
             if name == self.COL_ID:
                 id_ = value
             else:
-                sql += f'{name}={value}, '
+                sql += f"{name}={value}, "
 
         sql = sql[:-2]  # remove the last colon and space
         sql += f" WHERE {self.COL_ID} = {id_}"

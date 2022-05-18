@@ -3,19 +3,17 @@ import enum
 import sys
 from typing import List, Type
 
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread, QMutex, QUrl
-from PyQt5.QtWidgets import QMainWindow, QListWidgetItem, QWidget
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-
 import rclpy
-from mediscara.scripts.ros_node import QTROSNode
 from mediscara.config import IPList
-from mediscara.scripts.widgets.layout.gui_ui import Ui_GUIWindow
-from mediscara.scripts.widgets.layout.error_list_item_ui import Ui_ErrorListItem
-from mediscara.scripts.widgets.layout.node_list_item_ui import Ui_NodeListItem
 from mediscara.scripts.logger import Logger
-
+from mediscara.scripts.ros_node import QTROSNode
+from mediscara.scripts.widgets.layout.error_list_item_ui import Ui_ErrorListItem
+from mediscara.scripts.widgets.layout.gui_ui import Ui_GUIWindow
+from mediscara.scripts.widgets.layout.node_list_item_ui import Ui_NodeListItem
 from mediscara.scripts.widgets.layout.statusbar_ui import Ui_StatusBar
+from PyQt5.QtCore import QMutex, QObject, QThread, QUrl, pyqtSignal, pyqtSlot
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWidgets import QListWidgetItem, QMainWindow, QWidget
 
 
 class LoginStatus(enum.Enum):
@@ -25,6 +23,7 @@ class LoginStatus(enum.Enum):
     Admin - ALL
     User - CONTROL INFO
     """
+
     LOGGED_OUT = None
     USER = "user"
     ADMIN = "admin"
@@ -65,6 +64,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     class ErrorListItem(Ui_ErrorListItem, QWidget):
         """Class for a custom ListWidgetItem for displaying errors"""
+
         def __init__(self, node_name: str, error_msg: str, error_code: int):
             super(HMIApp.ErrorListItem, self).__init__()
             self.setupUi(self)
@@ -93,6 +93,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
     class StatusbarWidget(Ui_StatusBar, QWidget):
         """Custom widget class for the StatusBar"""
+
         def __init__(self):
             super(HMIApp.StatusbarWidget, self).__init__()
             self.setupUi(self)
@@ -137,10 +138,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         """ Create ROS thread """
         self.ros_thread = QThread()  # create thread
 
-        self.ros_worker = ROSWorker(node_class=node_class,
-                                    node_name=name,
-                                    depends_list=depends_list
-                                    )
+        self.ros_worker = ROSWorker(node_class=node_class, node_name=name, depends_list=depends_list)
 
         self.ros_worker.add_to_thread(self.ros_thread)
 
@@ -166,7 +164,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
 
         # grafana tab
         self.web_widget = QWebEngineView(self.tab_grafana)
-        self.web_widget.load(QUrl(IPList.Grafana.value))
+        self.web_widget.load(QUrl(IPList.GRAFANA.value))
         self.grafana_layout.addWidget(self.web_widget)
 
         # error tab
@@ -198,8 +196,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
     # region OVERRIDES *************************************************************************************************
 
     def closeEvent(self, _) -> None:  # pylint: disable=invalid-name
-        """This method gets called when the window is closing
-        """
+        """This method gets called when the window is closing"""
         self.ros_worker.stop()
         self.ros_thread.quit()
         self.ros_thread.wait()
@@ -231,7 +228,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         item_widget = HMIApp.ErrorListItem(node_name=node_name, error_msg=msg, error_code=err_code)
         list_widget_item = QListWidgetItem(self.list_error)  # add a new list widget item
         list_widget_item.setSizeHint(item_widget.sizeHint())  # copy the size hint from the item widget
-        self.list_error.addItem(list_widget_item)   # add a new item
+        self.list_error.addItem(list_widget_item)  # add a new item
         self.list_error.setItemWidget(list_widget_item, item_widget)  # set the item widget to the item
 
         self.statusbar_widget.set_error_count(self.list_error.count())
@@ -370,17 +367,14 @@ class ROSWorker(QObject):
 
     class Signals(QObject):
         """Class to store the signals necessary for communicating with the UI thread"""
+
         started = pyqtSignal()
         nodes_loaded = pyqtSignal(list, list)
         new_error = pyqtSignal(str, str, int)
         dependency_online = pyqtSignal(str, bool)
         status = pyqtSignal(object)
 
-    def __init__(self,
-                 node_class: Type[QTROSNode],
-                 node_name: str,
-                 depends_list: List[str]
-                 ):
+    def __init__(self, node_class: Type[QTROSNode], node_name: str, depends_list: List[str]):
         super(ROSWorker, self).__init__()
         self.__node_class = node_class
         self.__ros_node = None
@@ -401,10 +395,11 @@ class ROSWorker(QObject):
 
     def run(self):
         """Task for running the ROS node"""
-        self.__ros_node = self.__node_class(node_name=self.__node_name,
-                                            depends_on=self.__depends_list,
-                                            signals=self.signals
-                                            )
+        self.__ros_node = self.__node_class(
+            node_name=self.__node_name,
+            depends_on=self.__depends_list,
+            signals=self.signals,
+        )
 
         self.mutex.lock()
         self.__ready = True

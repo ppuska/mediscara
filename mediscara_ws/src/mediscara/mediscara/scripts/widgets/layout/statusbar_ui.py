@@ -15,9 +15,7 @@ class Ui_StatusBar(object):
     def setupUi(self, StatusBar):
         StatusBar.setObjectName("StatusBar")
         StatusBar.resize(320, 240)
-        StatusBar.setStyleSheet("QLabel {\n"
-"    padding: 6px;\n"
-"}")
+        StatusBar.setStyleSheet("QLabel {\n" "    padding: 6px;\n" "}")
         self.horizontalLayout = QtWidgets.QHBoxLayout(StatusBar)
         self.horizontalLayout.setContentsMargins(3, 3, 3, 3)
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -30,7 +28,7 @@ class Ui_StatusBar(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_error.sizePolicy().hasHeightForWidth())
         self.label_error.setSizePolicy(sizePolicy)
-        self.label_error.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_error.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.label_error.setObjectName("label_error")
         self.horizontalLayout.addWidget(self.label_error)
         self.horizontalLayout.setStretch(0, 1)
