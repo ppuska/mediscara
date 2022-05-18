@@ -25,6 +25,12 @@
    </property>
    <item row="1" column="0">
     <widget class="QPushButton" name="button_home">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -47,6 +53,12 @@ QPushButton:pressed {
    </item>
    <item row="0" column="1">
     <widget class="QPushButton" name="button_pause">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -70,6 +82,12 @@ QPushButton:pressed {
    </item>
    <item row="0" column="2">
     <widget class="QPushButton" name="button_end_session">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -93,6 +111,12 @@ QPushButton:pressed {
    </item>
    <item row="0" column="0">
     <widget class="QPushButton" name="button_start_session">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -115,6 +139,12 @@ QPushButton:pressed {
    </item>
    <item row="2" column="0">
     <widget class="QPushButton" name="button_start_cutting">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -138,6 +168,12 @@ QPushButton:pressed {
    </item>
    <item row="2" column="1" colspan="2">
     <widget class="QLabel" name="label_cutting">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>TextLabel</string>
      </property>
@@ -145,6 +181,12 @@ QPushButton:pressed {
    </item>
    <item row="1" column="2">
     <widget class="QLabel" name="label_time_remaining">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>TextLabel</string>
      </property>

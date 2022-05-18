@@ -57,6 +57,8 @@ class HMIRoboticApp(HMIApp):
             self.label_performance.setText("0 %")
             self.label_quality.setText("0 %")
 
+            self.label_oee.setText("0 %")
+
         def display_kpi(self, availability: float, quality: float, performance: float):
             """Displays the KPI information on the widget"""
 
@@ -186,6 +188,7 @@ class HMIRoboticApp(HMIApp):
 
         # state machine
         self.__state = None
+        self.state = HMIRoboticApp.STATUS.IDLE
 
         # kpi
         self.__kpi = KPI(HMIRoboticApp.KPI_QUOTA)
@@ -273,7 +276,7 @@ class HMIRoboticApp(HMIApp):
         msg.performance = performance
         msg.quality = quality
 
-        self.ros_worker.send_kpi(msg)
+        self.ros_worker.send_kpi(msg=msg)
 
         self.__kpi_update_timer.start(HMIRoboticApp.KPI_UPDATE_INTERVAL)
 
@@ -319,7 +322,6 @@ class ROSNodeRobotic(QTROSNode):
                                            topic=MessageList.KPIC1.value[0],
                                            qos_profile=10
                                            )
-
 
     def error_callback(self, msg: Error):
         self.signals.new_error.emit(msg.node_name, msg.errir_msg, msg.error_code)

@@ -11,6 +11,11 @@ class KPI:
         self.__quality = KPI.Quality(quota)
         self.__performance = KPI.Performance(quota)
 
+    def __str__(self) -> str:
+        return f"""KPI: availability: {str(self.availability)}
+                        quality: {str(self.quality)}
+                        performance: {str(self.performance)}"""
+
     @property
     def availability(self):
         """Returns the availability member of the class
@@ -49,7 +54,7 @@ class KPI:
         __actual_end: datetime = field(default=None)
 
         def __str__(self):
-            if self.actual_start is None:
+            if self.__actual_start is None:
                 actual_start_str = "Not started yet"
             else:
                 actual_start_str = self.__actual_start.strftime(self.format)
@@ -60,7 +65,7 @@ class KPI:
                 actual_end_str = self.__actual_end.strftime(self.format)
 
             return f"planned start: {self.__planned_start.strftime(self.format)} " \
-                   f"planned start: {self.__planned_start.strftime(self.format)} " \
+                   f"planned end: {self.__planned_end.strftime(self.format)} " \
                    f"actual start: {actual_start_str} " \
                    f"actual end: {actual_end_str}"
 
