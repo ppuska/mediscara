@@ -170,7 +170,7 @@ class QTROSNode(ROSNode, ABC):
         """Load info about the online nodes"""
 
     @abstractmethod
-    def send_control(self, cell: int, msg: object):
+    def send_control(self, msg: object):
         """Send messages to the respective control topics"""
 
     @abstractmethod

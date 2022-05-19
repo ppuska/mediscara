@@ -593,7 +593,7 @@ class ROSNodeCollab(QTROSNode):
         )
 
         # subscribers
-        self.__robot_status_subscription = self.create_subscription(
+        self.create_subscription(
             msg_type=MessageList.ROBOT2_STATUS.value[1],
             topic=MessageList.ROBOT2_STATUS.value[0],
             callback=self.robot_status_callback,
@@ -618,7 +618,7 @@ class ROSNodeCollab(QTROSNode):
 
         self.signals.dependency_online.emit(name, online)
 
-    def depends_offline(self):
+    def dependency_offline(self):
         self.signals.dependency_online.emit("", False)
         self.signals.new_error.emit("Internal error", "A dependency node has gone offline", 0)
 
@@ -628,7 +628,7 @@ class ROSNodeCollab(QTROSNode):
         missing_nodes = self.missing_dependencies
         self.signals.nodes_loaded.emit(all_nodes, missing_nodes)
 
-    def send_control(self, cell: int, msg: object):
+    def send_control(self, msg: object, cell: int = VISION):
         self.get_logger().debug(f"Sending command: {msg}")
         if cell == self.VISION:
             assert isinstance(msg, VisionControl)

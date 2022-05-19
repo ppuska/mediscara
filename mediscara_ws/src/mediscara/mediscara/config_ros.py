@@ -30,7 +30,7 @@ class MessageList(Enum):
 
     MARKER_STATUS = "marker_status", Ms
     MARKER_CONTROL = "marker_control", Bool
-    ROBOTIC_CONTROL = "robot1_control", r1c
+    ROBOT1_CONTROL = "robot1_control", r1c
     ROBOT2_STATUS = "robot2_status", r2s
     ROBOT2_CONTROL = "robot2_control", r2c
     VISION_CONTROL = "vision_control", Vc

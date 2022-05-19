@@ -5,6 +5,8 @@ from enum import Enum
 class IPList(Enum):
     """Enum class for storing ip addresses"""
 
+    SERVER = "25.18.161.28"
+
     MARKER_IP = "localhost"  # todo change to real IP
     GRAFANA = "http://localhost:3003"
     CRATE_DB = "http://host.docker.internal:4200"

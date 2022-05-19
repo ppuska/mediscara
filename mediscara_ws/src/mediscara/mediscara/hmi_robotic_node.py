@@ -7,22 +7,26 @@ from typing import List
 
 import rclpy
 from interfaces.msg import KPIC1, Error, Robot1Control, Robot1Status
-from manager.message.interface import Messenger
+
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
+
+from manager.message.interface import Messenger, DESTINATION
+
+from mediscara.config import IPList
 from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.kpi import KPI
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.scripts.widgets.layout.robotic_control import Ui_RoboticControlWidget
 from mediscara.scripts.widgets.layout.robotic_info import Ui_RoboticInfoTab
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
 
 
 class HMIRoboticApp(HMIApp):
     """A PyQt5 App to display the HMI interface to the user"""
 
-    NODE_NAME = NodeList.HMIRoboticNode.value
-    DEPENDS = [NodeList.Robot1Node.value]
+    NODE_NAME = NodeList.HMI_ROBOTIC_NODE.value
+    DEPENDS = [NodeList.ROBOT1_NODE.value]
 
     KPI_UPDATE_INTERVAL = 1000  # ms
     KPI_QUOTA = 60
@@ -57,8 +61,6 @@ class HMIRoboticApp(HMIApp):
             self.label_quality.setText("0 %")
 
             self.label_oee.setText("0 %")
-
-            self.__messenger = Messenger("25.18.161.28")
 
         def display_kpi(self, availability: float, quality: float, performance: float):
             """Displays the KPI information on the widget"""
@@ -119,11 +121,25 @@ class HMIRoboticApp(HMIApp):
     class ControlWidget(QWidget, Ui_RoboticControlWidget):
         """Class for displaying and interfacing with the Control Widget on the control Tab"""
 
+        MESSAGE_UPDATE_RATE = 2000  # ms
+
         def __init__(self, parent: None):
             super().__init__(parent)
             self.setupUi(self)  # show ui
 
             self.__locked = False
+
+            self.__messenger = Messenger(IPList.SERVER.value)
+            self.__messenger_timer = QTimer()
+            self.__messenger_timer.timeout.connect(self.display_manager_message)
+            self.__messenger_timer.start(self.MESSAGE_UPDATE_RATE)
+
+        def display_manager_message(self):
+            """Displays the managerial message"""
+            message = self.__messenger.get_message(DESTINATION.ROBOTIC)
+            self.label_manager_message.setText(f"Manager message: {message}")
+
+            self.__messenger_timer.start(self.MESSAGE_UPDATE_RATE)
 
         def lock_control(self, lock: bool):
             """Locks the control buttons in the widget"""
@@ -310,8 +326,8 @@ class ROSNodeRobotic(QTROSNode):
 
         # publishers
         self.__control = self.create_publisher(
-            msg_type=MessageList.Robot1Control.value[1],
-            topic=MessageList.Robot1Control.value[0],
+            msg_type=MessageList.ROBOT1_CONTROL.value[1],
+            topic=MessageList.ROBOT1_CONTROL.value[0],
             qos_profile=10,
         )
 
@@ -336,7 +352,7 @@ class ROSNodeRobotic(QTROSNode):
 
         self.signals.dependency_online.emit(name, online)
 
-    def depends_offline(self):
+    def dependency_offline(self):
         self.signals.dependency_online.emit("", False)
         self.signals.new_error.emit("Internal error", "A dependency node has gone offline", 0)
 
@@ -346,7 +362,7 @@ class ROSNodeRobotic(QTROSNode):
         missing_nodes = self.missing_dependencies
         self.signals.nodes_loaded.emit(all_nodes, missing_nodes)
 
-    def send_control(self, _: int, msg: object):
+    def send_control(self, msg: object):
         self.get_logger().debug(f"Sending command: {msg}")
 
         assert isinstance(msg, Robot1Control)

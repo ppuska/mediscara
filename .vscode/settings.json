@@ -1,3 +1,8 @@
 {
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "pyqt-integration.pyuic.compile.filepath": "${ui_name}.py",
+    "python.analysis.extraPaths": [
+        "C:/dev/ros2_galactic/Lib/site-packages",
+        "mediscara_ws/install/Lib/site-packages"
+    ]
 }
