@@ -20,4 +20,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint --rcfile=.pylint $(git ls-files '*.py')
+        pylint --max-line-length=120 --etension-pkg-whitelist=PyQt5 --ignored-modules=interfaces,std_msgs --ignore-paths=(.*tests/)|(.*widgets/) $(git ls-files '*.py')
