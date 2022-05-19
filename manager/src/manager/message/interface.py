@@ -21,6 +21,14 @@ class Messenger:
     """Class for managing manager messages to the FIWARE OCB"""
 
     def __init__(self, server_address: str) -> None:
+        """Initializes the messenger class
+
+        Args:
+            server_address (str): The IPv4 address of the server
+
+        Raises:
+            ConnectionError: If the FIWARE connector is unable to connect
+        """
 
         self.__fiware = FIWARE(server_addr=server_address)
 

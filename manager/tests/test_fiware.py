@@ -1,10 +1,17 @@
 """Testing module for the interfaces module"""
 
-import logging
+import os
+
+import pytest
 
 from manager.fiware import FIWARE
 
+from . import PING
 
+SERVER_ADDR = "25.18.161.28"
+
+
+@pytest.mark.skipif(os.system(PING + SERVER_ADDR) != 0, reason="Unable to ping server")
 def test_connection():
     """This method tests the init method of the fiware interface"""
 
@@ -18,7 +25,7 @@ def test_connection():
         f_connector = FIWARE("25.18.161.28")
 
     except ConnectionError:
-        logging.fatal("Connection error")
+        pytest.skip("Skipping connection error")
 
     f_connector.delete_entity(entity_id=entity_id)
 
