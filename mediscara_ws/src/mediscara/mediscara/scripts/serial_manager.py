@@ -1,5 +1,5 @@
+"""Module for serial communication with devices"""
 import sys
-import time
 from typing import Callable
 
 import serial
@@ -13,6 +13,7 @@ class SerialManager:
     __PORT_WIN = "COM10"
     __PORT_LINUX = None  # todo
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         parent,
@@ -67,6 +68,7 @@ class SerialManager:
             return False
 
     def send(self, message: str):
+        """Sends the message via the serial communication"""
         try:
             self.__serial_port.write(message.encode("utf-8"))
         except serial.PortNotOpenError:
@@ -77,8 +79,7 @@ class SerialManager:
         if self.__serial_port.is_open:
             return self._read(None)
 
-        else:
-            return None
+        return None
 
     def start_read(self):
         """Starts the reading thread"""
@@ -114,22 +115,3 @@ class SerialManager:
 
         else:
             self.__read_callback(message)
-
-
-if __name__ == "__main__":
-
-    def _read_callback(message):
-        print("got: " + message)
-
-    manager = SerialManager(parent=None, blocking=False, read_callback=_read_callback)
-    manager.open()
-    manager.start_read()
-    manager.send("Hello world1\n")
-    manager.send("Hello world2\n")
-    manager.send("Hello world3\n")
-
-    count = 1
-    while True:
-        time.sleep(1)
-        manager.send(f"Hello world{count}\n")
-        count += 1

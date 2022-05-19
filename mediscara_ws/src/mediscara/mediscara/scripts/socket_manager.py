@@ -1,3 +1,4 @@
+"""Module for socket communication related code"""
 import logging
 import socket
 import threading
@@ -8,7 +9,10 @@ from mediscara.scripts.logger import Logger
 from mediscara.scripts.thread_manager import WorkerThread
 
 
+# pylint: disable=too-few-public-methods
 class Decorator:
+    """Decorator class used to wrap socket communication"""
+
     @staticmethod
     def socket_check(func):
         """Wraps a try...except case around the function to except socket exceptions"""
@@ -20,17 +24,20 @@ class Decorator:
 
                 return result
 
-            except OSError as e:
-                logging.error(f"Socket error in {func.__name__}: {e}")
+            except OSError as error:
+                logging.error("Socket error in %s: %s", func.__name__, error)
+                return None
 
         return wrapper
 
 
+# pylint: disable=too-many-instance-attributes
 class SocketManager:
     """Class for implementing socket communication as a client"""
 
     MAX_RETRIES = 5
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         parent,
@@ -57,7 +64,7 @@ class SocketManager:
         :param received_callback: callback method for non-blocking receive calls
         :param connected_callback: callback method for non-blocking connect calls
         """
-        super(SocketManager, self).__init__()
+        super().__init__()
         self.__is_server = is_server
         self.__host = host
         self.__port = port
@@ -76,8 +83,6 @@ class SocketManager:
         else:
             self.__client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.__socket = None
-
-        self.__socket_connected = False
 
         self.__logger = Logger(parent=parent)
 
@@ -100,14 +105,13 @@ class SocketManager:
             if self.__is_server:  # check if the socket is a server
                 raise Exception(f"Server cannot connect to socket, use '{self.bind_and_accept.__name__}' method")
 
-            else:
-                return self._socket_connect(None)
+            return self._socket_connect(None)
 
-        else:
-            self.__connect_thread = WorkerThread(  # create socket thread
-                worker_function=self._socket_connect, result_callback=self._connected_callback_internal, loop=True
-            )
-            self.__connect_thread.start()
+        self.__connect_thread = WorkerThread(  # create socket thread
+            worker_function=self._socket_connect, result_callback=self._connected_callback_internal, loop=True
+        )
+        self.__connect_thread.start()
+        return None
 
     def bind_and_accept(self) -> Tuple[bool, str] or None:
         """Binds and accepts a socket connection
@@ -128,14 +132,14 @@ class SocketManager:
 
             return success, message
 
-        else:
-            if not self.__is_server:
-                raise Exception(f"Client cannot bind to socket, use '{self.connect.__name__}' method")
+        if not self.__is_server:
+            raise Exception(f"Client cannot bind to socket, use '{self.connect.__name__}' method")
 
-            self.__connect_thread = WorkerThread(
-                worker_function=self._bind_and_accept, result_callback=self._bound_callback_internal, loop=False
-            )
-            self.__connect_thread.start()
+        self.__connect_thread = WorkerThread(
+            worker_function=self._bind_and_accept, result_callback=self._bound_callback_internal, loop=False
+        )
+        self.__connect_thread.start()
+        return None
 
     @Decorator.socket_check
     def receive(self):
@@ -149,6 +153,7 @@ class SocketManager:
 
     @Decorator.socket_check
     def send(self, msg: str):
+        """Sends to message to the client socket"""
         self.__client_socket.sendall(f"{msg}\n".encode("utf-8"))
 
     def start_receive(self):
@@ -167,6 +172,8 @@ class SocketManager:
         self.__listen_thread.start()
 
     def close(self):
+        """Attempts to close the socket"""
+
         if self.__client_socket is not None:
             assert isinstance(self.__client_socket, socket.socket)
             self.__client_socket.close()
@@ -178,7 +185,7 @@ class SocketManager:
     def _socket_connect(self, _):
         """Private method for connecting to the socket"""
         error_msg = ""
-        for i in range(self.MAX_RETRIES):
+        for _ in range(self.MAX_RETRIES):
             try:
                 self.__client_socket.connect((self.__host, self.__port))
 
@@ -195,7 +202,6 @@ class SocketManager:
                 error_msg = "Socket timed out"
 
             else:
-                self.__socket_connected = True
                 return True, "Socket connected"
 
         return False, error_msg
@@ -230,7 +236,7 @@ class SocketManager:
         """
         if success:
             if message == "":
-                """Empty message as a client means disconnected server"""
+                # Empty message as a client means disconnected server
                 self.__logger.warn("Socket disconnected")
                 self.__listen_thread.stop()  # stop the listen thread
                 self.__client_socket.close()
@@ -238,7 +244,6 @@ class SocketManager:
                 self.__initial_connect = True
                 message = "Empty message"
                 success = False
-                self.__socket_connected = False
 
         else:
             if message == "Connection reset":
@@ -251,11 +256,11 @@ class SocketManager:
     def _bind_and_accept(self, lock: threading.Lock):
         """Private method for binding and accepting a socket for socket server communication"""
         error_msg = ""
-        for i in range(self.MAX_RETRIES):
+        for _ in range(self.MAX_RETRIES):
             try:
                 self.__socket.bind((self.__host, self.__port))
                 self.__socket.listen()
-                conn, address = self.__socket.accept()
+                conn, _ = self.__socket.accept()
                 lock.acquire()
                 self.__client_socket = conn
                 lock.release()
@@ -270,7 +275,6 @@ class SocketManager:
                 error_msg = "Socket timed out"
 
             else:
-                self.__socket_connected = True
                 return True, "Socket bound and listening..."
 
         return False, error_msg
@@ -289,39 +293,3 @@ class SocketManager:
 
         except ConnectionResetError:
             return False, "Connection reset"
-
-
-if __name__ == "__main__":
-    import time
-
-    def rec_callback(success, message):
-        if not success:
-            server.connect()
-
-    def connect_cb(success, _):
-        if success:
-            server.start_receive()
-        else:
-            server.connect()
-
-    server = SocketManager(
-        parent=None,
-        host="localhost",
-        port=65432,
-        connected_callback=connect_cb,
-        received_callback=rec_callback,
-        is_server=False,
-        blocking=False,
-    )
-
-    try:
-        server.connect()
-
-        count = 0
-        while True:
-            # print(f"\rCycle: {count}", end='')
-            time.sleep(1)
-            count += 1
-
-    except KeyboardInterrupt:
-        print("Stopping")

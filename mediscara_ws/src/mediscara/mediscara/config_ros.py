@@ -14,25 +14,25 @@ from std_msgs.msg import Bool
 class NodeList(Enum):
     """Enum class for storing the Nodes and their names in the system"""
 
-    Robot1Node = "robot1"
-    Robot2Node = "robot2"
-    SensorNode = "sensor"
-    MarkerNode = "marker"
-    LaserNode = "laser"
-    VisionNode = "vision"
-    HMICollabNode = "hmi_collaborative"
-    HMIRoboticNode = "hmi_robotic"
-    FIWARENode = "is_ros2"
+    ROBOT1_NODE = "robot1"
+    ROBOT2_NODE = "robot2"
+    SENSOR_NODE = "sensor"
+    MARKER_NODE = "marker"
+    LASER_NODE = "laser"
+    VISION_NODE = "vision"
+    HMI_COLLAB_NODE = "hmi_collaborative"
+    HMI_ROBOTIC_NODE = "hmi_robotic"
+    FIWARE_NODE = "is_ros2"
 
 
 class MessageList(Enum):
     """Enum class for storing message topics and their respective message types"""
 
-    MarkerStatus = "marker_status", Ms
-    MarkerControl = "marker_control", Bool
-    Robot1Control = "robot1_control", r1c
-    Robot2Status = "robot2_status", r2s
-    Robot2Control = "robot2_control", r2c
-    VisionControl = "vision_control", Vc
+    MARKER_STATUS = "marker_status", Ms
+    MARKER_CONTROL = "marker_control", Bool
+    ROBOTIC_CONTROL = "robot1_control", r1c
+    ROBOT2_STATUS = "robot2_status", r2s
+    ROBOT2_CONTROL = "robot2_control", r2c
+    VISION_CONTROL = "vision_control", Vc
     KPIC1 = "kpi_cell1", kpi_c1
     KPIC2 = "kpi_cell2", kpi_c2

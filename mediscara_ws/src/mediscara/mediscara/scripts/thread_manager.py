@@ -30,7 +30,7 @@ class WorkerThread(threading.Thread):
         self.__loop = loop
         self.__is_running = False
 
-        super(WorkerThread, self).__init__(daemon=True)
+        super().__init__(daemon=True)
 
     def __del__(self):
         if self.__loop:
@@ -60,6 +60,7 @@ class WorkerThread(threading.Thread):
         self.__is_running = False
 
     def stop(self):
+        """Attempts to stop a looping thread from re-executing"""
         if not self.__loop:
             raise Warning("Cannot stop a non-looping thread")
 
@@ -67,4 +68,5 @@ class WorkerThread(threading.Thread):
 
     @property
     def running(self):
+        """Returns whether the thread is looping or not"""
         return self.__is_running

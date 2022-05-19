@@ -101,8 +101,8 @@ class KPI:
             """
             if self.__actual_start is None:
                 return "Not set yet"
-            else:
-                return self.__actual_start.strftime(self.format)
+
+            return self.__actual_start.strftime(self.format)
 
         @property
         def actual_end(self):

@@ -6,6 +6,10 @@ from telnetlib import STATUS
 from typing import List
 
 import rclpy
+
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
+
 from interfaces.msg import KPIC2, Error, Robot2Control, Robot2Status, VisionControl
 from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.hmi import HMIApp, ROSWorker
@@ -13,15 +17,13 @@ from mediscara.scripts.kpi import KPI
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlWidget
 from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
 
 
 class HMICollabApp(HMIApp):
     """Subclass of HMIApp"""
 
-    NODE_NAME = NodeList.HMICollabNode.value
-    DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
+    NODE_NAME = NodeList.HMI_COLLAB_NODE.value
+    DEPENDS = [NodeList.ROBOT2_NODE.value, NodeList.MARKER_NODE.value]
 
     KPI_UPDATE_INTERVAL = 1000  # ms
     KPI_QUOTA = 60
@@ -50,7 +52,7 @@ class HMICollabApp(HMIApp):
         __BG_COLOR_RED = "background-color: red"
 
         def __init__(self, parent=None):
-            super(HMICollabApp.InfoWidget, self).__init__(parent)
+            super().__init__(parent)
             self.setupUi(self)
 
             self.label_availability_vis.setText("0 %")
@@ -311,16 +313,16 @@ class HMICollabApp(HMIApp):
         if self.ui_locking:  # if ui locking is not disabled
             missing = self.ros_worker.missing_dependencies()  # check for missing dependencies
             if bool(missing):  # the list is not empty
-                if NodeList.MarkerNode.value not in missing:  # marker is online
+                if NodeList.MARKER_NODE.value not in missing:  # marker is online
                     self.__marker_online = True
 
-                if NodeList.Robot2Node.value not in missing:  # robot is online
+                if NodeList.ROBOT2_NODE.value not in missing:  # robot is online
                     self.__robot_online = True
 
                 if not self.__robot_online or not self.__marker_online:  # if either offline, lock
                     self.control_widget.lock_control_robotic(True)
 
-                if NodeList.VisionNode.value not in missing:  # vision is online
+                if NodeList.VISION_NODE.value not in missing:  # vision is online
                     self.__vision_online = True
 
                 if not self.__vision_online:
@@ -331,14 +333,14 @@ class HMICollabApp(HMIApp):
 
     def ros_error_callback(self, node_name: str, msg: str, err_code: int):
         """This method gets called whenever a ROS node is producing an error"""
-        super(HMICollabApp, self).ros_error_callback(node_name, msg, err_code)
+        super().ros_error_callback(node_name, msg, err_code)
 
         # todo differentiate between vision system and robot
         self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, True)
 
     def clear_errors_callback(self):
         """This method gets called when the 'CLEAR ERRORS' button gets pressed"""
-        super(HMICollabApp, self).clear_errors_callback()
+        super().clear_errors_callback()
 
         self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, False)
 
@@ -501,13 +503,13 @@ class HMICollabApp(HMIApp):
 
     def dependency_callback(self, name: str, online: bool):
         """Callback method for when a ROS dependency comes online of goes offline"""
-        if name == NodeList.MarkerNode.value:
+        if name == NodeList.MARKER_NODE.value:
             self.__marker_online = online
 
-        elif name == NodeList.Robot2Node.value:
+        elif name == NodeList.ROBOT2_NODE.value:
             self.__robot_online = online
 
-        elif name == NodeList.VisionNode.value:
+        elif name == NodeList.VISION_NODE.value:
             self.__vision_online = online
 
         if not self.ui_locking:
@@ -569,18 +571,18 @@ class ROSNodeCollab(QTROSNode):
     ROBOTIC = 1
 
     def __init__(self, node_name: str, depends_on: List[str], signals: ROSWorker.Signals):
-        super(ROSNodeCollab, self).__init__(node_name=node_name, depends_on=depends_on, signals=signals)
+        super().__init__(node_name=node_name, depends_on=depends_on, signals=signals)
 
         # publishers
         self.__robot_control = self.create_publisher(
-            msg_type=MessageList.Robot2Control.value[1],
-            topic=MessageList.Robot2Control.value[0],
+            msg_type=MessageList.ROBOT2_CONTROL.value[1],
+            topic=MessageList.ROBOT2_CONTROL.value[0],
             qos_profile=10,
         )
 
         self.__vision_control = self.create_publisher(
-            msg_type=MessageList.VisionControl.value[1],
-            topic=MessageList.VisionControl.value[0],
+            msg_type=MessageList.VISION_CONTROL.value[1],
+            topic=MessageList.VISION_CONTROL.value[0],
             qos_profile=10,
         )
 
@@ -592,8 +594,8 @@ class ROSNodeCollab(QTROSNode):
 
         # subscribers
         self.__robot_status_subscription = self.create_subscription(
-            msg_type=MessageList.Robot2Status.value[1],
-            topic=MessageList.Robot2Status.value[0],
+            msg_type=MessageList.ROBOT2_STATUS.value[1],
+            topic=MessageList.ROBOT2_STATUS.value[0],
             callback=self.robot_status_callback,
             qos_profile=10,
         )

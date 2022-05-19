@@ -42,8 +42,7 @@ repos:
       exclude: (.*/tests/)|(.*/widgets/)  # exclude tests folder, and generated layout files
       args:
         [
-          --max-line-length=120,
-          --extension-pkg-whitelist=PyQt5,
+          --rcfile=.pylintrc,
           --fail-under=8
         ]
 

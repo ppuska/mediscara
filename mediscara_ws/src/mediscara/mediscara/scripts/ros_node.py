@@ -2,9 +2,10 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from rclpy.node import Node
+
 from interfaces.msg import Error
 from mediscara.scripts.utils import ErrorClass as UtilsError
-from rclpy.node import Node
 
 
 class ROSNode(Node, ABC):
@@ -21,13 +22,13 @@ class ROSNode(Node, ABC):
         :type node_name str
         :type depends_on list(str)
         """
-        super(ROSNode, self).__init__(f"{node_name}_node")
+        super().__init__(f"{node_name}_node")
 
         # Create dependency check
         self.__dependencies = depends_on
         self.__missing_depends_prev_state = None
         self.__missing_depends_prev = None
-        self.__depends_timer = self.create_timer(ROSNode.__DEPENDENCY_CHECK_INTERVAL, self.__depends_callback)
+        self.create_timer(ROSNode.__DEPENDENCY_CHECK_INTERVAL, self.__depends_callback)
 
         if not self.dependencies_ok:
             missing = self.missing_dependencies
@@ -132,7 +133,7 @@ class ROSNode(Node, ABC):
         if not self.__dependencies:
             return []
 
-        missing_depends = list()
+        missing_depends = []
         node_names = self.get_node_names()
         for node in self.__dependencies:
             if f"{node}_node" not in node_names:
@@ -161,7 +162,7 @@ class QTROSNode(ROSNode, ABC):
     """ROS Node to use in QT applications"""
 
     def __init__(self, node_name: str, depends_on: List[str], signals):
-        super(QTROSNode, self).__init__(node_name=node_name, depends_on=depends_on)
+        super().__init__(node_name=node_name, depends_on=depends_on)
         self.__signals = signals
 
     @abstractmethod

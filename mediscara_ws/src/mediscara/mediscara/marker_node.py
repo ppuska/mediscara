@@ -4,11 +4,13 @@ from time import time
 
 import rclpy
 from interfaces.msg import Error, MarkerStatus
+
+from std_msgs.msg import Bool
+
 from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.ros_node import ROSNode
 from mediscara.scripts.socket_manager import SocketManager
 from mediscara.scripts.utils import ErrorClass as UtilsError
-from std_msgs.msg import Bool
 
 
 class MarkerNode(ROSNode):  # todo fix error spamming issue
@@ -40,7 +42,7 @@ class MarkerNode(ROSNode):  # todo fix error spamming issue
     FALSE = "false"
 
     def __init__(self):
-        super(MarkerNode, self).__init__(NodeList.MarkerNode.value)
+        super(MarkerNode, self).__init__(NodeList.MARKER_NODE.value)
 
         self.__marker_socket = SocketManager(
             parent=self,
@@ -56,15 +58,15 @@ class MarkerNode(ROSNode):  # todo fix error spamming issue
 
         """Creating subscriptions"""
         self.__marker_control_subscription = self.create_subscription(
-            msg_type=MessageList.MarkerControl.value[1],  # todo implement custom message
-            topic=MessageList.MarkerControl.value[0],
+            msg_type=MessageList.MARKER_CONTROL.value[1],  # todo implement custom message
+            topic=MessageList.MARKER_CONTROL.value[0],
             callback=self.marker_control_callback,
             qos_profile=10,
         )
 
         """Creating publishers"""
         self.__marker_status_publisher = self.create_publisher(
-            msg_type=MessageList.MarkerStatus.value[1], topic=MessageList.MarkerStatus.value[0], qos_profile=10
+            msg_type=MessageList.MARKER_STATUS.value[1], topic=MessageList.MARKER_STATUS.value[0], qos_profile=10
         )
 
         self.get_logger().info(f"{self.__class__.__name__} started")
@@ -117,7 +119,7 @@ class MarkerNode(ROSNode):  # todo fix error spamming issue
         else:
             self.get_logger().info("Message: " + message)
 
-            """ Process the incoming message """
+            # Process the incoming message
             if message == self.LASER_STARTED_MSG:
                 self.__marker_on_time = time()  # store marker on time
 

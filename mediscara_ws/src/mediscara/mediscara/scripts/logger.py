@@ -3,15 +3,6 @@ import logging
 
 import coloredlogs
 
-try:
-    from rclpy.node import Node
-except ImportError as e:
-
-    class Node:
-        """Dummy import class"""
-
-        pass
-
 
 class Logger:
     """Class for managing logging messages"""

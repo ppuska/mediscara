@@ -4,6 +4,11 @@ import sys
 from typing import List, Type
 
 import rclpy
+
+from PyQt5.QtCore import QMutex, QObject, QThread, QUrl, pyqtSignal, pyqtSlot
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWidgets import QListWidgetItem, QMainWindow, QWidget
+
 from mediscara.config import IPList
 from mediscara.scripts.logger import Logger
 from mediscara.scripts.ros_node import QTROSNode
@@ -11,9 +16,6 @@ from mediscara.scripts.widgets.layout.error_list_item_ui import Ui_ErrorListItem
 from mediscara.scripts.widgets.layout.gui_ui import Ui_GUIWindow
 from mediscara.scripts.widgets.layout.node_list_item_ui import Ui_NodeListItem
 from mediscara.scripts.widgets.layout.statusbar_ui import Ui_StatusBar
-from PyQt5.QtCore import QMutex, QObject, QThread, QUrl, pyqtSignal, pyqtSlot
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWidgets import QListWidgetItem, QMainWindow, QWidget
 
 
 class LoginStatus(enum.Enum):
@@ -29,6 +31,7 @@ class LoginStatus(enum.Enum):
     ADMIN = "admin"
     MANAGER = "manager"
 
+    __LOGGED_OUT_PASS = None
     __USER_PASS = "user"
     __ADMIN_PASS = "admin"
     __MANAGER_PASS = "manager"
@@ -37,16 +40,19 @@ class LoginStatus(enum.Enum):
     def get_pass(cls, lvl):
         """Returns the selected user's password"""
         if lvl == cls.LOGGED_OUT:
-            return None
-        elif lvl == cls.USER:
+            return cls.__LOGGED_OUT_PASS.value
+        if lvl == cls.USER:
             return cls.__USER_PASS.value
-        elif lvl == cls.ADMIN:
+        if lvl == cls.ADMIN:
             return cls.__ADMIN_PASS.value
-        elif lvl == cls.MANAGER:
+        if lvl == cls.MANAGER:
             return cls.__MANAGER_PASS.value
 
+        return cls.__LOGGED_OUT_PASS.value
 
-# noinspection PyUnresolvedReferences
+
+# pylint: disable=too-many-instance-attributes
+# eight is necessary
 class HMIApp(QMainWindow, Ui_GUIWindow):
     """Base class for the HMI interfaces of the robotic cells"""
 
@@ -128,7 +134,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         :param node_class: Class object derived from the QTROSNode base class, which gets initialized and
         communicates with the user interface
         """
-        super(HMIApp, self).__init__()
+        super().__init__()
         self.setupUi(self)
 
         self.logger = Logger(parent=None, tag="HMI", level=Logger.DEBUG)
@@ -345,7 +351,7 @@ class HMIApp(QMainWindow, Ui_GUIWindow):
         """Sets the current login user level"""
         self.__user_level = value
         if value == LoginStatus.LOGGED_OUT:
-            self.statusbar_widget.label_login.setText(f"Not signed in")
+            self.statusbar_widget.label_login.setText("Not signed in")
 
         else:
             self.statusbar_widget.label_login.setText(f"Signed in as {value.value}")
@@ -375,7 +381,7 @@ class ROSWorker(QObject):
         status = pyqtSignal(object)
 
     def __init__(self, node_class: Type[QTROSNode], node_name: str, depends_list: List[str]):
-        super(ROSWorker, self).__init__()
+        super().__init__()
         self.__node_class = node_class
         self.__ros_node = None
         self.__node_name = node_name
