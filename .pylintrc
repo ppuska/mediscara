@@ -1,2 +1,9 @@
 [MASTER]
+init-hook=
+    import sys
+    sys.path.append("mediscara_ws/install/Lib/site-packages")
+    sys.path.append("C:/dev/ros2_galactic/Lib/site-packages")
+
+max-line-length=120
 extension-pkg-whitelist=PyQt5
+ignore-paths=.*tests/

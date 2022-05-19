@@ -1,14 +1,11 @@
-import coloredlogs
+"""Module for managing ROS-based and plain logging"""
 import logging
 
-try:
-    from rclpy.node import Node
-except ImportError as e:
-    class Node:
-        pass
+import coloredlogs
 
 
 class Logger:
+    """Class for managing logging messages"""
 
     DEBUG = logging.DEBUG
     INFO = logging.INFO
@@ -26,29 +23,33 @@ class Logger:
         self.__tag = tag
 
     def debug(self, msg: str):
+        """Print debug messages"""
         if self.__parent is not None:
             self.__parent.get_logger().debug(f"{self.__tag} {msg}")
 
         else:
-            logging.debug(f"{self.__tag} {msg}")
+            logging.debug("%s %s", self.__tag, msg)
 
     def info(self, msg: str):
+        """Prints info messages"""
         if self.__parent is not None:
             self.__parent.get_logger().info(f"{self.__tag} {msg}")
 
         else:
-            logging.info(f"{self.__tag} {msg}")
+            logging.info("%s %s", self.__tag, msg)
 
     def warn(self, msg: str):
+        """Prints warning messages"""
         if self.__parent is not None:
             self.__parent.get_logger().warn(f"{self.__tag} {msg}")
 
         else:
-            logging.warning(f"{self.__tag} {msg}")
+            logging.warning("%s %s", self.__tag, msg)
 
     def error(self, msg: str):
+        """Prints error messages"""
         if self.__parent is not None:
             self.__parent.get_logger().error(f"{self.__tag} {msg}")
 
         else:
-            logging.error(f"{self.__tag} {msg}")
+            logging.error("%s %s", self.__tag, msg)

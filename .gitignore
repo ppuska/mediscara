@@ -1,20 +1,8 @@
-*.pyc
-.idea/
-install/*
-build/*
-log/*
-is_ws/build/*
-is_ws/install/*
-is_ws/log/*
+.idea/*
 
-build/
+/**/build/
+/**/install/
+/**/log/
 
-install/
-
-log/
-
-.vscode/
-
-.env
-*.egg-info
-
+/**/__pycache__/*
+/**/*.egg-info/*

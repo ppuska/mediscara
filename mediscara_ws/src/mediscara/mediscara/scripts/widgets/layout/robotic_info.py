@@ -56,10 +56,7 @@ class Ui_RoboticInfoTab(object):
         self.gridLayout.addWidget(self.label_oee, 1, 2, 1, 1)
         self.verticalLayout.addWidget(self.groupBox)
         self.frame = QtWidgets.QFrame(RoboticInfoTab)
-        self.frame.setStyleSheet("QLabel {\n"
-"    border: 1px solid black;\n"
-"    border-radius: 7px;\n"
-"}")
+        self.frame.setStyleSheet("QLabel {\n" "    border: 1px solid black;\n" "    border-radius: 7px;\n" "}")
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
@@ -94,27 +91,31 @@ class Ui_RoboticInfoTab(object):
         self.line.setObjectName("line")
         self.horizontalLayout.addWidget(self.line)
         self.frame_2 = QtWidgets.QFrame(RoboticInfoTab)
-        self.frame_2.setStyleSheet("QFrame {\n"
-"    border: 1px solid black;\n"
-"    border-radius: 15px;\n"
-"    \n"
-"    background-color: rgba(85, 170, 255, 128);\n"
-"}")
+        self.frame_2.setStyleSheet(
+            "QFrame {\n"
+            "    border: 1px solid black;\n"
+            "    border-radius: 15px;\n"
+            "\n"
+            "    background-color: rgba(85, 170, 255, 128);\n"
+            "}"
+        )
         self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_2.setObjectName("frame_2")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.frame_2)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.frame_3 = QtWidgets.QFrame(self.frame_2)
-        self.frame_3.setStyleSheet("QFrame {\n"
-"    background-color: rgba(85, 170, 127, 128);\n"
-"}\n"
-"\n"
-"QLabel {\n"
-"    border: \"\";\n"
-"    background-color: rgba(255, 255, 255, 0);\n"
-"}\n"
-"")
+        self.frame_3.setStyleSheet(
+            "QFrame {\n"
+            "    background-color: rgba(85, 170, 127, 128);\n"
+            "}\n"
+            "\n"
+            "QLabel {\n"
+            '    border: "";\n'
+            "    background-color: rgba(255, 255, 255, 0);\n"
+            "}\n"
+            ""
+        )
         self.frame_3.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_3.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_3.setObjectName("frame_3")
@@ -125,33 +126,35 @@ class Ui_RoboticInfoTab(object):
         self.label_3.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.label_3.setObjectName("label_3")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label_3)
-        self.label_4 = QtWidgets.QLabel(self.frame_3)
-        self.label_4.setObjectName("label_4")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.label_4)
+        self.label_current_job = QtWidgets.QLabel(self.frame_3)
+        self.label_current_job.setObjectName("label_current_job")
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.label_current_job)
         self.label_5 = QtWidgets.QLabel(self.frame_3)
         self.label_5.setObjectName("label_5")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_5)
-        self.label_6 = QtWidgets.QLabel(self.frame_3)
-        self.label_6.setObjectName("label_6")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.label_6)
+        self.label_done_products = QtWidgets.QLabel(self.frame_3)
+        self.label_done_products.setObjectName("label_done_products")
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.label_done_products)
         self.label_8 = QtWidgets.QLabel(self.frame_3)
         self.label_8.setObjectName("label_8")
         self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_8)
-        self.label_9 = QtWidgets.QLabel(self.frame_3)
-        self.label_9.setObjectName("label_9")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.label_9)
+        self.label_remaining = QtWidgets.QLabel(self.frame_3)
+        self.label_remaining.setObjectName("label_remaining")
+        self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.label_remaining)
         self.verticalLayout_2.addWidget(self.frame_3)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
         self.frame_4 = QtWidgets.QFrame(self.frame_2)
-        self.frame_4.setStyleSheet("QFrame {\n"
-"    background-color: rgba(255, 255, 255, 128);\n"
-"}\n"
-"\n"
-"QLabel {\n"
-"    border: \"\";\n"
-"    background-color: rgba(255, 255, 255, 0);\n"
-"}")
+        self.frame_4.setStyleSheet(
+            "QFrame {\n"
+            "    background-color: rgba(255, 255, 255, 128);\n"
+            "}\n"
+            "\n"
+            "QLabel {\n"
+            '    border: "";\n'
+            "    background-color: rgba(255, 255, 255, 0);\n"
+            "}"
+        )
         self.frame_4.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_4.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_4.setObjectName("frame_4")
@@ -160,21 +163,21 @@ class Ui_RoboticInfoTab(object):
         self.label_10 = QtWidgets.QLabel(self.frame_4)
         self.label_10.setObjectName("label_10")
         self.formLayout_2.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label_10)
-        self.label_11 = QtWidgets.QLabel(self.frame_4)
-        self.label_11.setObjectName("label_11")
-        self.formLayout_2.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.label_11)
+        self.label_job_in_progress = QtWidgets.QLabel(self.frame_4)
+        self.label_job_in_progress.setObjectName("label_job_in_progress")
+        self.formLayout_2.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.label_job_in_progress)
         self.label_12 = QtWidgets.QLabel(self.frame_4)
         self.label_12.setObjectName("label_12")
         self.formLayout_2.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_12)
-        self.label_13 = QtWidgets.QLabel(self.frame_4)
-        self.label_13.setObjectName("label_13")
-        self.formLayout_2.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.label_13)
+        self.label_request_sent = QtWidgets.QLabel(self.frame_4)
+        self.label_request_sent.setObjectName("label_request_sent")
+        self.formLayout_2.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.label_request_sent)
         self.label_15 = QtWidgets.QLabel(self.frame_4)
         self.label_15.setObjectName("label_15")
         self.formLayout_2.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_15)
-        self.label_14 = QtWidgets.QLabel(self.frame_4)
-        self.label_14.setObjectName("label_14")
-        self.formLayout_2.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.label_14)
+        self.label_task = QtWidgets.QLabel(self.frame_4)
+        self.label_task.setObjectName("label_task")
+        self.formLayout_2.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.label_task)
         self.verticalLayout_2.addWidget(self.frame_4)
         self.verticalLayout_2.setStretch(0, 1)
         self.verticalLayout_2.setStretch(2, 1)
@@ -183,12 +186,14 @@ class Ui_RoboticInfoTab(object):
         self.horizontalLayout.setStretch(2, 1)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.label_global_error = QtWidgets.QLabel(RoboticInfoTab)
-        self.label_global_error.setStyleSheet("QLabel {\n"
-"    border: 1px solid black;\n"
-"    border-radius: 7px;\n"
-"    \n"
-"    background-color: rgba(157, 157, 157, 128);\n"
-"}")
+        self.label_global_error.setStyleSheet(
+            "QLabel {\n"
+            "    border: 1px solid black;\n"
+            "    border-radius: 7px;\n"
+            "\n"
+            "    background-color: rgba(157, 157, 157, 128);\n"
+            "}"
+        )
         self.label_global_error.setAlignment(QtCore.Qt.AlignCenter)
         self.label_global_error.setObjectName("label_global_error")
         self.verticalLayout_3.addWidget(self.label_global_error)
@@ -209,20 +214,20 @@ class Ui_RoboticInfoTab(object):
         self.label_7.setText(_translate("RoboticInfoTab", "Quality"))
         self.label_availability.setText(_translate("RoboticInfoTab", "TextLabel"))
         self.label_oee.setText(_translate("RoboticInfoTab", "TextLabel"))
-        self.label_power.setText(_translate("RoboticInfoTab", "TextLabel"))
-        self.label_running.setText(_translate("RoboticInfoTab", "TextLabel"))
-        self.label_waiting.setText(_translate("RoboticInfoTab", "TextLabel"))
-        self.label_error.setText(_translate("RoboticInfoTab", "TextLabel"))
+        self.label_power.setText(_translate("RoboticInfoTab", "Powered ON"))
+        self.label_running.setText(_translate("RoboticInfoTab", "Running"))
+        self.label_waiting.setText(_translate("RoboticInfoTab", "Waiting"))
+        self.label_error.setText(_translate("RoboticInfoTab", "Error"))
         self.label_3.setText(_translate("RoboticInfoTab", "Current Job:"))
-        self.label_4.setText(_translate("RoboticInfoTab", "TextLabel"))
+        self.label_current_job.setText(_translate("RoboticInfoTab", "TextLabel"))
         self.label_5.setText(_translate("RoboticInfoTab", "Done & Good products"))
-        self.label_6.setText(_translate("RoboticInfoTab", "TextLabel"))
+        self.label_done_products.setText(_translate("RoboticInfoTab", "TextLabel"))
         self.label_8.setText(_translate("RoboticInfoTab", "Remaining products:"))
-        self.label_9.setText(_translate("RoboticInfoTab", "TextLabel"))
+        self.label_remaining.setText(_translate("RoboticInfoTab", "TextLabel"))
         self.label_10.setText(_translate("RoboticInfoTab", "Job in Progress"))
-        self.label_11.setText(_translate("RoboticInfoTab", "TextLabel"))
+        self.label_job_in_progress.setText(_translate("RoboticInfoTab", "TextLabel"))
         self.label_12.setText(_translate("RoboticInfoTab", "Request sent for next job:"))
-        self.label_13.setText(_translate("RoboticInfoTab", "TextLabel"))
+        self.label_request_sent.setText(_translate("RoboticInfoTab", "TextLabel"))
         self.label_15.setText(_translate("RoboticInfoTab", "Task:"))
-        self.label_14.setText(_translate("RoboticInfoTab", "TextLabel"))
+        self.label_task.setText(_translate("RoboticInfoTab", "TextLabel"))
         self.label_global_error.setText(_translate("RoboticInfoTab", "TextLabel"))

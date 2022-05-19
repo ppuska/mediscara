@@ -1,11 +1,10 @@
-import time
+"""Module for serial communication with devices"""
+import sys
 from typing import Callable
 
 import serial
-import sys
-
-from mediscara.scripts.thread_manager import WorkerThread
 from mediscara.scripts.logger import Logger
+from mediscara.scripts.thread_manager import WorkerThread
 
 
 class SerialManager:
@@ -14,13 +13,16 @@ class SerialManager:
     __PORT_WIN = "COM10"
     __PORT_LINUX = None  # todo
 
-    def __init__(self,
-                 parent,
-                 blocking: bool,
-                 baud: int = 9600,
-                 parity=serial.PARITY_NONE,
-                 data_bits=serial.EIGHTBITS,
-                 read_callback: Callable[[str], None] = None):
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        parent,
+        blocking: bool,
+        baud: int = 9600,
+        parity=serial.PARITY_NONE,
+        data_bits=serial.EIGHTBITS,
+        read_callback: Callable[[str], None] = None,
+    ):
 
         self.__blocking = blocking
         self.__logger = Logger(parent=parent)
@@ -31,11 +33,11 @@ class SerialManager:
         if sys.platform.startswith("win"):  # windows platform, debug mode
             self.__serial_port.port = self.__PORT_WIN
 
-        elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):  # linux
+        elif sys.platform.startswith("linux") or sys.platform.startswith("cygwin"):  # linux
             self.__serial_port.port = self.__PORT_LINUX
 
         else:
-            raise EnvironmentError('Unsupported platform')
+            raise EnvironmentError("Unsupported platform")
 
         if not self.__blocking and self.__read_callback is None:
             raise AssertionError("In non-blocking mode, the read_callback cannot be null")
@@ -66,8 +68,9 @@ class SerialManager:
             return False
 
     def send(self, message: str):
+        """Sends the message via the serial communication"""
         try:
-            self.__serial_port.write(message.encode('utf-8'))
+            self.__serial_port.write(message.encode("utf-8"))
         except serial.PortNotOpenError:
             self.__logger.warn("Port not open, cannot send data")
 
@@ -76,8 +79,7 @@ class SerialManager:
         if self.__serial_port.is_open:
             return self._read(None)
 
-        else:
-            return None
+        return None
 
     def start_read(self):
         """Starts the reading thread"""
@@ -89,14 +91,14 @@ class SerialManager:
             return
 
         self.__logger.info("Staring read thread")
-        self.__read_thread = WorkerThread(worker_function=self._read,
-                                          result_callback=self.__read_callback_internal,
-                                          loop=True)
+        self.__read_thread = WorkerThread(
+            worker_function=self._read, result_callback=self.__read_callback_internal, loop=True
+        )
         self.__read_thread.start()
 
     def _read(self, _):
         try:
-            response = self.__serial_port.read_until().decode('utf-8')  # read until the terminator, and decode to str
+            response = self.__serial_port.read_until().decode("utf-8")  # read until the terminator, and decode to str
             return True, response
 
         except serial.PortNotOpenError:
@@ -113,21 +115,3 @@ class SerialManager:
 
         else:
             self.__read_callback(message)
-
-
-if __name__ == '__main__':
-    def _read_callback(message):
-        print("got: " + message)
-
-    manager = SerialManager(parent=None, blocking=False, read_callback=_read_callback)
-    manager.open()
-    manager.start_read()
-    manager.send("Hello world1\n")
-    manager.send("Hello world2\n")
-    manager.send("Hello world3\n")
-
-    count = 1
-    while True:
-        time.sleep(1)
-        manager.send(f"Hello world{count}\n")
-        count += 1

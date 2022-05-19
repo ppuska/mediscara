@@ -1,6 +1,6 @@
 """Library module for the Base ROS Node class"""
-from typing import List
 from abc import ABC, abstractmethod
+from typing import List
 
 from rclpy.node import Node
 
@@ -22,13 +22,13 @@ class ROSNode(Node, ABC):
         :type node_name str
         :type depends_on list(str)
         """
-        super(ROSNode, self).__init__(f"{node_name}_node")
+        super().__init__(f"{node_name}_node")
 
         # Create dependency check
         self.__dependencies = depends_on
         self.__missing_depends_prev_state = None
         self.__missing_depends_prev = None
-        self.__depends_timer = self.create_timer(ROSNode.__DEPENDENCY_CHECK_INTERVAL, self.__depends_callback)
+        self.create_timer(ROSNode.__DEPENDENCY_CHECK_INTERVAL, self.__depends_callback)
 
         if not self.dependencies_ok:
             missing = self.missing_dependencies
@@ -45,20 +45,13 @@ class ROSNode(Node, ABC):
             for node in self.__dependencies:
                 # error
                 self.create_subscription(
-                    msg_type=Error,
-                    topic=f"{node}_error",
-                    callback=self.error_callback,
-                    qos_profile=10
+                    msg_type=Error, topic=f"{node}_error", callback=self.error_callback, qos_profile=10
                 )
 
                 self.get_logger().debug(f'Error subscription for node "{node}" created')
 
         # Create error publisher
-        self.__error_publisher = self.create_publisher(
-            msg_type=Error,
-            topic=f'{node_name}_error',
-            qos_profile=10
-        )
+        self.__error_publisher = self.create_publisher(msg_type=Error, topic=f"{node_name}_error", qos_profile=10)
 
     # region CALLBACKS -------------------------------------------------------------------------------------------------
 
@@ -75,7 +68,8 @@ class ROSNode(Node, ABC):
 
             if len(self.__missing_depends_prev) < len(self.missing_dependencies):
                 new_nodes_offline = set(self.missing_dependencies).symmetric_difference(
-                    set(self.__missing_depends_prev))
+                    set(self.__missing_depends_prev)
+                )
 
                 for new in new_nodes_offline:
                     self.dependency_online(new, False)
@@ -88,7 +82,7 @@ class ROSNode(Node, ABC):
             self.all_depends_online()
 
         elif not self.dependencies_ok and not self.__missing_depends_prev_state:
-            self.depends_offline()
+            self.dependency_offline()
             self.__missing_depends_prev_state = True
 
     def error_callback(self, msg: Error):
@@ -111,7 +105,7 @@ class ROSNode(Node, ABC):
         """
         raise NotImplementedError("A subclass must implement this method if it has dependency nodes")
 
-    def depends_offline(self):
+    def dependency_offline(self):
         """Method to notify subclass that the dependencies have gone offline
         The child class must override this method
         """
@@ -139,7 +133,7 @@ class ROSNode(Node, ABC):
         if not self.__dependencies:
             return []
 
-        missing_depends = list()
+        missing_depends = []
         node_names = self.get_node_names()
         for node in self.__dependencies:
             if f"{node}_node" not in node_names:
@@ -154,7 +148,7 @@ class ROSNode(Node, ABC):
             return True
 
         node_names = self.get_node_names()
-        return all(f'{node_name}_node' in node_names for node_name in self.__dependencies)
+        return all(f"{node_name}_node" in node_names for node_name in self.__dependencies)
 
     @property
     def dependencies(self):
@@ -168,7 +162,7 @@ class QTROSNode(ROSNode, ABC):
     """ROS Node to use in QT applications"""
 
     def __init__(self, node_name: str, depends_on: List[str], signals):
-        super(QTROSNode, self).__init__(node_name=node_name, depends_on=depends_on)
+        super().__init__(node_name=node_name, depends_on=depends_on)
         self.__signals = signals
 
     @abstractmethod

@@ -4,20 +4,22 @@ from time import time
 
 import rclpy
 from interfaces.msg import Error, MarkerStatus
+
 from std_msgs.msg import Bool
 
-from mediscara.scripts.socket_manager import SocketManager
+from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.ros_node import ROSNode
-from mediscara.config_ros import NodeList, MessageList
+from mediscara.scripts.socket_manager import SocketManager
 from mediscara.scripts.utils import ErrorClass as UtilsError
 
 
-class MarkerNode(ROSNode): # todo fix error spamming issue
+class MarkerNode(ROSNode):  # todo fix error spamming issue
     """Class for the ROS node of the laser marker"""
 
     # Marker status
     class MarkerStatus(enum.Enum):
         """Enum class for storing marker status values"""
+
         WAITING_FOR_CONNECTION = 0
         IDLE = 1
         MARKING = 2
@@ -29,47 +31,45 @@ class MarkerNode(ROSNode): # todo fix error spamming issue
     MARKER_BUSY_ERROR = UtilsError(error_msg="Marker is busy", error_code=63)
 
     # Messages for the socket communication
-    INFO_MESSAGE = 'info'
-    START_LASER_MSG = 'start_laser'
-    LASER_STARTED_MSG = 'laser_started'
-    TOP_LASER_MSG = 'stop_laser'
-    LASER_STOPPED_MSG = 'laser_stopped'
-    LASER_ERROR_MSG = 'laser_error'
-    LASER_BUSY_MSG = 'laser_busy'
-    TRUE = 'true'
-    FALSE = 'false'
+    INFO_MESSAGE = "info"
+    START_LASER_MSG = "start_laser"
+    LASER_STARTED_MSG = "laser_started"
+    TOP_LASER_MSG = "stop_laser"
+    LASER_STOPPED_MSG = "laser_stopped"
+    LASER_ERROR_MSG = "laser_error"
+    LASER_BUSY_MSG = "laser_busy"
+    TRUE = "true"
+    FALSE = "false"
 
     def __init__(self):
-        super(MarkerNode, self).__init__(NodeList.MarkerNode.value)
+        super(MarkerNode, self).__init__(NodeList.MARKER_NODE.value)
 
-        self.__marker_socket = SocketManager(parent=self,
-                                             host="localhost",
-                                             port=65432,
-                                             is_server=False,
-                                             blocking=False,
-                                             connected_callback=self.__socket_connected_callback,
-                                             received_callback=self.__socket_received_callback
-                                             )
+        self.__marker_socket = SocketManager(
+            parent=self,
+            host="localhost",
+            port=65432,
+            is_server=False,
+            blocking=False,
+            connected_callback=self.__socket_connected_callback,
+            received_callback=self.__socket_received_callback,
+        )
         self.__marker_socket.connect()
         self.__marker_on_time = 0
 
         """Creating subscriptions"""
         self.__marker_control_subscription = self.create_subscription(
-            msg_type=MessageList.MarkerControl.value[1],  # todo implement custom message
-            topic=MessageList.MarkerControl.value[0],
+            msg_type=MessageList.MARKER_CONTROL.value[1],  # todo implement custom message
+            topic=MessageList.MARKER_CONTROL.value[0],
             callback=self.marker_control_callback,
-            qos_profile=10
+            qos_profile=10,
         )
 
         """Creating publishers"""
         self.__marker_status_publisher = self.create_publisher(
-            msg_type=MessageList.MarkerStatus.value[1],
-            topic=MessageList.MarkerStatus.value[0],
-            qos_profile=10
+            msg_type=MessageList.MARKER_STATUS.value[1], topic=MessageList.MARKER_STATUS.value[0], qos_profile=10
         )
 
         self.get_logger().info(f"{self.__class__.__name__} started")
-
 
     # region OVERRIDES *************************************************************************************************
 
@@ -92,11 +92,10 @@ class MarkerNode(ROSNode): # todo fix error spamming issue
 
     # region NODE CALLBACKS ********************************************************************************************
 
-
     def marker_control_callback(self, msg: Bool):
         """Callback method for the marker control ROS message
-            Args:
-                msg (Bool): The incoming message
+        Args:
+            msg (Bool): The incoming message
         """
         if msg.data:
             self.get_logger().info("Starting marking")
@@ -120,7 +119,7 @@ class MarkerNode(ROSNode): # todo fix error spamming issue
         else:
             self.get_logger().info("Message: " + message)
 
-            """ Process the incoming message """
+            # Process the incoming message
             if message == self.LASER_STARTED_MSG:
                 self.__marker_on_time = time()  # store marker on time
 
@@ -137,7 +136,7 @@ class MarkerNode(ROSNode): # todo fix error spamming issue
                 self.__marker_on_time = 0  # reset marker on time
 
             elif self.LASER_ERROR_MSG in message:
-                split = message.split(':')
+                split = message.split(":")
                 error = UtilsError(error_msg=split[0], error_code=int(split[1]))
 
                 self.publish_error(error)
@@ -163,5 +162,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__man__':
+if __name__ == "__man__":
     main()

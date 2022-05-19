@@ -2,16 +2,14 @@
 import enum
 
 import rclpy
-
 from interfaces.msg import Error, MarkerStatus, Robot2Control
-from std_msgs.msg import Bool
-
+from mediscara.config import IPList, PortList, SQLTableNames
+from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.ros_node import ROSNode
 from mediscara.scripts.socket_manager import SocketManager
-from mediscara.scripts.sql import SQLManager, Cell2Data
-from mediscara.config import PortList, IPList, SQLTableNames
-from mediscara.config_ros import NodeList, MessageList
+from mediscara.scripts.sql import Cell2Data, SQLManager
 from mediscara.scripts.utils import ErrorClass
+from std_msgs.msg import Bool
 
 
 class Robot2Node(ROSNode):
@@ -28,14 +26,12 @@ class Robot2Node(ROSNode):
 
     class MarkerState(enum.Enum):  # todo remove this from code
         """Enum class for a state machine storing the Marker's state"""
+
         WAITING = enum.auto()
         MARKING = enum.auto()
 
     def __init__(self):
-        super(Robot2Node, self).__init__(
-            node_name=NodeList.Robot2Node.value,
-            depends_on=[NodeList.MarkerNode.value]
-        )
+        super(Robot2Node, self).__init__(node_name=NodeList.Robot2Node.value, depends_on=[NodeList.MarkerNode.value])
 
         self.__marker_state = Robot2Node.MarkerState.WAITING
         self.__current_item = None
@@ -46,32 +42,30 @@ class Robot2Node(ROSNode):
             msg_type=MessageList.MarkerStatus.value[1],
             topic=MessageList.MarkerStatus.value[0],
             callback=self.status_callback,
-            qos_profile=10
+            qos_profile=10,
         )
 
         self.robot_control_sub = self.create_subscription(
             msg_type=MessageList.Robot2Control.value[1],
             topic=MessageList.Robot2Control.value[0],
             callback=self.control_callback,
-            qos_profile=10
+            qos_profile=10,
         )
 
         # publisher
         self.__marker_control_pub = self.create_publisher(
-            msg_type=MessageList.MarkerControl.value[1],
-            topic=MessageList.MarkerControl.value[0],
-            qos_profile=10
+            msg_type=MessageList.MarkerControl.value[1], topic=MessageList.MarkerControl.value[0], qos_profile=10
         )
 
         # Initializing the TCP Socket server
         self.__socket_client = SocketManager(
             parent=self,
-            host=IPList.Robot2.value,
-            port=PortList.Robot2.value,
+            host=IPList.ROBOT2.value,
+            port=PortList.ROBOT2.value,
             received_callback=self.socket_received_callback,
             connected_callback=self.socket_connected_callback,
             is_server=False,
-            blocking=False
+            blocking=False,
         )
         self.__socket_client.connect()
 
@@ -81,8 +75,9 @@ class Robot2Node(ROSNode):
 
         success, msg = self.__db_handler.connect_to_database()
         if not success:
-            self.__sql_timer = self.create_timer(timer_period_sec=self.SQL_REFRESH_INTERVAL,
-                                                 callback=self.sql_timer_callback)
+            self.__sql_timer = self.create_timer(
+                timer_period_sec=self.SQL_REFRESH_INTERVAL, callback=self.sql_timer_callback
+            )
             self.get_logger().warn(msg)
         else:
             self.get_logger().info(msg)
@@ -112,7 +107,7 @@ class Robot2Node(ROSNode):
                 self.__socket_client.send(self.MARKING_ERROR)
 
             if self.__marker_state == Robot2Node.MarkerState.WAITING:
-                self.get_logger().warn(f'Marker error: [{msg.error_code}]\n\t{msg.error_msg}')
+                self.get_logger().warn(f"Marker error: [{msg.error_code}]\n\t{msg.error_msg}")
 
     def destroy_node(self) -> bool:
         if self.__db_handler.connected:
@@ -127,8 +122,8 @@ class Robot2Node(ROSNode):
     # region TCP/IP messages
 
     # marker
-    START_MARKING = 'START_MARKING'
-    STOP_MARKING = 'STOP_MARKING'
+    START_MARKING = "START_MARKING"
+    STOP_MARKING = "STOP_MARKING"
     MARKING_SUCCESS = "MARKING_SUCCESS"
     MARKING_ERROR = "MARKING_ERROR"
     # jobs
@@ -180,7 +175,7 @@ class Robot2Node(ROSNode):
         else:
             # PROCESSING THE INCOMING MESSAGE
             if msg.startswith("J|"):  # joint values
-                joints = msg[2:].split('|')
+                joints = msg[2:].split("|")
                 self.get_logger().debug(f"Joint values: {joints}")
 
             elif msg == self.JOB_REQUEST:  # handle job request
@@ -269,9 +264,11 @@ class Robot2Node(ROSNode):
             self.get_logger().warn("No next item in database")
             return
 
-        job_string = f"JS:{self.__current_item.inc_type.upper()}_" \
-                     f"{self.__current_item.part_type.upper()}:" \
-                     f"{self.__current_item.remaining}"
+        job_string = (
+            f"JS:{self.__current_item.inc_type.upper()}_"
+            f"{self.__current_item.part_type.upper()}:"
+            f"{self.__current_item.remaining}"
+        )
 
         self.get_logger().info(f"Sending job select command: {job_string}")
         self.__socket_client.send(job_string)  # todo update database
@@ -285,9 +282,7 @@ class Robot2Node(ROSNode):
         assert isinstance(self.__current_item, Cell2Data)
         self.__current_item.remaining -= 1
 
-        success = self.__db_handler.update_element(table_name=self.SQL_TABLE_NAME,
-                                                   new_value=self.__current_item
-                                                   )
+        success = self.__db_handler.update_element(table_name=self.SQL_TABLE_NAME, new_value=self.__current_item)
 
         return success
 
@@ -301,9 +296,7 @@ class Robot2Node(ROSNode):
             self.get_logger().warn("Cannot remove an item which has remaining jobs")
             return
 
-        success = self.__db_handler.delete_element(id_=self.__current_item.id,
-                                                   table_name=self.SQL_TABLE_NAME
-                                                   )
+        success = self.__db_handler.delete_element(id_=self.__current_item.id, table_name=self.SQL_TABLE_NAME)
 
         return success
 
@@ -316,9 +309,7 @@ class Robot2Node(ROSNode):
         assert isinstance(self.__current_item, Cell2Data)
         self.__current_item.in_production = in_production
 
-        success = self.__db_handler.update_element(table_name=self.SQL_TABLE_NAME,
-                                                   new_value=self.__current_item
-                                                   )
+        success = self.__db_handler.update_element(table_name=self.SQL_TABLE_NAME, new_value=self.__current_item)
 
         return success
 
@@ -339,5 +330,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

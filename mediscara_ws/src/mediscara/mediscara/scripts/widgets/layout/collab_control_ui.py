@@ -15,12 +15,9 @@ class Ui_CollabControlWidget(object):
     def setupUi(self, CollabControlWidget):
         CollabControlWidget.setObjectName("CollabControlWidget")
         CollabControlWidget.resize(704, 496)
-        CollabControlWidget.setStyleSheet("QLabel {\n"
-"    border-radius: 10px;\n"
-"    background-color: rgba(0, 255, 127, 128);\n"
-"}\n"
-"\n"
-"")
+        CollabControlWidget.setStyleSheet(
+            "QLabel {\n" "    border-radius: 10px;\n" "    background-color: rgba(0, 255, 127, 128);\n" "}\n" "\n" ""
+        )
         self.horizontalLayout = QtWidgets.QHBoxLayout(CollabControlWidget)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.groupBox = QtWidgets.QGroupBox(CollabControlWidget)
@@ -44,13 +41,15 @@ class Ui_CollabControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_home.sizePolicy().hasHeightForWidth())
         self.button_home.setSizePolicy(sizePolicy)
         self.button_home.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_home.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(108, 210, 240, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(57, 138, 163, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
+        self.button_home.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(108, 210, 240, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(57, 138, 163, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}"
+        )
         self.button_home.setObjectName("button_home")
         self.gridLayout.addWidget(self.button_home, 1, 0, 1, 1)
         self.label_pcb_ok = QtWidgets.QLabel(self.groupBox)
@@ -77,13 +76,15 @@ class Ui_CollabControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_start_session.sizePolicy().hasHeightForWidth())
         self.button_start_session.setSizePolicy(sizePolicy)
         self.button_start_session.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_start_session.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
+        self.button_start_session.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}"
+        )
         self.button_start_session.setObjectName("button_start_session")
         self.gridLayout.addWidget(self.button_start_session, 0, 0, 1, 1)
         self.label_label_ok = QtWidgets.QLabel(self.groupBox)
@@ -102,14 +103,16 @@ class Ui_CollabControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_measure_label.sizePolicy().hasHeightForWidth())
         self.button_measure_label.setSizePolicy(sizePolicy)
         self.button_measure_label.setMinimumSize(QtCore.QSize(0, 30))
-        self.button_measure_label.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 128), stop:1 rgba(255, 255, 255, 128));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 128), stop:1 rgba(255, 255, 255, 128));\n"
-"}\n"
-"")
+        self.button_measure_label.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 128), stop:1 rgba(255, 255, 255, 128));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 128), stop:1 rgba(255, 255, 255, 128));\n"
+            "}\n"
+            ""
+        )
         self.button_measure_label.setObjectName("button_measure_label")
         self.gridLayout.addWidget(self.button_measure_label, 2, 1, 2, 1)
         self.button_end_session = QtWidgets.QPushButton(self.groupBox)
@@ -119,14 +122,16 @@ class Ui_CollabControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_end_session.sizePolicy().hasHeightForWidth())
         self.button_end_session.setSizePolicy(sizePolicy)
         self.button_end_session.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_end_session.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"")
+        self.button_end_session.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            ""
+        )
         self.button_end_session.setObjectName("button_end_session")
         self.gridLayout.addWidget(self.button_end_session, 0, 2, 1, 1)
         self.button_pause = QtWidgets.QPushButton(self.groupBox)
@@ -145,13 +150,15 @@ class Ui_CollabControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_measure_pcb.sizePolicy().hasHeightForWidth())
         self.button_measure_pcb.setSizePolicy(sizePolicy)
         self.button_measure_pcb.setMinimumSize(QtCore.QSize(0, 30))
-        self.button_measure_pcb.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(108, 210, 240, 128), stop:1 rgba(255, 255, 255, 128));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(57, 138, 163, 128), stop:1 rgba(255, 255, 255, 128));\n"
-"}")
+        self.button_measure_pcb.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(108, 210, 240, 128), stop:1 rgba(255, 255, 255, 128));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(57, 138, 163, 128), stop:1 rgba(255, 255, 255, 128));\n"
+            "}"
+        )
         self.button_measure_pcb.setObjectName("button_measure_pcb")
         self.gridLayout.addWidget(self.button_measure_pcb, 2, 0, 2, 1)
         self.label_maintenance = QtWidgets.QLabel(self.groupBox)
@@ -174,13 +181,15 @@ class Ui_CollabControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_start_session_rob.sizePolicy().hasHeightForWidth())
         self.button_start_session_rob.setSizePolicy(sizePolicy)
         self.button_start_session_rob.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_start_session_rob.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
+        self.button_start_session_rob.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(92, 212, 76, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(88, 198, 71, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}"
+        )
         self.button_start_session_rob.setObjectName("button_start_session_rob")
         self.gridLayout_2.addWidget(self.button_start_session_rob, 0, 0, 1, 1)
         self.button_home_rob = QtWidgets.QPushButton(self.groupBox_2)
@@ -190,13 +199,15 @@ class Ui_CollabControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_home_rob.sizePolicy().hasHeightForWidth())
         self.button_home_rob.setSizePolicy(sizePolicy)
         self.button_home_rob.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_home_rob.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(108, 210, 240, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(57, 138, 163, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}")
+        self.button_home_rob.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(108, 210, 240, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(57, 138, 163, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}"
+        )
         self.button_home_rob.setObjectName("button_home_rob")
         self.gridLayout_2.addWidget(self.button_home_rob, 3, 0, 1, 1)
         self.button_pause_rob = QtWidgets.QPushButton(self.groupBox_2)
@@ -215,14 +226,16 @@ class Ui_CollabControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_end_session_rob.sizePolicy().hasHeightForWidth())
         self.button_end_session_rob.setSizePolicy(sizePolicy)
         self.button_end_session_rob.setMinimumSize(QtCore.QSize(0, 60))
-        self.button_end_session_rob.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 255), stop:1 rgba(255, 255, 255, 255));\n"
-"}\n"
-"")
+        self.button_end_session_rob.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 255), stop:1 rgba(255, 255, 255, 255));\n"
+            "}\n"
+            ""
+        )
         self.button_end_session_rob.setObjectName("button_end_session_rob")
         self.gridLayout_2.addWidget(self.button_end_session_rob, 0, 2, 1, 1)
         self.label_maintenance_2 = QtWidgets.QLabel(self.groupBox_2)
@@ -257,14 +270,16 @@ class Ui_CollabControlWidget(object):
         sizePolicy.setHeightForWidth(self.button_start_marking.sizePolicy().hasHeightForWidth())
         self.button_start_marking.setSizePolicy(sizePolicy)
         self.button_start_marking.setMinimumSize(QtCore.QSize(0, 30))
-        self.button_start_marking.setStyleSheet("QPushButton:!pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 128), stop:1 rgba(255, 255, 255, 128));\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 128), stop:1 rgba(255, 255, 255, 128));\n"
-"}\n"
-"")
+        self.button_start_marking.setStyleSheet(
+            "QPushButton:!pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(240, 62, 114, 128), stop:1 rgba(255, 255, 255, 128));\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background-color: qlineargradient(spread:reflect, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(216, 56, 104, 128), stop:1 rgba(255, 255, 255, 128));\n"
+            "}\n"
+            ""
+        )
         self.button_start_marking.setObjectName("button_start_marking")
         self.gridLayout_2.addWidget(self.button_start_marking, 4, 0, 2, 2)
         self.label_marking_ok = QtWidgets.QLabel(self.groupBox_2)
@@ -287,12 +302,10 @@ class Ui_CollabControlWidget(object):
         self.groupBox.setTitle(_translate("CollabControlWidget", "VISION"))
         self.label_remaining_time.setText(_translate("CollabControlWidget", "Remaining time: "))
         self.button_home.setText(_translate("CollabControlWidget", "HOME"))
-        self.label_pcb_ok.setText(_translate("CollabControlWidget", "PCB Measure:\n"
-"OK"))
+        self.label_pcb_ok.setText(_translate("CollabControlWidget", "PCB Measure:\n" "OK"))
         self.label_message.setText(_translate("CollabControlWidget", "TextLabel"))
         self.button_start_session.setText(_translate("CollabControlWidget", "Start Session"))
-        self.label_label_ok.setText(_translate("CollabControlWidget", "Label Measure:\n"
-"OK"))
+        self.label_label_ok.setText(_translate("CollabControlWidget", "Label Measure:\n" "OK"))
         self.button_measure_label.setText(_translate("CollabControlWidget", "Measure Label"))
         self.button_end_session.setText(_translate("CollabControlWidget", "End Session"))
         self.button_pause.setText(_translate("CollabControlWidget", "Pause/Resume"))
@@ -307,6 +320,7 @@ class Ui_CollabControlWidget(object):
         self.label_message_rob.setText(_translate("CollabControlWidget", "TextLabel"))
         self.label_maintenance_rob.setText(_translate("CollabControlWidget", "TextLabel"))
         self.button_start_marking.setText(_translate("CollabControlWidget", "Start Marking"))
-        self.label_marking_ok.setText(_translate("CollabControlWidget", "Marking:\n"
-"OK"))
+        self.label_marking_ok.setText(_translate("CollabControlWidget", "Marking:\n" "OK"))
+
+
 from . import res_rc

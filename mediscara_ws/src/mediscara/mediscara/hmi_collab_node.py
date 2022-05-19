@@ -1,36 +1,38 @@
 """Module for the HMI Collaborative App"""
 import logging
 import sys
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
 from enum import Enum, auto
 from telnetlib import STATUS
-from typing import ClassVar, List
-
-from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
+from typing import List
 
 import rclpy
-from interfaces.msg import Error, Robot2Status, Robot2Control, VisionControl, KPIC2
+
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
+
+from interfaces.msg import KPIC2, Error, Robot2Control, Robot2Status, VisionControl
+from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.hmi import HMIApp, ROSWorker
+from mediscara.scripts.kpi import KPI
 from mediscara.scripts.ros_node import QTROSNode
-from mediscara.config_ros import NodeList, MessageList
-from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
 from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlWidget
+from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
 
 
 class HMICollabApp(HMIApp):
-    """Subclass of HMIApp
-    """
-    NODE_NAME = NodeList.HMICollabNode.value
-    DEPENDS = [NodeList.Robot2Node.value, NodeList.MarkerNode.value]
+    """Subclass of HMIApp"""
+
+    NODE_NAME = NodeList.HMI_COLLAB_NODE.value
+    DEPENDS = [NodeList.ROBOT2_NODE.value, NodeList.MARKER_NODE.value]
 
     KPI_UPDATE_INTERVAL = 1000  # ms
+    KPI_QUOTA = 60
 
     # region INNER CLASSES *********************************************************************************************
 
     class STATUS(Enum):
         """Enum class to implement a state machine of the production state"""
+
         IDLE = auto()
         WORKING = auto()
         PAUSED = auto()
@@ -50,7 +52,7 @@ class HMICollabApp(HMIApp):
         __BG_COLOR_RED = "background-color: red"
 
         def __init__(self, parent=None):
-            super(HMICollabApp.InfoWidget, self).__init__(parent)
+            super().__init__(parent)
             self.setupUi(self)
 
             self.label_availability_vis.setText("0 %")
@@ -178,8 +180,7 @@ class HMICollabApp(HMIApp):
                 label.setStyleSheet("")
 
     class ControlWidget(QWidget, Ui_CollabControlWidget):
-        """Class for the Control Widget in the Collaborative HMI App
-        """
+        """Class for the Control Widget in the Collaborative HMI App"""
 
         def __init__(self, parent=None):
             super(HMICollabApp.ControlWidget, self).__init__(parent=parent)
@@ -248,17 +249,19 @@ class HMICollabApp(HMIApp):
         @property
         def buttons(self):
             """Returns all the buttons in the layout"""
-            return [self.button_home,
-                    self.button_home_rob,
-                    self.button_measure_label,
-                    self.button_measure_pcb,
-                    self.button_start_session,
-                    self.button_start_session_rob,
-                    self.button_start_marking,
-                    self.button_pause,
-                    self.button_pause_rob,
-                    self.button_end_session,
-                    self.button_end_session_rob]
+            return [
+                self.button_home,
+                self.button_home_rob,
+                self.button_measure_label,
+                self.button_measure_pcb,
+                self.button_start_session,
+                self.button_start_session_rob,
+                self.button_start_marking,
+                self.button_pause,
+                self.button_pause_rob,
+                self.button_end_session,
+                self.button_end_session_rob,
+            ]
 
     # endregion
 
@@ -295,8 +298,8 @@ class HMICollabApp(HMIApp):
         self.state_vision = HMICollabApp.STATUS.IDLE
 
         # KPI calculation
-        self.__kpi_rob = KPI()
-        self.__kpi_vis = KPI()
+        self.__kpi_rob = KPI(quota=HMICollabApp.KPI_QUOTA)
+        self.__kpi_vis = KPI(quota=HMICollabApp.KPI_QUOTA)
 
         self.kpi_update_timer = QTimer()
         self.kpi_update_timer.timeout.connect(self.kpi_update_callback)
@@ -313,16 +316,16 @@ class HMICollabApp(HMIApp):
         if self.ui_locking:  # if ui locking is not disabled
             missing = self.ros_worker.missing_dependencies()  # check for missing dependencies
             if bool(missing):  # the list is not empty
-                if NodeList.MarkerNode.value not in missing:  # marker is online
+                if NodeList.MARKER_NODE.value not in missing:  # marker is online
                     self.__marker_online = True
 
-                if NodeList.Robot2Node.value not in missing:  # robot is online
+                if NodeList.ROBOT2_NODE.value not in missing:  # robot is online
                     self.__robot_online = True
 
                 if not self.__robot_online or not self.__marker_online:  # if either offline, lock
                     self.control_widget.lock_control_robotic(True)
 
-                if NodeList.VisionNode.value not in missing:  # vision is online
+                if NodeList.VISION_NODE.value not in missing:  # vision is online
                     self.__vision_online = True
 
                 if not self.__vision_online:
@@ -333,14 +336,14 @@ class HMICollabApp(HMIApp):
 
     def ros_error_callback(self, node_name: str, msg: str, err_code: int):
         """This method gets called whenever a ROS node is producing an error"""
-        super(HMICollabApp, self).ros_error_callback(node_name, msg, err_code)
+        super().ros_error_callback(node_name, msg, err_code)
 
         # todo differentiate between vision system and robot
         self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, True)
 
     def clear_errors_callback(self):
         """This method gets called when the 'CLEAR ERRORS' button gets pressed"""
-        super(HMICollabApp, self).clear_errors_callback()
+        super().clear_errors_callback()
 
         self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, False)
 
@@ -352,7 +355,7 @@ class HMICollabApp(HMIApp):
         """Callback method for when a button gets clicked"""
         button_clicked = self.sender()
 
-        # robotic
+        # region robotic
         if button_clicked == self.control_widget.button_start_session_rob:
             if self.state_robot == HMICollabApp.STATUS.IDLE:
                 self.__kpi_rob.availability.start_now()
@@ -368,19 +371,18 @@ class HMICollabApp(HMIApp):
             msg.start_marking = False
             msg.pause = True
 
-            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
-
-
             if self.state_robot == HMICollabApp.STATUS.WORKING:
                 self.__kpi_rob.performance.pause_start()  # start the pause
+
+                self.state_robot = HMICollabApp.STATUS.PAUSED  # change the state to paused
 
             elif self.state_robot == HMICollabApp.STATUS.PAUSED:
                 # resuming from pause
                 self.__kpi_rob.performance.pause_end()  # end the pause
                 self.state_robot = HMICollabApp.STATUS.WORKING
-                return
+                msg.pause = False
 
-            self.state_robot = HMICollabApp.STATUS.PAUSED  # change the state to paused
+            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
 
         elif button_clicked == self.control_widget.button_end_session_rob:
             self.__kpi_rob.availability.end_now()
@@ -402,7 +404,9 @@ class HMICollabApp(HMIApp):
 
             self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
 
-        # vision
+        # endregion
+
+        # region vision
         if button_clicked == self.control_widget.button_start_session:
             if self.state_vision == HMICollabApp.STATUS.IDLE:
                 self.__kpi_vis.availability.start_now()
@@ -427,7 +431,7 @@ class HMICollabApp(HMIApp):
         elif button_clicked == self.control_widget.button_end_session:
             self.__kpi_vis.availability.end_now()
 
-            self.state_robot = HMICollabApp.STATUS.IDLE
+            self.state_vision = HMICollabApp.STATUS.IDLE
 
         elif button_clicked == self.control_widget.button_home:
             msg = VisionControl()
@@ -453,6 +457,8 @@ class HMICollabApp(HMIApp):
 
             self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
 
+        # endregion
+
     def kpi_update_callback(self):
         """Sends ROS messages about the KPIs of the cells periodically"""
         # robotic
@@ -460,22 +466,19 @@ class HMICollabApp(HMIApp):
         p_rob = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
         q_rob = self.__kpi_rob.quality.calculate()
 
-        self.info_widget.display_kpi(self.InfoWidget.ROBOTIC,
-                                     availability=a_rob,
-                                     quality=q_rob,
-                                     performance=p_rob
-                                     )
+        self.info_widget.display_kpi(
+            self.InfoWidget.ROBOTIC,
+            availability=a_rob,
+            quality=q_rob,
+            performance=p_rob,
+        )
 
         # vision
         a_vis = self.__kpi_vis.availability.calculate()
         p_vis = self.__kpi_vis.performance.calculate(self.__kpi_vis.availability.actual_duration)
         q_vis = self.__kpi_vis.quality.calculate()
 
-        self.info_widget.display_kpi(ROSNodeCollab.VISION,
-                                     availability=a_vis,
-                                     quality=q_vis,
-                                     performance=p_vis
-                                     )
+        self.info_widget.display_kpi(ROSNodeCollab.VISION, availability=a_vis, quality=q_vis, performance=p_vis)
 
         msg = KPIC2()
         msg.availability_robotic = a_rob
@@ -503,13 +506,13 @@ class HMICollabApp(HMIApp):
 
     def dependency_callback(self, name: str, online: bool):
         """Callback method for when a ROS dependency comes online of goes offline"""
-        if name == NodeList.MarkerNode.value:
+        if name == NodeList.MARKER_NODE.value:
             self.__marker_online = online
 
-        elif name == NodeList.Robot2Node.value:
+        elif name == NodeList.ROBOT2_NODE.value:
             self.__robot_online = online
 
-        elif name == NodeList.VisionNode.value:
+        elif name == NodeList.VISION_NODE.value:
             self.__vision_online = online
 
         if not self.ui_locking:
@@ -546,7 +549,6 @@ class HMICollabApp(HMIApp):
     def state_robot(self, value: STATUS):
         """Sets the state and locks the buttons accordingly"""
         self.__state_rob = value
-        logging.info("Status set to: %s", value)
 
         self.control_widget.set_state_robotic(value)
 
@@ -566,40 +568,40 @@ class HMICollabApp(HMIApp):
 
 
 class ROSNodeCollab(QTROSNode):
-    """Class for the ROS Node in the HMI application
-    """
+    """Class for the ROS Node in the HMI application"""
 
     VISION = 0
     ROBOTIC = 1
 
     def __init__(self, node_name: str, depends_on: List[str], signals: ROSWorker.Signals):
-        super(ROSNodeCollab, self).__init__(node_name=node_name, depends_on=depends_on, signals=signals)
+        super().__init__(node_name=node_name, depends_on=depends_on, signals=signals)
 
         # publishers
-        self.__robot_control = self.create_publisher(msg_type=MessageList.Robot2Control.value[1],
-                                                     topic=MessageList.Robot2Control.value[0],
-                                                     qos_profile=10
-                                                     )
+        self.__robot_control = self.create_publisher(
+            msg_type=MessageList.ROBOT2_CONTROL.value[1],
+            topic=MessageList.ROBOT2_CONTROL.value[0],
+            qos_profile=10,
+        )
 
-        self.__vision_control = self.create_publisher(msg_type=MessageList.VisionControl.value[1],
-                                                      topic=MessageList.VisionControl.value[0],
-                                                      qos_profile=10
-                                                      )
+        self.__vision_control = self.create_publisher(
+            msg_type=MessageList.VISION_CONTROL.value[1],
+            topic=MessageList.VISION_CONTROL.value[0],
+            qos_profile=10,
+        )
 
         self.__kpi = self.create_publisher(
             msg_type=MessageList.KPIC2.value[1],
             topic=MessageList.KPIC2.value[0],
-            qos_profile=10
-            )
+            qos_profile=10,
+        )
 
         # subscribers
         self.__robot_status_subscription = self.create_subscription(
-            msg_type=MessageList.Robot2Status.value[1],
-            topic=MessageList.Robot2Status.value[0],
+            msg_type=MessageList.ROBOT2_STATUS.value[1],
+            topic=MessageList.ROBOT2_STATUS.value[0],
             callback=self.robot_status_callback,
-            qos_profile=10
+            qos_profile=10,
         )
-
 
         self.get_logger().info("ROS node online")
         self.signals.started.emit()
@@ -654,276 +656,6 @@ class ROSNodeCollab(QTROSNode):
         self.signals.status.emit(msg)
 
 
-class KPI:
-    """Class for tracking and managing KPIs"""
-
-    PRODUCT_QUOTA = 60
-
-    def __init__(self):
-        self.__availability = KPI.Availability()
-        self.__quality = KPI.Quality(self.PRODUCT_QUOTA)
-        self.__performance = KPI.Performance(self.PRODUCT_QUOTA)
-
-    @property
-    def availability(self):
-        """Returns the availability member of the class
-
-        Returns:
-            KPI.Availability: Availability
-        """
-        return self.__availability
-
-    @property
-    def quality(self):
-        """Returns the quality member of the class
-
-        Returns:
-            KPI.Quality: Quality
-        """
-        return self.__quality
-
-    @property
-    def performance(self):
-        """Returns the performance member of the class
-
-        Returns:
-            KPI.Performance: Performance
-        """
-        return self.__performance
-
-    @dataclass
-    class Availability:
-        """Dataclass to manage and store the availability KPI value
-        """
-        format = "%H:%M:%S"
-        __planned_start: ClassVar[datetime] = datetime.strptime("08:00:00", format)
-        __planned_end: ClassVar[datetime] = datetime.strptime("8:03:00", format)
-
-        __actual_start: datetime = field(default=None)
-        __actual_end: datetime = field(default=None)
-
-        def __str__(self):
-            if self.actual_start is None:
-                actual_start_str = "Not started yet"
-            else:
-                actual_start_str = self.__actual_start.strftime(self.format)
-
-            if self.__actual_end is None:
-                actual_end_str = "Not ended yet"
-            else:
-                actual_end_str = self.__actual_end.strftime(self.format)
-
-            return f"planned start: {self.__planned_start.strftime(self.format)} " \
-                   f"planned start: {self.__planned_start.strftime(self.format)} " \
-                   f"actual start: {actual_start_str} " \
-                   f"actual end: {actual_end_str}"
-
-        def start_now(self):
-            """Sets the actual start time to the current time
-            """
-            self.__actual_start = datetime.now()
-
-        def end_now(self):
-            """Sets the actual end time to the current time
-            """
-            self.__actual_end = datetime.now()
-
-        def calculate(self):
-            """Calculates the Availabilty KPI
-
-            Returns:
-                float: Availability KPI
-            """
-            planned_duration = self.__planned_end - self.__planned_start
-
-            return self.actual_duration / planned_duration
-
-        # region PROPERTIES
-
-        @property
-        def actual_start(self):
-            """Returns the actual start value in a None safe way
-
-            Returns:
-                str: the actual start value as a formatted string
-            """
-            if self.__actual_start is None:
-                return "Not set yet"
-            else:
-                return self.__actual_start.strftime(self.format)
-
-        @property
-        def actual_end(self):
-            """Returns the actual end value as a formatted string
-
-            Returns:
-                str: The actual end time as a formatted string
-            """
-            if self.__actual_end is None:
-                return "Not set yet"
-            else:
-                return self.__actual_end
-
-        @property
-        def planned_start(self):
-            """Returns the planned start time
-
-            Returns:
-                datetime: The planned start time
-            """
-            return self.__planned_start
-
-        @property
-        def planned_end(self):
-            """Returns the planned end time
-
-            Returns:
-                datetim: The planned end time
-            """
-            return self.__planned_end
-
-        @property
-        def actual_duration(self) -> timedelta:
-            """Returns the actual duration (A_curM in the documenatation)"""
-            if self.__actual_start is None:
-                return timedelta(0)
-
-            start = self.__actual_start
-
-            if self.__actual_end is None:
-                end = datetime.now()
-
-            else:
-                end = self.__actual_end
-
-            return end - start
-
-        # endregion
-
-    @dataclass
-    class Quality:
-        """Class for calculating and storing quality KPI data
-
-        Reference quality is defined as
-        """
-
-        __product_quota: int
-
-        __product_count: int = field(default=0)
-        __error_count: int = field(default=0)
-
-        def calculate(self):
-            """Calculates the Quality KPI number
-
-            Returns:
-                float: the Quality KPI
-            """
-            return (self.product_count - self.error_count) / self.__product_quota
-
-        @property
-        def product_count(self):
-            """Product count getter
-
-            Returns:
-                int: product count
-            """
-            return self.__product_count
-
-        @product_count.setter
-        def product_count(self, value: int):
-            """Product count setter
-
-            Args:
-                value (int): the value to be set
-            """
-            self.__product_count = value
-
-        @property
-        def error_count(self):
-            """Error count getter
-
-            Returns:
-                int: the number of errors
-            """
-            return self.__error_count
-
-        @error_count.setter
-        def error_count(self, value: int):
-            """Error count setter
-
-            Args:
-                value (int): the number of errors to be set
-            """
-            self.__error_count = value
-
-    @dataclass
-    class Performance:
-        """Class for calculating and storing performance KPIs
-
-        Performance is calculated as {products manufactured} / {manufacturing time}
-        Reference performance is 60 [-] / 10 [h]
-        Actual performance is calculated as {actual products made} / A_curM - {time paused}
-            - where A_curM is the actual working time (see Availability class)
-
-        The performance KPI is calculated like this:
-            - P_M = {Actual performance} / {Reference performance}
-
-        To simplify code performance will be calculated as
-            - {manufacturing time} / {products manufactured}
-        and the performance KPI will be calculated as
-            - 1 / P_M = 1 / ({Actual performance} / {Reference performance})
-        """
-        __product_quota: int
-
-        __work_period: ClassVar[timedelta] = timedelta(hours=10)
-        __reference_performance: timedelta = field(init=False)
-
-        __paused: timedelta = field(default=timedelta(0))
-        __pause_timer: ClassVar[datetime] = None
-
-        __product_count: int = field(default=0)
-
-        def __post_init__(self):
-            self.__reference_performance = self.__work_period / self.__product_quota
-
-        def calculate(self, a_cur_m: timedelta):
-            if self.product_count == 0:
-                return 0.00
-
-            actual_performance = (a_cur_m - self.paused) / self.product_count
-
-            if actual_performance == timedelta(0):
-                return 0.0
-
-            return self.__reference_performance / actual_performance
-
-        def pause_start(self):
-            self.__pause_timer = datetime.now()
-
-        def pause_end(self):
-            if self.__pause_timer is None:
-                return
-
-            self.paused += datetime.now() - self.__pause_timer
-            self.__pause_timer = None
-
-        @property
-        def paused(self):
-            return self.__paused
-
-        @paused.setter
-        def paused(self, value: timedelta):
-            self.__paused = value
-
-        @property
-        def product_count(self):
-            return self.__product_count
-
-        @product_count.setter
-        def product_count(self, value: int):
-            self.__product_count = value
-
-
 def main(args=None):
     """Entry point for the main function"""
     rclpy.init(args=args)
@@ -936,6 +668,6 @@ def main(args=None):
         print("Stopping")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # main()
     main()
