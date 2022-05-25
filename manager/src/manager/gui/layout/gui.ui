@@ -41,6 +41,7 @@
      <addaction name="action_cell2"/>
     </widget>
     <addaction name="menu_manage_cells"/>
+    <addaction name="action_preferences"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -63,6 +64,11 @@
   <action name="action_cell2">
    <property name="text">
     <string>Cell 2</string>
+   </property>
+  </action>
+  <action name="action_preferences">
+   <property name="text">
+    <string>Preferences</string>
    </property>
   </action>
  </widget>

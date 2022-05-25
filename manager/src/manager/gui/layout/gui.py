@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\Users\gyurc\OneDrive\Dokumentumok\VSCode Projects\mediscara\manager\src\manager\gui\layout\gui.ui'
+# Form implementation generated from reading ui file 'c:\Users\gyurc\OneDrive\Dokumentumok\VSCodeProjects\mediscara\manager\src\manager\gui\layout\gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -42,9 +42,12 @@ class Ui_MainWindow(object):
         self.action_cell1.setObjectName("action_cell1")
         self.action_cell2 = QtWidgets.QAction(MainWindow)
         self.action_cell2.setObjectName("action_cell2")
+        self.action_preferences = QtWidgets.QAction(MainWindow)
+        self.action_preferences.setObjectName("action_preferences")
         self.menu_manage_cells.addAction(self.action_cell1)
         self.menu_manage_cells.addAction(self.action_cell2)
         self.menuFile.addAction(self.menu_manage_cells.menuAction())
+        self.menuFile.addAction(self.action_preferences)
         self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -59,6 +62,7 @@ class Ui_MainWindow(object):
         self.actionCell_2.setText(_translate("MainWindow", "Cell 2"))
         self.action_cell1.setText(_translate("MainWindow", "Cell 1"))
         self.action_cell2.setText(_translate("MainWindow", "Cell 2"))
+        self.action_preferences.setText(_translate("MainWindow", "Preferences"))
 
 
 from PyQt5 import QtWebEngineWidgets
