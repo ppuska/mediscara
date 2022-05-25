@@ -1,0 +1,7 @@
+{
+    "python.linting.enabled": true,
+    "python.analysis.extraPaths": [
+        "C:/dev/ros2_galactic/Lib/site-packages",
+        "mediscara_ws/install/Lib/site-packages"
+    ]
+}

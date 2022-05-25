@@ -1,6 +1,5 @@
 coloredlogs >= 15.0.1
-<<<<<<< HEAD
 requests >= 2.22.0
-=======
-requests >= 2.22.0
->>>>>>> 70fc1787b8e7c6a3cf8c774408daf7f9788fa975
+pyyaml >= 6.0
+pyqt5 >= 5.15.4
+pyqtwebengine >= 5.15.5
