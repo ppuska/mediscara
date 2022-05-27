@@ -100,6 +100,28 @@ class FIWARE:
         logging.debug("Unable to update entity '%s'. (response %s)", entity_id, response.content)
         return False
 
+    def update_entity_append(self, entity: dict):
+        """Attempts to update the entity using the append update action
+
+        Args:
+            entity (dict): The entity formatted as NGSi v2 data
+
+        Returns:
+            bool: Whether the operation was successful
+        """
+
+        payload = {"actionType": "append", "entities": []}
+
+        payload["entities"].append(entity)
+
+        response = requests.post(f"http://{self.__server_address}/v2/op/update", json=payload)
+
+        if response.status_code == StatusCodes.NO_CONTENT.value:
+            return True
+
+        logging.debug("Unable to update entity. (response %s)", response.content)
+        return False
+
     def delete_entity(self, entity_id: str):
         """Deletes the entity from the OCB
 
