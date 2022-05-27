@@ -6,12 +6,9 @@ import pytest
 
 from manager.fiware import FIWARE
 
-from . import PING
-
-SERVER_ADDR = "25.18.161.28"
+from . import PING, SERVER_ADDR
 
 
-@pytest.mark.skipif(os.system(PING + SERVER_ADDR) != 0, reason="Unable to ping server")
 def test_connection():
     """This method tests the init method of the fiware interface"""
 
