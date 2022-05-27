@@ -46,12 +46,12 @@ repos:
           --fail-under=8
         ]
 
-# pytest
-- repo: local
-  hooks:
-    - id: pytest
-      name: pytest
-      entry: pytest
-      language: system
-      pass_filenames: false
-      always_run: true
+# # pytest
+# - repo: local
+#   hooks:
+#     - id: pytest
+#       name: pytest
+#       entry: pytest
+#       language: system
+#       pass_filenames: false
+#       always_run: true
