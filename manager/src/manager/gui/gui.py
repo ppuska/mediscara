@@ -6,8 +6,11 @@ import re
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWidgets import QMainWindow, QLineEdit
 
+
 from .layout.gui import Ui_MainWindow
 from .layout.preferences import Ui_preferencesWindow
+from .cell_industrial import IndustrialCell
+
 from .settings import AppSettings
 
 
@@ -30,6 +33,8 @@ class ManagerGUI(QMainWindow, Ui_MainWindow):
 
         # connect the actions
         self.action_preferences.triggered.connect(self._open_preferences)
+        self.action_collaborative.triggered.connect(self._open_collab_window)
+        self.action_industrial.triggered.connect(self._open_industrial_window)
 
         self.load_page()
 
@@ -48,6 +53,14 @@ class ManagerGUI(QMainWindow, Ui_MainWindow):
 
         if preferences.settings_changed:
             self.load_page()  # reload the page after changing settings
+
+    def _open_collab_window(self):
+        """Callback function from the menubar to open the collab cell editor"""
+
+    def _open_industrial_window(self):
+        """Callback function from the menubar to open the industrial cell editor"""
+        window = IndustrialCell(server_address=self.__settings.server_address, parent=self)
+        window.show()
 
 
 class Preferences(QMainWindow, Ui_preferencesWindow):

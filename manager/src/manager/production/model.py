@@ -165,6 +165,16 @@ class Container:
 
         return container
 
+    @staticmethod
+    def get_industrial_id():
+        """Returns the ID of an industrial order container"""
+        return f"{IndustialOrder.type}.container"
+
+    @staticmethod
+    def get_collaborative_id():
+        """Returns the ID of a collaborative order container"""
+        return f"{CollaborativeOrder.type}.container"
+
     @property
     def container_id(self):
         """Returns the id of the container"""

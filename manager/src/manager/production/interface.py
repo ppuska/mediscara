@@ -55,3 +55,7 @@ class Production:
         container.order_list.append(order)
 
         return self.__fiware.update_entity_append(container.to_ngsi())
+
+    def load_production_orders(self, container_id: str):
+
+        return Container.from_ngsi(self.__fiware.get_entity(entity_id=container_id))

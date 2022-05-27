@@ -37,8 +37,8 @@
      <property name="title">
       <string>Manage Cells...</string>
      </property>
-     <addaction name="action_cell1"/>
-     <addaction name="action_cell2"/>
+     <addaction name="action_collaborative"/>
+     <addaction name="action_industrial"/>
     </widget>
     <addaction name="menu_manage_cells"/>
     <addaction name="action_preferences"/>
@@ -56,14 +56,14 @@
     <string>Cell 2</string>
    </property>
   </action>
-  <action name="action_cell1">
+  <action name="action_collaborative">
    <property name="text">
-    <string>Cell 1</string>
+    <string>Collaborative</string>
    </property>
   </action>
-  <action name="action_cell2">
+  <action name="action_industrial">
    <property name="text">
-    <string>Cell 2</string>
+    <string>Industrial</string>
    </property>
   </action>
   <action name="action_preferences">
