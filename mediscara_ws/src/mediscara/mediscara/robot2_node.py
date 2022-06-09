@@ -1,5 +1,6 @@
 """Module for the ROS Node in Robotic Cell 2"""
 import enum
+from mediscara.scripts.fiware.model import CollaborativeOrder, Container
 
 import rclpy
 from interfaces.msg import Error, MarkerStatus, Robot2Control
@@ -9,6 +10,7 @@ from mediscara.scripts.ros_node import ROSNode
 from mediscara.scripts.socket_manager import SocketManager
 from mediscara.scripts.sql import Cell2Data, SQLManager
 from mediscara.scripts.utils import ErrorClass
+from mediscara.scripts.fiware.production import Production
 from std_msgs.msg import Bool
 
 
@@ -17,6 +19,8 @@ class Robot2Node(ROSNode):
 
     This cell contains the Kawasaki DuAro2 and the Laser Marker
     """
+
+    SERVER_URL = 'http://localhost:1026'
 
     SQL_TABLE_NAME = SQLTableNames.CELL2.value  # type: str
     SQL_REFRESH_INTERVAL = 5  # s
@@ -31,7 +35,7 @@ class Robot2Node(ROSNode):
         MARKING = enum.auto()
 
     def __init__(self):
-        super(Robot2Node, self).__init__(node_name=NodeList.Robot2Node.value, depends_on=[NodeList.MarkerNode.value])
+        super(Robot2Node, self).__init__(node_name=NodeList.ROBOT2_NODE.value, depends_on=[NodeList.MARKER_NODE.value])
 
         self.__marker_state = Robot2Node.MarkerState.WAITING
         self.__current_item = None
@@ -39,22 +43,24 @@ class Robot2Node(ROSNode):
         # Creating status and control channels
         # subscription
         self.__marker_status_sub = self.create_subscription(
-            msg_type=MessageList.MarkerStatus.value[1],
-            topic=MessageList.MarkerStatus.value[0],
+            msg_type=MessageList.MARKER_STATUS.value[1],
+            topic=MessageList.MARKER_STATUS.value[0],
             callback=self.status_callback,
             qos_profile=10,
         )
 
         self.robot_control_sub = self.create_subscription(
-            msg_type=MessageList.Robot2Control.value[1],
-            topic=MessageList.Robot2Control.value[0],
+            msg_type=MessageList.ROBOT2_CONTROL.value[1],
+            topic=MessageList.ROBOT2_CONTROL.value[0],
             callback=self.control_callback,
             qos_profile=10,
         )
 
         # publisher
         self.__marker_control_pub = self.create_publisher(
-            msg_type=MessageList.MarkerControl.value[1], topic=MessageList.MarkerControl.value[0], qos_profile=10
+            msg_type=MessageList.MARKER_CONTROL.value[1],
+            topic=MessageList.MARKER_CONTROL.value[0],
+            qos_profile=10
         )
 
         # Initializing the TCP Socket server
@@ -67,20 +73,23 @@ class Robot2Node(ROSNode):
             is_server=False,
             blocking=False,
         )
-        self.__socket_client.connect()
+        # self.__socket_client.connect()  # FIXME: No route to host error when there is no host
+
+        # Initializing the FIWARE OCB Python API
+        self.__connector = Production(Robot2Node.SERVER_URL)
 
         # Initializing MySQL database client
-        self.__db_handler = SQLManager(table=[(self.SQL_TABLE_NAME, Cell2Data)])
-        self.__sql_timer = None
+        # self.__db_handler = SQLManager(table=[(self.SQL_TABLE_NAME, Cell2Data)])
+        # self.__sql_timer = None
 
-        success, msg = self.__db_handler.connect_to_database()
-        if not success:
-            self.__sql_timer = self.create_timer(
-                timer_period_sec=self.SQL_REFRESH_INTERVAL, callback=self.sql_timer_callback
-            )
-            self.get_logger().warn(msg)
-        else:
-            self.get_logger().info(msg)
+        # success, msg = self.__db_handler.connect_to_database()
+        # if not success:
+        #     self.__sql_timer = self.create_timer(
+        #         timer_period_sec=self.SQL_REFRESH_INTERVAL, callback=self.sql_timer_callback
+        #     )
+        #     self.get_logger().warn(msg)
+        # else:
+        #     self.get_logger().info(msg)
 
         self.get_logger().info(f"{self.__class__.__name__} is online")
 
@@ -145,7 +154,7 @@ class Robot2Node(ROSNode):
             self.__socket_client.send(self.HOME)
 
         elif msg.start_marking:
-            self.__socket_client.send(self.START_MARKING)
+            # self.__socket_client.send(self.START_MARKING)
             self.send_job()
 
         elif msg.pause:
@@ -257,21 +266,49 @@ class Robot2Node(ROSNode):
         self.__current_item = self.__db_handler.get_next_element(self.SQL_TABLE_NAME)  # type: Cell2Data
 
     def send_job(self):
-        """Searches for the next item in the MySQL database and sends it to the robot as a job request"""
-        self.__current_item = self.__db_handler.get_next_element(self.SQL_TABLE_NAME)  # type: Cell2Data
+        """Searches for the next item in the FIWARE OCB production orders"""
 
-        if self.__current_item is None:
-            self.get_logger().warn("No next item in database")
+        # Communication with the robot:
+        # JS:<Incubator type (upper case)>_<Part type (upper case)>:<how many to make>
+        # which the robot interprets as
+        # JS:<program_name>:<number of cycles>
+
+        container = self.__connector.load_production_orders(Container.get_collaborative_id())
+
+        orders = container.order_list
+
+        if not orders:
+            self.get_logger().warn("No next production order")  # TODO add message to the HMI
             return
 
+        assert isinstance(orders, CollaborativeOrder)
+
         job_string = (
-            f"JS:{self.__current_item.inc_type.upper()}_"
-            f"{self.__current_item.part_type.upper()}:"
-            f"{self.__current_item.remaining}"
+            f"JS:{orders[0].incubator_type.upper()}_"
+            f"{orders[0].part_type.upper()}:"
+            f"{orders[0].remaining}"
         )
 
-        self.get_logger().info(f"Sending job select command: {job_string}")
-        self.__socket_client.send(job_string)  # todo update database
+        # self.__socket_client.send(job_string) # TODO: add back the implementation
+
+        self.get_logger().info(f"Orders are: {orders}")
+
+    # def send_job(self):
+    #     """Searches for the next item in the MySQL database and sends it to the robot as a job request"""
+    #     self.__current_item = self.__db_handler.get_next_element(self.SQL_TABLE_NAME)  # type: Cell2Data
+
+    #     if self.__current_item is None:
+    #         self.get_logger().warn("No next item in database")
+    #         return
+
+    #     job_string = (
+    #         f"JS:{self.__current_item.inc_type.upper()}_"
+    #         f"{self.__current_item.part_type.upper()}:"
+    #         f"{self.__current_item.remaining}"
+    #     )
+
+    #     self.get_logger().info(f"Sending job select command: {job_string}")
+    #     self.__socket_client.send(job_string)  # todo update database
 
     def decrement_remaining_count(self):
         """Decrements the current item's 'remaining' count by one"""
