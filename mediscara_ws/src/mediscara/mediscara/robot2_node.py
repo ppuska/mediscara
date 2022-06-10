@@ -1,6 +1,5 @@
 """Module for the ROS Node in Robotic Cell 2"""
 import enum
-from mediscara.scripts.fiware.model import CollaborativeOrder, Container
 
 import rclpy
 from interfaces.msg import Error, MarkerStatus, Robot2Control
@@ -10,7 +9,8 @@ from mediscara.scripts.ros_node import ROSNode
 from mediscara.scripts.socket_manager import SocketManager
 from mediscara.scripts.sql import Cell2Data, SQLManager
 from mediscara.scripts.utils import ErrorClass
-from mediscara.scripts.fiware.production import Production
+from fiware.production import Production
+from fiware.model import CollaborativeOrder
 from std_msgs.msg import Bool
 
 
@@ -273,15 +273,13 @@ class Robot2Node(ROSNode):
         # which the robot interprets as
         # JS:<program_name>:<number of cycles>
 
-        container = self.__connector.load_production_orders(Container.get_collaborative_id())
-
-        orders = container.order_list
+        orders = self.__connector.load_production_orders(order=CollaborativeOrder)
 
         if not orders:
             self.get_logger().warn("No next production order")  # TODO add message to the HMI
             return
 
-        assert isinstance(orders, CollaborativeOrder)
+        assert isinstance(orders[0], CollaborativeOrder)
 
         job_string = (
             f"JS:{orders[0].incubator_type.upper()}_"

@@ -1,5 +1,5 @@
 [submodule "FIWARE OCB Python API"]
-	path = mediscara_ws/src/mediscara/mediscara/scripts/fiware
+	path = fiware
 	url = https://github.com/ppuska/mediscara.fiware
 	branch = model_ver2
 
