@@ -279,15 +279,25 @@ class Robot2Node(ROSNode):
             self.get_logger().warn("No next production order")  # TODO add message to the HMI
             return
 
-        assert isinstance(orders[0], CollaborativeOrder)
+        order = orders[0]
+
+        assert isinstance(order, CollaborativeOrder)
 
         job_string = (
-            f"JS:{orders[0].incubator_type.upper()}_"
-            f"{orders[0].part_type.upper()}:"
-            f"{orders[0].remaining}"
+            f"JS:{order.incubator_type.upper()}_"
+            f"{order.part_type.upper()}:"
+            f"{order.remaining}"
         )
 
         # self.__socket_client.send(job_string) # TODO: add back the implementation
+
+        order.count -= 1
+
+        success = self.__connector.update_production_order_count(order)
+
+        message = "Successfully updated production count" if success else "Production count unsuccessful"
+
+        self.get_logger().info(message)
 
         self.get_logger().info(f"Orders are: {orders}")
 

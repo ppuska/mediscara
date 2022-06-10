@@ -1,6 +1,9 @@
 name: Code linting with PyLint
 
-on: [push]
+on:
+  push:
+    branches:
+      - stable
 
 jobs:
   build:
