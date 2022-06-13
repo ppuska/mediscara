@@ -69,6 +69,9 @@ class SocketManager:
         self.__host = host
         self.__port = port
         self.__blocking = blocking
+
+        self.__connected = False
+
         if not self.__blocking:
             if received_callback is None or connected_callback is None:
                 raise Exception("When in non-blocking mode, callbacks must not be None")
@@ -154,7 +157,11 @@ class SocketManager:
     @Decorator.socket_check
     def send(self, msg: str):
         """Sends to message to the client socket"""
-        self.__client_socket.sendall(f"{msg}\n".encode("utf-8"))
+        if self.__connected:
+            self.__client_socket.sendall(f"{msg}\n".encode("utf-8"))
+
+        else:
+            logging.warn("Not connected, cannot send data")
 
     def start_receive(self):
         """Starts the receiver thread that listens to incoming communication on the socket
@@ -201,6 +208,9 @@ class SocketManager:
             except TimeoutError:
                 error_msg = "Socket timed out"
 
+            except OSError as error:
+                error_msg = str(error)
+
             else:
                 return True, "Socket connected"
 
@@ -210,6 +220,7 @@ class SocketManager:
         """Internal callback method for connection results
         Calls the callback method of the superclass
         """
+        self.__connected = success
         if success:
             self.__logger.info(message)
             self.__connect_thread.stop()
@@ -222,6 +233,7 @@ class SocketManager:
         """Internal callback method for binding attempt results
         Calls the callback method of the superclass
         """
+        self.__connected = success
         if success:
             self.__logger.info(message)
             self.__connect_thread.stop()
@@ -293,3 +305,8 @@ class SocketManager:
 
         except ConnectionResetError:
             return False, "Connection reset"
+
+    @property
+    def connected(self) -> bool:
+        """Returns the connection status of the object"""
+        return self.__connected

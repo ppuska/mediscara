@@ -22,9 +22,6 @@ class Robot2Node(ROSNode):
 
     SERVER_URL = 'http://localhost:1026'
 
-    SQL_TABLE_NAME = SQLTableNames.CELL2.value  # type: str
-    SQL_REFRESH_INTERVAL = 5  # s
-
     INVALID_ROBOT_JOB_ERROR = ErrorClass(error_msg="The robot job was invalid", error_code=0)  # todo configure this
     ROBOT_JOB_FAILED_ERROR = ErrorClass(error_msg="The robot job has failed", error_code=0)
 
@@ -38,7 +35,7 @@ class Robot2Node(ROSNode):
         super(Robot2Node, self).__init__(node_name=NodeList.ROBOT2_NODE.value, depends_on=[NodeList.MARKER_NODE.value])
 
         self.__marker_state = Robot2Node.MarkerState.WAITING
-        self.__current_item = None
+        self.__current_order = None
 
         # Creating status and control channels
         # subscription
@@ -73,23 +70,10 @@ class Robot2Node(ROSNode):
             is_server=False,
             blocking=False,
         )
-        # self.__socket_client.connect()  # FIXME: No route to host error when there is no host
+        self.__socket_client.connect()  # FIXME: No route to host error when there is no host
 
         # Initializing the FIWARE OCB Python API
         self.__connector = Production(Robot2Node.SERVER_URL)
-
-        # Initializing MySQL database client
-        # self.__db_handler = SQLManager(table=[(self.SQL_TABLE_NAME, Cell2Data)])
-        # self.__sql_timer = None
-
-        # success, msg = self.__db_handler.connect_to_database()
-        # if not success:
-        #     self.__sql_timer = self.create_timer(
-        #         timer_period_sec=self.SQL_REFRESH_INTERVAL, callback=self.sql_timer_callback
-        #     )
-        #     self.get_logger().warn(msg)
-        # else:
-        #     self.get_logger().info(msg)
 
         self.get_logger().info(f"{self.__class__.__name__} is online")
 
@@ -119,10 +103,11 @@ class Robot2Node(ROSNode):
                 self.get_logger().warn(f"Marker error: [{msg.error_code}]\n\t{msg.error_msg}")
 
     def destroy_node(self) -> bool:
-        if self.__db_handler.connected:
-            self.set_in_production(False)
-        self.__db_handler.close()
-        return super().destroy_node()
+        if self.__current_order is not None:
+            self.__connector.set_active(self.__current_order, False)  # set as inactive job
+
+        if self.__socket_client.connected:  # disconnect from the socket
+            self.__socket_client.close()
 
     # endregion
 
@@ -154,7 +139,7 @@ class Robot2Node(ROSNode):
             self.__socket_client.send(self.HOME)
 
         elif msg.start_marking:
-            # self.__socket_client.send(self.START_MARKING)
+            self.__socket_client.send(self.START_MARKING)
             self.send_job()
 
         elif msg.pause:
@@ -192,7 +177,7 @@ class Robot2Node(ROSNode):
 
             elif msg == self.JOB_INVALID:  # job request was invalid
                 self.get_logger().error("Invalid robot job")
-                self.set_in_production(False)
+                self.__connector.set_active(self.__current_order, False)
                 self.publish_error(self.INVALID_ROBOT_JOB_ERROR)
 
             elif msg == self.JOB_STARTED:  # job has started
@@ -201,15 +186,20 @@ class Robot2Node(ROSNode):
 
             elif msg == self.JOB_SUCCESS:  # job successfully done
                 self.get_logger().info("Robot job successfully done")
-                self.set_in_production(False)
-                self.decrement_remaining_count()
-                if self.__current_item.remaining == 0:
-                    self.get_logger().info(f"Removing item with id: {self.__current_item.id}")
-                    self.remove_done_item()
+                self.__connector.set_active(self.__current_order, False)
+
+                new_order = CollaborativeOrder()  # create the updated order
+                new_order.remaining = self.__current_order.remaining - 1  # set the remaining value
+                self.__connector.update_production_order_remaining(new_order=new_order)  # update the order in the database
+                self.__current_order = new_order
+
+                if self.__current_order.remaining == 0:  # if the remaining is zero, remove the order from the database
+                    self.get_logger().info(f"Removing item with id: {self.__current_order.id}")
+                    self.__connector.delete_production_order(order=self.__current_order)
 
             elif msg == self.JOB_FAILED:  # job failed
                 self.get_logger().error("Robot job failed")
-                self.set_in_production(False)
+                self.__connector.set_active(self.__current_order, False)
                 self.publish_error(self.ROBOT_JOB_FAILED_ERROR)
 
             elif msg == self.START_MARKING:
@@ -263,7 +253,7 @@ class Robot2Node(ROSNode):
 
     def get_current_item(self):
         """Sets the current item variable"""
-        self.__current_item = self.__db_handler.get_next_element(self.SQL_TABLE_NAME)  # type: Cell2Data
+        self.__current_order = self.__db_handler.get_next_element(self.SQL_TABLE_NAME)  # type: Cell2Data
 
     def send_job(self):
         """Searches for the next item in the FIWARE OCB production orders"""
@@ -279,84 +269,18 @@ class Robot2Node(ROSNode):
             self.get_logger().warn("No next production order")  # TODO add message to the HMI
             return
 
-        order = orders[0]
+        self.__current_order = orders[0]
 
-        assert isinstance(order, CollaborativeOrder)
+        assert isinstance(self.__current_order, CollaborativeOrder)
 
         job_string = (
-            f"JS:{order.incubator_type.upper()}_"
-            f"{order.part_type.upper()}:"
-            f"{order.remaining}"
+            f"JS:{self.__current_order.incubator_type.upper()}_"
+            f"{self.__current_order.part_type.upper()}:"
+            f"{self.__current_order.remaining}"
         )
 
-        # self.__socket_client.send(job_string) # TODO: add back the implementation
-
-        order.count -= 1
-
-        success = self.__connector.update_production_order_count(order)
-
-        message = "Successfully updated production count" if success else "Production count unsuccessful"
-
-        self.get_logger().info(message)
-
-        self.get_logger().info(f"Orders are: {orders}")
-
-    # def send_job(self):
-    #     """Searches for the next item in the MySQL database and sends it to the robot as a job request"""
-    #     self.__current_item = self.__db_handler.get_next_element(self.SQL_TABLE_NAME)  # type: Cell2Data
-
-    #     if self.__current_item is None:
-    #         self.get_logger().warn("No next item in database")
-    #         return
-
-    #     job_string = (
-    #         f"JS:{self.__current_item.inc_type.upper()}_"
-    #         f"{self.__current_item.part_type.upper()}:"
-    #         f"{self.__current_item.remaining}"
-    #     )
-
-    #     self.get_logger().info(f"Sending job select command: {job_string}")
-    #     self.__socket_client.send(job_string)  # todo update database
-
-    def decrement_remaining_count(self):
-        """Decrements the current item's 'remaining' count by one"""
-        if self.__current_item is None:
-            self.get_logger().warn("No item loaded from database, loading now...")
-            self.get_current_item()
-
-        assert isinstance(self.__current_item, Cell2Data)
-        self.__current_item.remaining -= 1
-
-        success = self.__db_handler.update_element(table_name=self.SQL_TABLE_NAME, new_value=self.__current_item)
-
-        return success
-
-    def remove_done_item(self):
-        """Removes the current item if its 'remaining' counter is zero"""
-        self.get_current_item()
-
-        assert isinstance(self.__current_item, Cell2Data)
-
-        if self.__current_item.remaining > 0:
-            self.get_logger().warn("Cannot remove an item which has remaining jobs")
-            return
-
-        success = self.__db_handler.delete_element(id_=self.__current_item.id, table_name=self.SQL_TABLE_NAME)
-
-        return success
-
-    def set_in_production(self, in_production: bool) -> bool:
-        """Sets the current item's 'in_production' value to the given value"""
-        if self.__current_item is None:
-            self.get_logger().warn("No item loaded from database, loading now...")
-            self.get_current_item()
-
-        assert isinstance(self.__current_item, Cell2Data)
-        self.__current_item.in_production = in_production
-
-        success = self.__db_handler.update_element(table_name=self.SQL_TABLE_NAME, new_value=self.__current_item)
-
-        return success
+        self.__socket_client.send(job_string)
+        self.__connector.set_active(order=self.__current_order, active=True)  # sets the order to be active
 
     # endregion
 
