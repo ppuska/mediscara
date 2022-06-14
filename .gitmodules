@@ -1,3 +1,8 @@
+[submodule "FIWARE OCB Python API"]
+	path = fiware-api
+	url = https://github.com/ppuska/mediscara.fiware
+	branch = model_ver2
+
 [submodule "Integration Service FIWARE SH"]
 	path = is_ws/src/FIWARE-SH
 	url = https://github.com/eProsima/FIWARE-SH
@@ -9,8 +14,3 @@
 [submodule "eProsima Integration Service"]
 	path = is_ws/src/Integration-Service
 	url = https://github.com/eProsima/Integration-Service
-
-[submodule "FIWARE"]
-	path = fiware
-	url = https://github.com/ppuska/mediscara.fiware
-	branch = model_ver2
