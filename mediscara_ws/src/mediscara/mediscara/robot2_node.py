@@ -3,15 +3,14 @@ import enum
 
 import rclpy
 from interfaces.msg import Error, MarkerStatus, Robot2Control
-from mediscara.config import IPList, PortList, SQLTableNames
+from std_msgs.msg import Bool
+from mediscara.config import IPList, PortList
 from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.ros_node import ROSNode
 from mediscara.scripts.socket_manager import SocketManager
-from mediscara.scripts.sql import Cell2Data, SQLManager
 from mediscara.scripts.utils import ErrorClass
 from fiware.production import Production
 from fiware.model import CollaborativeOrder
-from std_msgs.msg import Bool
 
 
 class Robot2Node(ROSNode):
@@ -32,14 +31,15 @@ class Robot2Node(ROSNode):
         MARKING = enum.auto()
 
     def __init__(self):
-        super(Robot2Node, self).__init__(node_name=NodeList.ROBOT2_NODE.value, depends_on=[NodeList.MARKER_NODE.value])
+        super().__init__(node_name=NodeList.ROBOT2_NODE.value, depends_on=[NodeList.MARKER_NODE.value])
 
         self.__marker_state = Robot2Node.MarkerState.WAITING
         self.__current_order = None
+        self.__job_in_progress = False
 
         # Creating status and control channels
         # subscription
-        self.__marker_status_sub = self.create_subscription(
+        self.create_subscription(
             msg_type=MessageList.MARKER_STATUS.value[1],
             topic=MessageList.MARKER_STATUS.value[0],
             callback=self.status_callback,
@@ -70,7 +70,7 @@ class Robot2Node(ROSNode):
             is_server=False,
             blocking=False,
         )
-        self.__socket_client.connect()  # FIXME: No route to host error when there is no host
+        self.__socket_client.connect()
 
         # Initializing the FIWARE OCB Python API
         self.__connector = Production(Robot2Node.SERVER_URL)
@@ -89,11 +89,11 @@ class Robot2Node(ROSNode):
     def all_depends_online(self):
         self.get_logger().info("Missing dependencies have come online")
 
-    def depends_offline(self):
+    def dependency_offline(self):
         self.get_logger().warn(f"A dependency has gone offline:\n{self.missing_dependencies}")
 
     def error_callback(self, msg: Error):
-        if msg.node_name == NodeList.MarkerNode.value:
+        if msg.node_name == NodeList.MARKER_NODE.value:
             # marker error
             if self.__marker_state == Robot2Node.MarkerState.MARKING:
                 self.get_logger().error(f"Error while marking: [{msg.error_code}]\n\t{msg.error_msg}")
@@ -135,6 +135,7 @@ class Robot2Node(ROSNode):
 
     def control_callback(self, msg: Robot2Control):
         """Callback method for the Robot2Control message"""
+        self.get_logger().info("Control callback")
         if msg.home:
             self.__socket_client.send(self.HOME)
 
@@ -181,17 +182,34 @@ class Robot2Node(ROSNode):
                 self.publish_error(self.INVALID_ROBOT_JOB_ERROR)
 
             elif msg == self.JOB_STARTED:  # job has started
+                if self.__job_in_progress:
+                    # a job was in progress
+                    self.get_logger().info("Job successfully done")
+
+                    # set the remaining value
+                    self.__current_order.remaining -= 1
+                    # update the order in the database
+                    self.__connector.update_production_order_remaining(new_order=self.__current_order)
+
+                    if self.__current_order.remaining == 0:
+                        # if the remaining is zero, remove the order from the database
+                        self.get_logger().info(f"Removing item with id: {self.__current_order.id}")
+                        self.__connector.delete_production_order(order=self.__current_order)
+
+                else:
+                    self.__job_in_progress = True
+
                 self.get_logger().info("Robot job started")
-                self.set_in_production(True)
 
             elif msg == self.JOB_SUCCESS:  # job successfully done
                 self.get_logger().info("Robot job successfully done")
+                self.__job_in_progress = False
                 self.__connector.set_active(self.__current_order, False)
 
-                new_order = CollaborativeOrder()  # create the updated order
-                new_order.remaining = self.__current_order.remaining - 1  # set the remaining value
-                self.__connector.update_production_order_remaining(new_order=new_order)  # update the order in the database
-                self.__current_order = new_order
+                # set the remaining value
+                self.__current_order.remaining -= 1
+                # update the order in the database
+                self.__connector.update_production_order_remaining(new_order=self.__current_order)
 
                 if self.__current_order.remaining == 0:  # if the remaining is zero, remove the order from the database
                     self.get_logger().info(f"Removing item with id: {self.__current_order.id}")
@@ -217,16 +235,6 @@ class Robot2Node(ROSNode):
         """Callback function for the socket connection"""
         self.__socket_client.start_receive()
 
-    def sql_timer_callback(self):
-        """Callback method for a timer to check the MySQL database connection"""
-        if not self.__db_handler.connected:
-            success, msg = self.__db_handler.connect_to_database()
-            if success:
-                self.get_logger().info(msg)
-
-            else:
-                self.get_logger().warn(msg)
-
     # endregion
 
     # region MESSAGE GENERATION ****************************************************************************************
@@ -251,9 +259,6 @@ class Robot2Node(ROSNode):
 
     # region METHODS ***************************************************************************************************
 
-    def get_current_item(self):
-        """Sets the current item variable"""
-        self.__current_order = self.__db_handler.get_next_element(self.SQL_TABLE_NAME)  # type: Cell2Data
 
     def send_job(self):
         """Searches for the next item in the FIWARE OCB production orders"""
