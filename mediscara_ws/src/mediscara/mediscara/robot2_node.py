@@ -1,10 +1,14 @@
 """Module for the ROS Node in Robotic Cell 2"""
+import argparse
 import enum
+import os
+from typing import Optional, Tuple
+
 
 import rclpy
 from interfaces.msg import Error, MarkerStatus, Robot2Control
 from std_msgs.msg import Bool
-from mediscara.config import IPList, PortList
+
 from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.ros_node import ROSNode
 from mediscara.scripts.socket_manager import SocketManager
@@ -19,10 +23,10 @@ class Robot2Node(ROSNode):
     This cell contains the Kawasaki DuAro2 and the Laser Marker
     """
 
-    SERVER_URL = 'http://localhost:1026'
-
     INVALID_ROBOT_JOB_ERROR = ErrorClass(error_msg="The robot job was invalid", error_code=0)  # todo configure this
     ROBOT_JOB_FAILED_ERROR = ErrorClass(error_msg="The robot job has failed", error_code=0)
+
+    __DEFAULT_ROBOT_PORT = 65432
 
     class MarkerState(enum.Enum):  # todo remove this from code
         """Enum class for a state machine storing the Marker's state"""
@@ -30,8 +34,12 @@ class Robot2Node(ROSNode):
         WAITING = enum.auto()
         MARKING = enum.auto()
 
-    def __init__(self):
+    def __init__(self, server_url: str, robot_ip: str, robot_port: int or None):
         super().__init__(node_name=NodeList.ROBOT2_NODE.value, depends_on=[NodeList.MARKER_NODE.value])
+
+        if robot_port is None:
+            self.get_logger().warning(f"Robot port not specified, defaulting to {self.__DEFAULT_ROBOT_PORT}")
+            robot_port = Robot2Node.__DEFAULT_ROBOT_PORT
 
         self.__marker_state = Robot2Node.MarkerState.WAITING
         self.__current_order = None
@@ -63,8 +71,8 @@ class Robot2Node(ROSNode):
         # Initializing the TCP Socket server
         self.__socket_client = SocketManager(
             parent=self,
-            host=IPList.ROBOT2.value,
-            port=PortList.ROBOT2.value,
+            host=robot_ip,
+            port=robot_port,
             received_callback=self.socket_received_callback,
             connected_callback=self.socket_connected_callback,
             is_server=False,
@@ -73,7 +81,12 @@ class Robot2Node(ROSNode):
         self.__socket_client.connect()
 
         # Initializing the FIWARE OCB Python API
-        self.__connector = Production(Robot2Node.SERVER_URL)
+        try:
+            self.__connector = Production(server_url)
+
+        except ConnectionError:
+            self.get_logger().fatal("Could not connect to the FIWARE OCB, exiting...")
+            self.destroy_node()
 
         self.get_logger().info(f"{self.__class__.__name__} is online")
 
@@ -289,12 +302,57 @@ class Robot2Node(ROSNode):
 
     # endregion
 
+SERVER_URL = "SERVER_URL"
+ROBOT_IP = "ROBOT_IP"
+ROBOT_PORT = "ROBOT_PORT"
+
+def load_arguments() -> Tuple[str, str, Optional[int]]:
+    """Loads the arguments from the environment variables, or from the command line arguments
+
+    Returns:
+        Tuple: The arguments (server ip, robot ip) as a tuple
+    """
+    server_url = os.getenv(SERVER_URL)
+    robot_ip = os.getenv(ROBOT_IP)
+    robot_port = os.getenv(ROBOT_PORT)
+
+    # argument parser
+    # the arguments that are None beccome required <=> (<argument> is None)
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('--server-url',
+                            type=str,
+                            dest=SERVER_URL,
+                            required=(server_url is None),
+                            help="The url of the FIWARE OCB"
+                            )
+    arg_parser.add_argument('--robot-ip',
+                            type=str,
+                            dest=ROBOT_IP,
+                            required=(robot_ip is None),
+                            help="The IP address of the robot"
+                            )
+    arg_parser.add_argument("--robot-port",
+                            type=int,
+                            dest=ROBOT_PORT,
+                            required=False,
+                            help="The port to connect to the robot via sockets"
+                            )
+
+    args = vars(arg_parser.parse_args())
+
+    # get the command line arguments, or if they are None, load the previous value
+    server_url = args.get(SERVER_URL, server_url)
+    robot_ip = args.get(ROBOT_IP, robot_ip)
+    robot_port = args.get(ROBOT_PORT, robot_port)
+
+    return server_url, robot_ip, robot_port
 
 def main(args=None):
     """Main function and entry point of the Node"""
-    rclpy.init(args=args)
+    server_ip, robot_ip, robot_port = load_arguments()
 
-    robot2_node = Robot2Node()
+    rclpy.init(args=args)
+    robot2_node = Robot2Node(server_ip, robot_ip, robot_port)
     try:
         rclpy.spin(robot2_node)
     except KeyboardInterrupt:
