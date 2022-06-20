@@ -7,22 +7,23 @@ from typing import List
 
 import rclpy
 from interfaces.msg import KPIC1, Error, Robot1Control, Robot1Status
-from manager.message.interface import Messenger
+
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
+
+
 from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.kpi import KPI
 from mediscara.scripts.ros_node import QTROSNode
 from mediscara.scripts.widgets.layout.robotic_control import Ui_RoboticControlWidget
 from mediscara.scripts.widgets.layout.robotic_info import Ui_RoboticInfoTab
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
-
 
 class HMIRoboticApp(HMIApp):
     """A PyQt5 App to display the HMI interface to the user"""
 
-    NODE_NAME = NodeList.HMIRoboticNode.value
-    DEPENDS = [NodeList.Robot1Node.value]
+    NODE_NAME = NodeList.HMI_ROBOTIC_NODE.value
+    DEPENDS = [NodeList.ROBOT1_NODE.value]
 
     KPI_UPDATE_INTERVAL = 1000  # ms
     KPI_QUOTA = 60
@@ -30,7 +31,7 @@ class HMIRoboticApp(HMIApp):
     # region INNER CLASSES
 
     class STATUS(Enum):
-        """Ebzm class to store the values of a state machine"""
+        """Enum class to store the values of a state machine"""
 
         IDLE = auto()
         WORKING = auto()
@@ -57,8 +58,6 @@ class HMIRoboticApp(HMIApp):
             self.label_quality.setText("0 %")
 
             self.label_oee.setText("0 %")
-
-            self.__messenger = Messenger("25.18.161.28")
 
         def display_kpi(self, availability: float, quality: float, performance: float):
             """Displays the KPI information on the widget"""
@@ -310,8 +309,8 @@ class ROSNodeRobotic(QTROSNode):
 
         # publishers
         self.__control = self.create_publisher(
-            msg_type=MessageList.Robot1Control.value[1],
-            topic=MessageList.Robot1Control.value[0],
+            msg_type=MessageList.ROBOT1_CONTROL.value[1],
+            topic=MessageList.ROBOT1_CONTROL.value[0],
             qos_profile=10,
         )
 

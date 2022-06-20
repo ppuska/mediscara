@@ -5,6 +5,7 @@ from interfaces.msg import KPIC1 as kpi_c1
 from interfaces.msg import KPIC2 as kpi_c2
 from interfaces.msg import MarkerStatus as Ms
 from interfaces.msg import Robot1Control as r1c
+from interfaces.msg import Robot1Status as r1s
 from interfaces.msg import Robot2Control as r2c
 from interfaces.msg import Robot2Status as r2s
 from interfaces.msg import VisionControl as Vc
@@ -30,7 +31,8 @@ class MessageList(Enum):
 
     MARKER_STATUS = "marker_status", Ms
     MARKER_CONTROL = "marker_control", Bool
-    ROBOTIC_CONTROL = "robot1_control", r1c
+    ROBOT1_CONTROL = "robot1_control", r1c
+    ROBOT1_STATUS = "robot1_status", r1s
     ROBOT2_STATUS = "robot2_status", r2s
     ROBOT2_CONTROL = "robot2_control", r2c
     VISION_CONTROL = "vision_control", Vc

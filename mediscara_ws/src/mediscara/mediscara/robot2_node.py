@@ -68,7 +68,7 @@ class Robot2Node(ROSNode):
             qos_profile=10
         )
 
-        # Initializing the TCP Socket server
+        # Initializing the TCP Socket client
         self.__socket_client = SocketManager(
             parent=self,
             host=robot_ip,
