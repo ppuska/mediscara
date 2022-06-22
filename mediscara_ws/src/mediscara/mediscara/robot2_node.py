@@ -148,7 +148,6 @@ class Robot2Node(ROSNode):
 
     def control_callback(self, msg: Robot2Control):
         """Callback method for the Robot2Control message"""
-        self.get_logger().info("Control callback")
         if msg.home:
             self.__socket_client.send(self.HOME)
 
@@ -158,16 +157,6 @@ class Robot2Node(ROSNode):
 
         elif msg.pause:
             self.__socket_client.send(self.PAUSE)
-
-        # if msg.data:
-        #     self.send_job()
-        #     assert isinstance(self.__current_item, Cell2Data)
-        #     self.__current_item.in_production = True
-        #
-        #     print(self.__db_handler.update_element(table_name=self.SQL_TABLE_NAME,
-        #                                            new_value=self.__current_item
-        #                                            )
-        #           )
 
     def status_callback(self, msg: MarkerStatus):
         """Callback method for the MarkerStatus messages"""
@@ -215,7 +204,7 @@ class Robot2Node(ROSNode):
                 self.get_logger().info("Robot job started")
 
             elif msg == self.JOB_SUCCESS:  # job successfully done
-                self.get_logger().info("Robot job successfully done")
+                self.get_logger().info("All of the given jobs were finished")
                 self.__job_in_progress = False
                 self.__connector.set_active(self.__current_order, False)
 
@@ -284,7 +273,9 @@ class Robot2Node(ROSNode):
         orders = self.__connector.load_production_orders(order=CollaborativeOrder)
 
         if not orders:
-            self.get_logger().warn("No next production order")  # TODO add message to the HMI
+            self.get_logger().warn("No next production order")
+            # TODO configure error codes
+            self.publish_error(ErrorClass(error_code=-1, error_msg="No next production order in database"))
             return
 
         self.__current_order = orders[0]

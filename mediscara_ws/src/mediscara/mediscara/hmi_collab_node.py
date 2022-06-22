@@ -19,7 +19,7 @@ from mediscara.scripts.widgets.layout.collab_control_ui import Ui_CollabControlW
 from mediscara.scripts.widgets.layout.collab_info_ui import Ui_CollabInfoTab
 
 
-class HMICollabApp(HMIApp):
+class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
     """Subclass of HMIApp"""
 
     NODE_NAME = NodeList.HMI_COLLAB_NODE.value
@@ -266,7 +266,7 @@ class HMICollabApp(HMIApp):
     # endregion
 
     def __init__(self):
-        super(HMICollabApp, self).__init__(name=self.NODE_NAME, depends_list=self.DEPENDS, node_class=ROSNodeCollab)
+        super().__init__(name=self.NODE_NAME, depends_list=self.DEPENDS, node_class=ROSNodeCollab)
 
         # add info widget
         self.info_widget = HMICollabApp.InfoWidget(self.tab_info)
@@ -342,7 +342,7 @@ class HMICollabApp(HMIApp):
         """This method gets called when the 'CLEAR ERRORS' button gets pressed"""
         super().clear_errors_callback()
 
-        self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, False)
+        self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, False)  # FIXME this may not be needed
 
     # endregion
 
@@ -593,7 +593,7 @@ class ROSNodeCollab(QTROSNode):
         )
 
         # subscribers
-        self.__robot_status_subscription = self.create_subscription(
+        self.create_subscription(
             msg_type=MessageList.ROBOT2_STATUS.value[1],
             topic=MessageList.ROBOT2_STATUS.value[0],
             callback=self.robot_status_callback,
@@ -618,7 +618,7 @@ class ROSNodeCollab(QTROSNode):
 
         self.signals.dependency_online.emit(name, online)
 
-    def depends_offline(self):
+    def dependency_offline(self):
         self.signals.dependency_online.emit("", False)
         self.signals.new_error.emit("Internal error", "A dependency node has gone offline", 0)
 

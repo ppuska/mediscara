@@ -3,8 +3,7 @@ import argparse
 import os
 from typing import Optional, Tuple
 
-from numpy import False_
-from mediscara_ws.src.mediscara.mediscara.scripts.socket_manager import SocketManager
+from mediscara.scripts.socket_manager import SocketManager
 import rclpy
 from interfaces.msg import Error, Robot1Control
 from mediscara.config_ros import MessageList, NodeList
