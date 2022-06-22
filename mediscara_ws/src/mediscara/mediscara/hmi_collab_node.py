@@ -26,7 +26,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
     DEPENDS = [NodeList.ROBOT2_NODE.value, NodeList.MARKER_NODE.value]
 
     KPI_UPDATE_INTERVAL = 1000  # ms
-    KPI_QUOTA = 60
+    KPI_QUOTA = 7000
 
     # region INNER CLASSES *********************************************************************************************
 
@@ -65,9 +65,9 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
         def display_kpi(self, box: int, *, availability: float, quality: float, performance: float):
             """Displays the KPI data to the widget"""
             if box == self.ROBOTIC:
-                self.label_availability_rob.setText(f"{availability:.1f}%")
-                self.label_quality_rob.setText(f"{quality:.1f}%")
-                self.label_performance_rob.setText(f"{performance:.1f}%")
+                self.label_availability_rob.setText(f"{availability*100:.1f}%")
+                self.label_quality_rob.setText(f"{quality*100:.1f}%")
+                self.label_performance_rob.setText(f"{performance*100:.1f}%")
 
             elif box == self.VISION:
                 self.label_availability_vis.setText(f"{availability:.1f}%")
@@ -356,6 +356,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
         if button_clicked == self.control_widget.button_start_session_rob:
             if self.state_robot == HMICollabApp.STATUS.IDLE:
                 self.__kpi_rob = KPI(quota=HMICollabApp.KPI_QUOTA)  # reinit the kpis
+                self.__kpi_rob.availability.start_now()
 
             elif self.state_robot == HMICollabApp.STATUS.WORKING:
                 return  # nothing changed, skip
@@ -465,8 +466,6 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
         a_rob = self.__kpi_rob.availability.calculate()
         p_rob = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
         q_rob = self.__kpi_rob.quality.calculate()
-
-        print(a_rob, p_rob, q_rob)
 
         self.info_widget.display_kpi(
             self.InfoWidget.ROBOTIC,

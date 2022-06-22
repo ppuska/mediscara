@@ -12,10 +12,11 @@ class KPI:
         self.__quality = KPI.Quality(quota)
         self.__performance = KPI.Performance(quota)
 
-    def __str__(self) -> str:
-        return f"""KPI: availability: {str(self.availability)}
-                        quality: {str(self.quality)}
-                        performance: {str(self.performance)}"""
+    def __repr__(self) -> str:
+        return f"""KPI:
+        {self.availability}
+        {self.quality}
+        {self.performance}"""
 
     @property
     def availability(self):
@@ -50,26 +51,13 @@ class KPI:
 
         format = "%H:%M:%S"
         __planned_start: ClassVar[datetime] = datetime.strptime("08:00:00", format)
-        __planned_end: ClassVar[datetime] = datetime.strptime("8:03:00", format)  # todo set to 16:00:00
+        __planned_end: ClassVar[datetime] = datetime.strptime("10:00:00", format)  # todo set to 16:00:00
         __actual_start: datetime = field(default=None)
         __actual_end: datetime = field(default=None)
 
-        def __str__(self):
-            if self.__actual_start is None:
-                actual_start_str = "Not started yet"
-            else:
-                actual_start_str = self.__actual_start.strftime(self.format)
-
-            if self.__actual_end is None:
-                actual_end_str = "Not ended yet"
-            else:
-                actual_end_str = self.__actual_end.strftime(self.format)
-
+        def __repr__(self):
             return (
-                f"planned start: {self.__planned_start.strftime(self.format)} "
-                f"planned end: {self.__planned_end.strftime(self.format)} "
-                f"actual start: {actual_start_str} "
-                f"actual end: {actual_end_str}"
+                f"Availability: {self.actual_duration=} / {self.__planned_end - self.__planned_start=} = {self.calculate()}"
             )
 
         def start_now(self):
@@ -164,6 +152,9 @@ class KPI:
         __product_count: int = field(default=0)
         __error_count: int = field(default=0)
 
+        def __repr__(self):
+            return f"Quality: ({self.product_count} - {self.error_count}) / {self.__product_quota} = {self.calculate()}"
+
         def calculate(self):
             """Calculates the Quality KPI number
 
@@ -237,7 +228,10 @@ class KPI:
         __product_count: int = field(default=0)
 
         def __post_init__(self):
-            self.__reference_performance = self.__work_period / self.__product_quota
+            self.__reference_performance = self.__product_quota / self.__work_period.total_seconds()
+
+        def __repr__(self):
+            return f"Performance: {self.paused=} {self.product_count=}"
 
         def calculate(self, a_cur_m: timedelta):
             """Calculates the Performace KPI based on the input and stored data
@@ -248,15 +242,19 @@ class KPI:
             Returns:
                 float: The performance KPI
             """
-            if self.product_count == 0:
-                return 0.00
 
-            actual_performance = (a_cur_m - self.paused) / self.product_count
+            manuf_time = (a_cur_m - self.paused).total_seconds()  # in seconds as float
 
-            if actual_performance == timedelta(0):
+            if manuf_time == 0:
                 return 0.0
 
-            return self.__reference_performance / actual_performance
+            actual_performance = self.product_count / (a_cur_m - self.paused).total_seconds()
+
+            kpi = actual_performance / self.__reference_performance
+
+            print(manuf_time, actual_performance, kpi)
+
+            return kpi
 
         def pause_start(self):
             """Starts the pause timer"""
