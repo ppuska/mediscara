@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 
 
 import rclpy
-from interfaces.msg import Error, MarkerStatus, Robot2Control
+from interfaces.msg import Error, MarkerStatus, Robot2Control, Robot2Status
 from std_msgs.msg import Bool
 
 from mediscara.config_ros import MessageList, NodeList
@@ -44,6 +44,7 @@ class Robot2Node(ROSNode):
         self.__marker_state = Robot2Node.MarkerState.WAITING
         self.__current_order = None
         self.__job_in_progress = False
+        self.__job_complete = False
 
         # Creating status and control channels
         # subscription
@@ -65,6 +66,12 @@ class Robot2Node(ROSNode):
         self.__marker_control_pub = self.create_publisher(
             msg_type=MessageList.MARKER_CONTROL.value[1],
             topic=MessageList.MARKER_CONTROL.value[0],
+            qos_profile=10
+        )
+
+        self.__robot_status_pub = self.create_publisher(
+            msg_type=MessageList.ROBOT2_STATUS.value[1],
+            topic=MessageList.ROBOT2_STATUS.value[0],
             qos_profile=10
         )
 
@@ -143,6 +150,10 @@ class Robot2Node(ROSNode):
     HOME = "HOME"
     # pausing
     PAUSE = "PAUSE"
+    # status
+    STATUS = "STATUS"
+    TRUE = "TRUE"
+    FALSE = "FALSE"
 
     # endregion
 
@@ -175,6 +186,33 @@ class Robot2Node(ROSNode):
                 joints = msg[2:].split("|")
                 self.get_logger().debug(f"Joint values: {joints}")
 
+            if msg.startswith(self.STATUS):  # status msgs
+                # status msg syntax: STATUS:MOTOR_ON:RUNNING:WAITING:ERROR
+                tokens = msg.split(":")
+
+                ros_msg = Robot2Status()
+                ros_msg.power = False
+                ros_msg.running = False
+                ros_msg.waiting = False
+                ros_msg.error = False
+
+                ros_msg.job_success = self.__job_complete
+                self.__job_complete = False
+
+                if tokens[1] == self.TRUE:
+                    ros_msg.power = True
+
+                if tokens[2] == self.TRUE:
+                    ros_msg.running = True
+
+                if tokens[3] == self.TRUE:
+                    ros_msg.waiting = True
+
+                if tokens[4] == self.TRUE:
+                    ros_msg.error = True
+
+                self.__robot_status_pub.publish(ros_msg)
+
             elif msg == self.JOB_REQUEST:  # handle job request
                 self.send_job()
 
@@ -192,6 +230,8 @@ class Robot2Node(ROSNode):
                     self.__current_order.remaining -= 1
                     # update the order in the database
                     self.__connector.update_production_order_remaining(new_order=self.__current_order)
+
+                    self.__job_complete = True
 
                     if self.__current_order.remaining == 0:
                         # if the remaining is zero, remove the order from the database
@@ -212,6 +252,8 @@ class Robot2Node(ROSNode):
                 self.__current_order.remaining -= 1
                 # update the order in the database
                 self.__connector.update_production_order_remaining(new_order=self.__current_order)
+
+                self.__job_complete = True
 
                 if self.__current_order.remaining == 0:  # if the remaining is zero, remove the order from the database
                     self.get_logger().info(f"Removing item with id: {self.__current_order.id}")
@@ -260,7 +302,6 @@ class Robot2Node(ROSNode):
     # endregion
 
     # region METHODS ***************************************************************************************************
-
 
     def send_job(self):
         """Searches for the next item in the FIWARE OCB production orders"""
