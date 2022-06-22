@@ -1,6 +1,7 @@
 [MASTER]
 init-hook=
     import sys;
+    sys.path.append("/opt/ros/galactic/lib/python3.8/site-packages");
     sys.path.append("mediscara_ws/install/mediscara/lib/python3.8/site-packages");
     sys.path.append("mediscara_ws/install/interfaces/lib/python3.8/site-packages");
 

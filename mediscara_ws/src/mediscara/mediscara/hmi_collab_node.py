@@ -355,7 +355,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
         # region robotic
         if button_clicked == self.control_widget.button_start_session_rob:
             if self.state_robot == HMICollabApp.STATUS.IDLE:
-                self.__kpi_rob.availability.start_now()
+                self.__kpi_rob = KPI(quota=HMICollabApp.KPI_QUOTA)  # reinit the kpis
 
             elif self.state_robot == HMICollabApp.STATUS.WORKING:
                 return  # nothing changed, skip
@@ -368,18 +368,21 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
             msg.start_marking = False
             msg.pause = True
 
+            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
+
             if self.state_robot == HMICollabApp.STATUS.WORKING:
                 self.__kpi_rob.performance.pause_start()  # start the pause
 
                 self.state_robot = HMICollabApp.STATUS.PAUSED  # change the state to paused
 
-            elif self.state_robot == HMICollabApp.STATUS.PAUSED:
+                return
+
+            if self.state_robot == HMICollabApp.STATUS.PAUSED:
                 # resuming from pause
                 self.__kpi_rob.performance.pause_end()  # end the pause
                 self.state_robot = HMICollabApp.STATUS.WORKING
-                msg.pause = False
 
-            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
+                return
 
         elif button_clicked == self.control_widget.button_end_session_rob:
             self.__kpi_rob.availability.end_now()
@@ -463,6 +466,8 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
         p_rob = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
         q_rob = self.__kpi_rob.quality.calculate()
 
+        print(a_rob, p_rob, q_rob)
+
         self.info_widget.display_kpi(
             self.InfoWidget.ROBOTIC,
             availability=a_rob,
@@ -500,6 +505,13 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
             self.info_widget.set_power(HMICollabApp.InfoWidget.ROBOTIC, msg.power)
             self.info_widget.set_waiting(HMICollabApp.InfoWidget.ROBOTIC, msg.waiting)
             self.info_widget.set_running(HMICollabApp.InfoWidget.ROBOTIC, msg.running)
+
+            if msg.job_success:
+                self.__kpi_rob.performance.product_count += 1
+                self.__kpi_rob.quality.product_count += 1
+
+            if msg.error:
+                self.__kpi_rob.quality.error_count += 1
 
     def dependency_callback(self, name: str, online: bool):
         """Callback method for when a ROS dependency comes online of goes offline"""
@@ -545,6 +557,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
     @state_robot.setter
     def state_robot(self, value: STATUS):
         """Sets the state and locks the buttons accordingly"""
+        logging.info(f"Robot state: {value}")
         self.__state_rob = value
 
         self.control_widget.set_state_robotic(value)
