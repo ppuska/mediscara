@@ -1,8 +1,3 @@
-[submodule "fiware-api"]
-	path = fiware-api
-	url = https://github.com/ppuska/mediscara.fiware
-	branch = model_ver2
-
 [submodule "is_ws/src/FIWARE-SH"]
 	path = is_ws/src/FIWARE-SH
 	url = https://github.com/eProsima/FIWARE-SH
@@ -14,3 +9,7 @@
 [submodule "is_ws/src/Integration-Service"]
 	path = is_ws/src/Integration-Service
 	url = https://github.com/eProsima/Integration-Service
+[submodule "fiware-api"]
+	path = fiware-api
+	url = https://github.com/ppuska/mediscara.fiware
+	branch = model_ver2
