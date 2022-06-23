@@ -1,24 +1,28 @@
 types:
-    idls:
-      - >
-        struct KPIC2 {
-            double availability_robotic;
-            double quality_robotic;
-            double performance_robotic;
-            double availability_vision;
-            double quality_vision;
-            double performance_vision;
-        };
-
+  idls:
+    - >
+      struct KPIC2 {
+          double availability_robotic;
+          double performance_robotic;
+          double quality_robotic;
+          double availability_vision;
+          double performance_vision;
+          double quality_vision;
+      };
 
 systems:
-    ros2: { type: ros2 }
-    fiware: { type: fiware, host: "127.0.0.1", port: 1026, types-from: ros2 }
+  ros2: { type: ros2 }
+  fiware: { type: fiware, host: "127.0.0.1", port: 1026, types-from: ros2 }
 
 routes:
-    ros2_to_fiware: { from: ros2, to: fiware }
-    fiware_to_ros2: { from: fiware, to: ros2 }
+  ros2_to_fiware: { from: ros2, to: fiware }
+  fiware_to_ros2: { from: fiware, to: ros2 }
 
 topics:
-    kpi_cell2: { type: "interfaces/KPIC2", route: ros2_to_fiware, remap: {fiware: {type: KPIC2}} }
- #   hello_ros2: { type: "std_msgs/String", route: ros2_to_fiware, remap: {fiware: {type: HelloWorld}} }
+  kpi_cell2:
+    {
+      type: "interfaces/KPIC2",
+      route: ros2_to_fiware,
+      remap: { fiware: { type: KPIC2 } },
+    }
+  #   hello_ros2: { type: "std_msgs/String", route: ros2_to_fiware, remap: {fiware: {type: HelloWorld}} }
