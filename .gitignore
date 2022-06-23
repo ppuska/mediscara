@@ -1,0 +1,12 @@
+.idea/*
+
+/**/build/
+/**/install/
+/**/log/
+
+/**/__pycache__/*
+/**/*.egg-info/*
+
+venv/
+.pylintrc
+mediscara.manager.code-workspace
