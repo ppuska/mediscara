@@ -11,6 +11,7 @@ from mediscara.scripts.ros_node import ROSNode
 
 from fiware.production import Production
 
+
 class Robot1Node(ROSNode):
     """Class for robotic cell no 1
 
@@ -32,7 +33,7 @@ class Robot1Node(ROSNode):
             msg_type=MessageList.ROBOT1_CONTROL.value[1],
             topic=MessageList.ROBOT1_CONTROL.value[0],
             callback=self.status_callback,
-            qos_profile=10
+            qos_profile=10,
         )
 
         # TODO make laser control publisher
@@ -53,7 +54,7 @@ class Robot1Node(ROSNode):
             received_callback=self.socket_received_callback,
             connected_callback=self.socket_connected_callback,
             is_server=False,
-            blocking=False
+            blocking=False,
         )
 
         self.__socket_client.connect()
@@ -74,7 +75,6 @@ class Robot1Node(ROSNode):
     PAUSE = "PAUSE"
 
     # endregion
-
 
     # region CALLBACKS
 
@@ -167,6 +167,7 @@ class Robot1Node(ROSNode):
 
     # endregion
 
+
 SERVER_URL = "SERVER_URL"
 ROBOT_IP = "ROBOT_IP"
 ROBOT_PORT = "ROBOT_PORT"
@@ -185,24 +186,15 @@ def load_arguments() -> Tuple[str, str, Optional[int]]:
     # argument parser
     # the arguments that are None beccome required <=> (<argument> is None)
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--server-url',
-                            type=str,
-                            dest=SERVER_URL,
-                            required=(server_url is None),
-                            help="The url of the FIWARE OCB"
-                            )
-    arg_parser.add_argument('--robot-ip',
-                            type=str,
-                            dest=ROBOT_IP,
-                            required=(robot_ip is None),
-                            help="The IP address of the robot"
-                            )
-    arg_parser.add_argument("--robot-port",
-                            type=int,
-                            dest=ROBOT_PORT,
-                            required=False,
-                            help="The port to connect to the robot via sockets"
-                            )
+    arg_parser.add_argument(
+        "--server-url", type=str, dest=SERVER_URL, required=(server_url is None), help="The url of the FIWARE OCB"
+    )
+    arg_parser.add_argument(
+        "--robot-ip", type=str, dest=ROBOT_IP, required=(robot_ip is None), help="The IP address of the robot"
+    )
+    arg_parser.add_argument(
+        "--robot-port", type=int, dest=ROBOT_PORT, required=False, help="The port to connect to the robot via sockets"
+    )
 
     args = vars(arg_parser.parse_args())
 
@@ -212,7 +204,6 @@ def load_arguments() -> Tuple[str, str, Optional[int]]:
     robot_port = args.get(ROBOT_PORT, robot_port)
 
     return server_url, robot_ip, robot_port
-
 
 
 def main(args=None):

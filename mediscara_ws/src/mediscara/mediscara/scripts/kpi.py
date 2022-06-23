@@ -56,9 +56,7 @@ class KPI:
         __actual_end: datetime = field(default=None)
 
         def __repr__(self):
-            return (
-                f"Availability: {self.actual_duration=} / {self.__planned_end - self.__planned_start=} = {self.calculate()}"
-            )
+            return f"Availability: {self.actual_duration=} / {self.__planned_end - self.__planned_start=} = {self.calculate()}"
 
         def start_now(self):
             """Sets the actual start time to the current time"""

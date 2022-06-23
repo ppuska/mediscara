@@ -19,6 +19,7 @@ from mediscara.scripts.ros_node import QTROSNode
 from mediscara.scripts.widgets.layout.robotic_control import Ui_RoboticControlWidget
 from mediscara.scripts.widgets.layout.robotic_info import Ui_RoboticInfoTab
 
+
 class HMIRoboticApp(HMIApp):
     """A PyQt5 App to display the HMI interface to the user"""
 
