@@ -26,7 +26,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
     DEPENDS = [NodeList.ROBOT2_NODE.value, NodeList.MARKER_NODE.value]
 
     KPI_UPDATE_INTERVAL = 1000  # ms
-    KPI_QUOTA = 7000
+    KPI_QUOTA = 5000
 
     # region INNER CLASSES *********************************************************************************************
 
@@ -522,6 +522,12 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
 
     def status_callback(self, msg):
         """Callback method for the Robot2Status topic messages"""
+
+        if not hasattr(HMICollabApp.status_callback, "was_in_error"):
+            raise AttributeError(
+                f"The {HMICollabApp.status_callback.__name__} method must have a 'was_in_error' attribute"
+            )
+
         if isinstance(msg, Robot2Status):
             self.info_widget.set_error(HMICollabApp.InfoWidget.ROBOTIC, msg.error)
             self.info_widget.set_power(HMICollabApp.InfoWidget.ROBOTIC, msg.power)
@@ -532,8 +538,16 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
                 self.__kpi_rob.performance.product_count += 1
                 self.__kpi_rob.quality.product_count += 1
 
-            if msg.error:
+            # only register as an error if the previous message was not an error and this message is
+            if msg.error and not HMICollabApp.status_callback.was_in_error:
                 self.__kpi_rob.quality.error_count += 1
+                HMICollabApp.status_callback.was_in_error = True  # set the error flag
+
+            else:
+                HMICollabApp.status_callback.was_in_error = False  # reset the error flag
+
+    # this is needed to filter out a continuous stream of error messages as one error
+    status_callback.was_in_error = False  # wether the previous status message had errors or not
 
     def dependency_callback(self, name: str, online: bool):
         """Callback method for when a ROS dependency comes online of goes offline"""
