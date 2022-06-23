@@ -171,56 +171,87 @@ class Robot2Node(ROSNode):
             self.get_logger().info("Marking successful")
             self.__socket_client.send(self.MARKING_SUCCESS)
 
-    def socket_received_callback(self, success: bool, msg: str):
+    def socket_received_callback(self, success: bool, incoming: str):
         """Callback function for socket receive"""
         if not success:
             self.__socket_client.connect()
 
         else:
-            # PROCESSING THE INCOMING MESSAGE
-            if msg.startswith("J|"):  # joint values
-                joints = msg[2:].split("|")
-                self.get_logger().debug(f"Joint values: {joints}")
 
-            if msg.startswith(self.STATUS):  # status msgs
-                # status msg syntax: STATUS:MOTOR_ON:RUNNING:WAITING:ERROR
-                tokens = msg.split(":")
+            messages = incoming.split("\n")
 
-                ros_msg = Robot2Status()
-                ros_msg.power = False
-                ros_msg.running = False
-                ros_msg.waiting = False
-                ros_msg.error = False
+            for msg in messages:
 
-                ros_msg.job_success = self.__job_complete
-                self.__job_complete = False
+                if not msg:
+                    continue
 
-                if tokens[1] == self.TRUE:
-                    ros_msg.power = True
+                self.get_logger().info(f"Got TCP message: {msg}")
+                # PROCESSING THE INCOMING MESSAGE
+                if msg.startswith("J|"):  # joint values
+                    joints = msg[2:].split("|")
+                    self.get_logger().debug(f"Joint values: {joints}")
 
-                if tokens[2] == self.TRUE:
-                    ros_msg.running = True
+                if msg.startswith(self.STATUS):  # status msgs
+                    # status msg syntax: STATUS:MOTOR_ON:RUNNING:WAITING:ERROR
+                    tokens = msg.split(":")
 
-                if tokens[3] == self.TRUE:
-                    ros_msg.waiting = True
+                    ros_msg = Robot2Status()
+                    ros_msg.power = False
+                    ros_msg.running = False
+                    ros_msg.waiting = False
+                    ros_msg.error = False
 
-                if tokens[4] == self.TRUE:
-                    ros_msg.error = True
+                    ros_msg.job_success = self.__job_complete
+                    self.__job_complete = False
 
-                self.__robot_status_pub.publish(ros_msg)
+                    if tokens[1] == self.TRUE:
+                        ros_msg.power = True
 
-            elif msg == self.JOB_REQUEST:  # handle job request
-                self.send_job()
+                    if tokens[2] == self.TRUE:
+                        ros_msg.running = True
 
-            elif msg == self.JOB_INVALID:  # job request was invalid
-                self.get_logger().error("Invalid robot job")
-                self.__connector.set_active(self.__current_order, False)
-                self.publish_error(self.INVALID_ROBOT_JOB_ERROR)
+                    if tokens[3] == self.TRUE:
+                        ros_msg.waiting = True
 
-            elif msg == self.JOB_STARTED:  # job has started
-                if self.__job_in_progress:
-                    # a job was in progress
-                    self.get_logger().info("Job successfully done")
+                    if tokens[4] == self.TRUE:
+                        ros_msg.error = True
+
+                    self.__robot_status_pub.publish(ros_msg)
+
+                elif msg == self.JOB_REQUEST:  # handle job request
+                    self.send_job()
+
+                elif msg == self.JOB_INVALID:  # job request was invalid
+                    self.get_logger().error("Invalid robot job")
+                    self.__connector.set_active(self.__current_order, False)
+                    self.publish_error(self.INVALID_ROBOT_JOB_ERROR)
+
+                elif msg == self.JOB_STARTED:  # job has started
+                    if self.__job_in_progress:
+                        # a job was in progress
+                        self.get_logger().info("Job successfully done")
+
+                        # set the remaining value
+                        self.__current_order.remaining -= 1
+                        # update the order in the database
+                        self.__connector.update_production_order_remaining(new_order=self.__current_order)
+
+                        self.__job_complete = True
+
+                        if self.__current_order.remaining == 0:
+                            # if the remaining is zero, remove the order from the database
+                            self.get_logger().info(f"Removing item with id: {self.__current_order.id}")
+                            self.__connector.delete_production_order(order=self.__current_order)
+
+                    else:
+                        self.__job_in_progress = True
+
+                    self.get_logger().info("Robot job started")
+
+                elif msg == self.JOB_SUCCESS:  # job successfully done
+                    self.get_logger().info("All of the given jobs were finished")
+                    self.__job_in_progress = False
+                    self.__connector.set_active(self.__current_order, False)
 
                     # set the remaining value
                     self.__current_order.remaining -= 1
@@ -229,47 +260,27 @@ class Robot2Node(ROSNode):
 
                     self.__job_complete = True
 
-                    if self.__current_order.remaining == 0:
-                        # if the remaining is zero, remove the order from the database
+                    if (
+                        self.__current_order.remaining == 0
+                    ):  # if the remaining is zero, remove the order from the database
                         self.get_logger().info(f"Removing item with id: {self.__current_order.id}")
                         self.__connector.delete_production_order(order=self.__current_order)
 
+                elif msg == self.JOB_FAILED:  # job failed
+                    self.get_logger().error("Robot job failed")
+                    self.__connector.set_active(self.__current_order, False)
+                    self.publish_error(self.ROBOT_JOB_FAILED_ERROR)
+
+                elif msg == self.START_MARKING:
+                    self.get_logger().info("Sending marker start...")
+                    self.start_marking()
+
+                elif msg == self.STOP_MARKING:
+                    self.get_logger().info("Sending marker stop...")
+                    self.stop_marking()
+
                 else:
-                    self.__job_in_progress = True
-
-                self.get_logger().info("Robot job started")
-
-            elif msg == self.JOB_SUCCESS:  # job successfully done
-                self.get_logger().info("All of the given jobs were finished")
-                self.__job_in_progress = False
-                self.__connector.set_active(self.__current_order, False)
-
-                # set the remaining value
-                self.__current_order.remaining -= 1
-                # update the order in the database
-                self.__connector.update_production_order_remaining(new_order=self.__current_order)
-
-                self.__job_complete = True
-
-                if self.__current_order.remaining == 0:  # if the remaining is zero, remove the order from the database
-                    self.get_logger().info(f"Removing item with id: {self.__current_order.id}")
-                    self.__connector.delete_production_order(order=self.__current_order)
-
-            elif msg == self.JOB_FAILED:  # job failed
-                self.get_logger().error("Robot job failed")
-                self.__connector.set_active(self.__current_order, False)
-                self.publish_error(self.ROBOT_JOB_FAILED_ERROR)
-
-            elif msg == self.START_MARKING:
-                self.get_logger().info("Sending marker start...")
-                self.start_marking()
-
-            elif msg == self.STOP_MARKING:
-                self.get_logger().info("Sending marker stop...")
-                self.stop_marking()
-
-            else:
-                self.get_logger().warn(f"Unknown robot message: {msg}")
+                    self.get_logger().warn(f"Unknown robot message: {msg}")
 
     def socket_connected_callback(self, _):
         """Callback function for the socket connection"""

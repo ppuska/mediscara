@@ -145,13 +145,11 @@ class KPI:
         Reference quality is defined as
         """
 
-        __product_quota: int
-
         __product_count: int = field(default=0)
         __error_count: int = field(default=0)
 
         def __repr__(self):
-            return f"Quality: ({self.product_count} - {self.error_count}) / {self.__product_quota} = {self.calculate()}"
+            return f"Quality: ({self.product_count} - {self.error_count}) / {self.product_count} = {self.calculate()}"
 
         def calculate(self):
             """Calculates the Quality KPI number
@@ -159,7 +157,13 @@ class KPI:
             Returns:
                 float: the Quality KPI
             """
-            return (self.product_count - self.error_count) / self.__product_quota
+            if self.product_count == 0:
+                return 0
+
+            if self.error_count > self.product_count:
+                return 0
+
+            return (self.product_count - self.error_count) / self.product_count
 
         @property
         def product_count(self):
