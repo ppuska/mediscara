@@ -460,38 +460,61 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
 
         # endregion
 
-    def kpi_update_callback(self):
-        """Sends ROS messages about the KPIs of the cells periodically"""
-        # robotic
-        a_rob = self.__kpi_rob.availability.calculate()
-        p_rob = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
-        q_rob = self.__kpi_rob.quality.calculate()
+    KPI_PRESCALE = 60  # send ros msg on every 60th visual update
 
+    def kpi_update_callback(self):
+        """Updates the KPI readouts on the info widget, and sends it to the OCB with a given prescale"""
+
+        if not hasattr(HMICollabApp.kpi_update_callback, "ticks"):
+            raise AttributeError(
+                f"The {self.kpi_update_callback.__name__} method must have a 'ticks attribute (initialized to 0)"
+            )
+
+        # robotic kpi
+        availability = self.__kpi_rob.availability.calculate()
+        performance = self.__kpi_rob.performance.calculate(self.__kpi_rob.availability.actual_duration)
+        quality = self.__kpi_rob.quality.calculate()
+
+        # display the kpi on the info widget
         self.info_widget.display_kpi(
             self.InfoWidget.ROBOTIC,
-            availability=a_rob,
-            quality=q_rob,
-            performance=p_rob,
+            availability=availability,
+            quality=quality,
+            performance=performance,
         )
 
-        # vision
-        a_vis = self.__kpi_vis.availability.calculate()
-        p_vis = self.__kpi_vis.performance.calculate(self.__kpi_vis.availability.actual_duration)
-        q_vis = self.__kpi_vis.quality.calculate()
+        msg = KPIC2()  # create KPI ROS message
+        # add the kpis to the message
+        msg.availability_robotic = availability
+        msg.performance_robotic = performance
+        msg.quality_robotic = quality
 
-        self.info_widget.display_kpi(ROSNodeCollab.VISION, availability=a_vis, quality=q_vis, performance=p_vis)
+        # vision kpi
+        availability = self.__kpi_vis.availability.calculate()
+        performance = self.__kpi_vis.performance.calculate(self.__kpi_vis.availability.actual_duration)
+        quality = self.__kpi_vis.quality.calculate()
 
-        msg = KPIC2()
-        msg.availability_robotic = a_rob
-        msg.performance_robotic = p_rob
-        msg.quality_robotic = q_rob
-        msg.availability_vision = a_vis
-        msg.performance_vision = p_vis
-        msg.quality_vision = q_vis
+        # display the kpi on the info widget
+        self.info_widget.display_kpi(
+            ROSNodeCollab.VISION, availability=availability, quality=quality, performance=performance
+        )
 
-        self.ros_worker.send_kpi(msg)
+        # add the kpi to the ros message
+        msg.availability_vision = availability
+        msg.performance_vision = performance
+        msg.quality_vision = quality
 
-        self.kpi_update_timer.start(self.KPI_UPDATE_INTERVAL)  # restart timer
+        # if the ticks are larger than the prescale value, send the ros message
+        if HMICollabApp.kpi_update_callback.ticks >= HMICollabApp.KPI_PRESCALE:
+            # send ROS message
+            logging.info("Sending KPI ROS message")
+            self.ros_worker.send_kpi(msg)
+            HMICollabApp.kpi_update_callback.ticks = 0  # reset the ticks value
+
+        else:
+            HMICollabApp.kpi_update_callback.ticks += 1  # increment the ticks
+
+    kpi_update_callback.ticks = 0  # set the method attribute
 
     # endregion
 

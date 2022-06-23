@@ -250,8 +250,6 @@ class KPI:
 
             kpi = actual_performance / self.__reference_performance
 
-            print(manuf_time, actual_performance, kpi)
-
             return kpi
 
         def pause_start(self):
