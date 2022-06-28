@@ -8,7 +8,6 @@ from interfaces.msg import Robot1Control as r1c
 from interfaces.msg import Robot1Status as r1s
 from interfaces.msg import Robot2Control as r2c
 from interfaces.msg import Robot2Status as r2s
-from interfaces.msg import VisionControl as Vc
 from std_msgs.msg import Bool
 
 
@@ -35,6 +34,5 @@ class MessageList(Enum):
     ROBOT1_STATUS = "robot1_status", r1s
     ROBOT2_STATUS = "robot2_status", r2s
     ROBOT2_CONTROL = "robot2_control", r2c
-    VISION_CONTROL = "vision_control", Vc
     KPIC1 = "kpi_cell1", kpi_c1
     KPIC2 = "kpi_cell2", kpi_c2

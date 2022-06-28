@@ -68,5 +68,10 @@ class WorkerThread(threading.Thread):
 
     @property
     def running(self):
-        """Returns whether the thread is looping or not"""
+        """Returns wether the thread is running or not"""
         return self.__is_running
+
+    @property
+    def looping(self):
+        """Returns wether the thread is set to loop or not"""
+        return self.__loop

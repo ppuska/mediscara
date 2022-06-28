@@ -103,10 +103,10 @@ class SocketManager:
             self.__logger.info(f"Connecting to '{self.__host}:{self.__port}'")
             self.__initial_connect = False
 
-        if self.__blocking:  # check if blocking mode is enabled
+        if self.__is_server:  # check if the socket is a server
+            raise Exception(f"Server cannot connect to socket, use '{self.bind_and_accept.__name__}' method")
 
-            if self.__is_server:  # check if the socket is a server
-                raise Exception(f"Server cannot connect to socket, use '{self.bind_and_accept.__name__}' method")
+        if self.__blocking:  # check if blocking mode is enabled
 
             return self._socket_connect(None)
 
@@ -236,7 +236,8 @@ class SocketManager:
         self.__connected = success
         if success:
             self.__logger.info(message)
-            self.__connect_thread.stop()
+            if self.__connect_thread.looping:
+                self.__connect_thread.stop()
             self.__connected_callback(message)
 
         else:

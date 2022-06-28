@@ -10,7 +10,7 @@ import rclpy
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
 
-from interfaces.msg import KPIC2, Error, Robot2Control, Robot2Status, VisionControl
+from interfaces.msg import KPIC2, Error, Robot2Control, Robot2Status
 from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.kpi import KPI
@@ -198,7 +198,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
 
             self.__locked_vision = lock
 
-        def lock_control_robotic(self, lock: bool):
+        def lock_control_marker(self, lock: bool):
             """Locks the controls of the robotic system"""
             self.button_start_session_rob.setEnabled(not lock)
             self.button_home_rob.setEnabled(not lock)
@@ -320,7 +320,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
                     self.__robot_online = True
 
                 if not self.__robot_online or not self.__marker_online:  # if either offline, lock
-                    self.control_widget.lock_control_robotic(True)
+                    self.control_widget.lock_control_marker(True)
 
                 if NodeList.VISION_NODE.value not in missing:  # vision is online
                     self.__vision_online = True
@@ -364,12 +364,9 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
             self.state_robot = HMICollabApp.STATUS.WORKING  # change the state
 
         elif button_clicked == self.control_widget.button_pause_rob:
-            msg = Robot2Control()
-            msg.home = False
-            msg.start_marking = False
-            msg.pause = True
+            # TODO finish marker messages
 
-            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
+            # self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
 
             if self.state_robot == HMICollabApp.STATUS.WORKING:
                 self.__kpi_rob.performance.pause_start()  # start the pause
@@ -392,24 +389,20 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
 
         elif button_clicked == self.control_widget.button_home_rob:
             msg = Robot2Control()
-            msg.home = True
-            msg.start_marking = False
-            msg.pause = False
 
-            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
+            self.ros_worker.send_control(cell=ROSNodeCollab.MARKER, msg=msg)
 
         elif button_clicked == self.control_widget.button_start_marking:
             msg = Robot2Control()
-            msg.home = False
-            msg.start_marking = True
 
-            self.ros_worker.send_control(cell=ROSNodeCollab.ROBOTIC, msg=msg)
+            self.ros_worker.send_control(cell=ROSNodeCollab.MARKER, msg=msg)
 
         # endregion
 
         # region vision
         if button_clicked == self.control_widget.button_start_session:
             if self.state_vision == HMICollabApp.STATUS.IDLE:
+                self.__kpi_vis = KPI(quota=HMICollabApp.KPI_QUOTA)  # reinit the kpis
                 self.__kpi_vis.availability.start_now()
 
             elif self.state_vision == HMICollabApp.STATUS.WORKING:
@@ -435,24 +428,27 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
             self.state_vision = HMICollabApp.STATUS.IDLE
 
         elif button_clicked == self.control_widget.button_home:
-            msg = VisionControl()
+            msg = Robot2Control()
             msg.home = True
+            msg.pause = False
             msg.measure_label = False
             msg.measure_pcb = False
 
             self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
 
         elif button_clicked == self.control_widget.button_measure_pcb:
-            msg = VisionControl()
+            msg = Robot2Control()
             msg.home = False
+            msg.pause = True
             msg.measure_label = False
             msg.measure_pcb = True
 
             self.ros_worker.send_control(cell=ROSNodeCollab.VISION, msg=msg)
 
         elif button_clicked == self.control_widget.button_measure_label:
-            msg = VisionControl()
+            msg = Robot2Control()
             msg.home = False
+            msg.pause = False
             msg.measure_label = True
             msg.measure_pcb = False
 
@@ -561,17 +557,17 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
             self.__vision_online = online
 
         if not self.ui_locking:
-            self.control_widget.lock_control_robotic(False)
+            self.control_widget.lock_control_marker(False)
             self.control_widget.lock_control_vision(False)
 
         else:
             if self.__marker_online and self.__robot_online:
                 self.logger.info("Unlocking robot UI")
-                self.control_widget.lock_control_robotic(False)  # unlock the UI
+                self.control_widget.lock_control_marker(False)  # unlock the UI
 
             else:
                 self.logger.info("Locking robot UI")
-                self.control_widget.lock_control_robotic(True)
+                self.control_widget.lock_control_marker(True)
 
             if self.__vision_online:
                 self.logger.info("Unlocking vision UI")
@@ -617,7 +613,7 @@ class ROSNodeCollab(QTROSNode):
     """Class for the ROS Node in the HMI application"""
 
     VISION = 0
-    ROBOTIC = 1
+    MARKER = 1
 
     def __init__(self, node_name: str, depends_on: List[str], signals: ROSWorker.Signals):
         super().__init__(node_name=node_name, depends_on=depends_on, signals=signals)
@@ -630,8 +626,8 @@ class ROSNodeCollab(QTROSNode):
         )
 
         self.__vision_control = self.create_publisher(
-            msg_type=MessageList.VISION_CONTROL.value[1],
-            topic=MessageList.VISION_CONTROL.value[0],
+            msg_type=MessageList.ROBOT2_CONTROL.value[1],
+            topic=MessageList.ROBOT2_CONTROL.value[0],
             qos_profile=10,
         )
 
@@ -680,10 +676,10 @@ class ROSNodeCollab(QTROSNode):
     def send_control(self, cell: int, msg: object):
         self.get_logger().debug(f"Sending command: {msg}")
         if cell == self.VISION:
-            assert isinstance(msg, VisionControl)
+            assert isinstance(msg, Robot2Control)
             self.__vision_control.publish(msg)
 
-        elif cell == self.ROBOTIC:
+        elif cell == self.MARKER:
             assert isinstance(msg, Robot2Control)
             self.__robot_control.publish(msg)
 
