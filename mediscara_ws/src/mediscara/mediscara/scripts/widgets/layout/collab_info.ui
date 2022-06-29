@@ -246,7 +246,7 @@
    <item>
     <widget class="QGroupBox" name="box_robotic">
      <property name="title">
-      <string>Robotic</string>
+      <string>Marker</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0,1">
       <item>

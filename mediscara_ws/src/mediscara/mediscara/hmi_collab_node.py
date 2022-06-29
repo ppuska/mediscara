@@ -10,7 +10,7 @@ import rclpy
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QPushButton, QWidget
 
-from interfaces.msg import KPIC2, Error, Robot2Control, Robot2Status
+from interfaces.msg import KPIC2, Error, Robot2Control, Robot2Status, MarkerStatus
 from mediscara.config_ros import MessageList, NodeList
 from mediscara.scripts.hmi import HMIApp, ROSWorker
 from mediscara.scripts.kpi import KPI
@@ -41,7 +41,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
         """Class for displaying the info QWidget on the info tab"""
 
         VISION = 0
-        ROBOTIC = 1
+        MARKING = 1
 
         __POWER_ON_TEXT = "Power ON"
         __POWER_OFF_TEXT = "Power"
@@ -64,15 +64,15 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
 
         def display_kpi(self, box: int, *, availability: float, quality: float, performance: float):
             """Displays the KPI data to the widget"""
-            if box == self.ROBOTIC:
+            if box == self.MARKING:
                 self.label_availability_rob.setText(f"{availability*100:.1f}%")
                 self.label_quality_rob.setText(f"{quality*100:.1f}%")
                 self.label_performance_rob.setText(f"{performance*100:.1f}%")
 
             elif box == self.VISION:
-                self.label_availability_vis.setText(f"{availability:.1f}%")
-                self.label_quality_vis.setText(f"{quality:.1f}%")
-                self.label_performance_vis.setText(f"{performance:.1f}%")
+                self.label_availability_vis.setText(f"{availability*100:.1f}%")
+                self.label_quality_vis.setText(f"{quality*100:.1f}%")
+                self.label_performance_vis.setText(f"{performance*100:.1f}%")
 
             else:
                 raise ValueError(f"Invalid input number ({box})")
@@ -90,7 +90,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
             if box == self.VISION:
                 label = self.label_power_vis
 
-            elif box == self.ROBOTIC:
+            elif box == self.MARKING:
                 label = self.label_power_rob
 
             else:
@@ -117,7 +117,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
             if box == self.VISION:
                 label = self.label_running_vis
 
-            elif box == self.ROBOTIC:
+            elif box == self.MARKING:
                 label = self.label_running_rob
 
             else:
@@ -142,7 +142,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
             if box == self.VISION:
                 label = self.label_waiting_vis
 
-            elif box == self.ROBOTIC:
+            elif box == self.MARKING:
                 label = self.label_waiting_rob
 
             else:
@@ -167,7 +167,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
             if box == self.VISION:
                 label = self.label_error_vis
 
-            elif box == self.ROBOTIC:
+            elif box == self.MARKING:
                 label = self.label_error_rob
 
             else:
@@ -288,7 +288,6 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
         # interface lock variables
         self.__marker_online = False
         self.__robot_online = False
-        self.__vision_online = False
 
         # state machine
         self.__state_rob = None
@@ -319,13 +318,10 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
                 if NodeList.ROBOT2_NODE.value not in missing:  # robot is online
                     self.__robot_online = True
 
-                if not self.__robot_online or not self.__marker_online:  # if either offline, lock
+                if not self.__marker_online:  # lock marker
                     self.control_widget.lock_control_marker(True)
 
-                if NodeList.VISION_NODE.value not in missing:  # vision is online
-                    self.__vision_online = True
-
-                if not self.__vision_online:
+                if not self.__robot_online:
                     self.control_widget.lock_control_vision(True)
 
         else:
@@ -337,12 +333,6 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
 
         # todo differentiate between vision system and robot
         self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, True)
-
-    def clear_errors_callback(self):
-        """This method gets called when the 'CLEAR ERRORS' button gets pressed"""
-        super().clear_errors_callback()
-
-        self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, False)  # FIXME this may not be needed
 
     # endregion
 
@@ -473,7 +463,7 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
 
         # display the kpi on the info widget
         self.info_widget.display_kpi(
-            self.InfoWidget.ROBOTIC,
+            self.InfoWidget.MARKING,
             availability=availability,
             quality=quality,
             performance=performance,
@@ -519,31 +509,55 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
     def status_callback(self, msg):
         """Callback method for the Robot2Status topic messages"""
 
-        if not hasattr(HMICollabApp.status_callback, "was_in_error"):
+        if not hasattr(HMICollabApp.status_callback, "marker_error"):
             raise AttributeError(
-                f"The {HMICollabApp.status_callback.__name__} method must have a 'was_in_error' attribute"
+                f"The {HMICollabApp.status_callback.__name__} method must have a 'marker_error' attribute"
             )
 
-        if isinstance(msg, Robot2Status):
-            self.info_widget.set_error(HMICollabApp.InfoWidget.ROBOTIC, msg.error)
-            self.info_widget.set_power(HMICollabApp.InfoWidget.ROBOTIC, msg.power)
-            self.info_widget.set_waiting(HMICollabApp.InfoWidget.ROBOTIC, msg.waiting)
-            self.info_widget.set_running(HMICollabApp.InfoWidget.ROBOTIC, msg.running)
+        if not hasattr(HMICollabApp.status_callback, "vision_error"):
+            raise AttributeError(
+                f"The {HMICollabApp.status_callback.__name__} method must have a 'vision_error' attribute"
+            )
+
+        if isinstance(msg, Robot2Status):  # vision system
+            self.info_widget.set_error(HMICollabApp.InfoWidget.VISION, msg.error)
+            self.info_widget.set_power(HMICollabApp.InfoWidget.VISION, msg.power)
+            self.info_widget.set_waiting(HMICollabApp.InfoWidget.VISION, msg.waiting)
+            self.info_widget.set_running(HMICollabApp.InfoWidget.VISION, msg.running)
 
             if msg.job_success:
+                self.__kpi_vis.performance.product_count += 1
+                self.__kpi_vis.quality.product_count += 1
+
+            # only register as an error if the previous message was not an error and this message is
+            if msg.error and not HMICollabApp.status_callback.vision_error:
+                self.__kpi_vis.quality.error_count += 1
+                HMICollabApp.status_callback.vision_error = True  # set the error flag
+
+            else:
+                HMICollabApp.status_callback.vision_error = False  # reset the error flag
+
+        if isinstance(msg, MarkerStatus):  # marker system
+            self.info_widget.set_error(HMICollabApp.InfoWidget.MARKING, msg.error)
+            self.info_widget.set_power(HMICollabApp.InfoWidget.MARKING, msg.power)
+            self.info_widget.set_waiting(HMICollabApp.InfoWidget.MARKING, msg.waiting)
+            self.info_widget.set_running(HMICollabApp.InfoWidget.MARKING, msg.running)
+
+            if msg.marking_successful:
                 self.__kpi_rob.performance.product_count += 1
                 self.__kpi_rob.quality.product_count += 1
 
-            # only register as an error if the previous message was not an error and this message is
-            if msg.error and not HMICollabApp.status_callback.was_in_error:
+                # only register as an error if the previous message was not an error and this message is
+            if msg.error and not HMICollabApp.status_callback.marker_error:
                 self.__kpi_rob.quality.error_count += 1
-                HMICollabApp.status_callback.was_in_error = True  # set the error flag
+                HMICollabApp.status_callback.marker_error = True  # set the error flag
 
             else:
-                HMICollabApp.status_callback.was_in_error = False  # reset the error flag
+                HMICollabApp.status_callback.marker_error = False  # reset the error flag
 
     # this is needed to filter out a continuous stream of error messages as one error
-    status_callback.was_in_error = False  # wether the previous status message had errors or not
+    status_callback.vision_error = False  # wether the previous status message had errors or not
+    status_callback.marker_error = False
 
     def dependency_callback(self, name: str, online: bool):
         """Callback method for when a ROS dependency comes online of goes offline"""
@@ -553,28 +567,25 @@ class HMICollabApp(HMIApp):  # pylint: disable=too-many-instance-attributes
         elif name == NodeList.ROBOT2_NODE.value:
             self.__robot_online = online
 
-        elif name == NodeList.VISION_NODE.value:
-            self.__vision_online = online
-
         if not self.ui_locking:
             self.control_widget.lock_control_marker(False)
             self.control_widget.lock_control_vision(False)
 
         else:
-            if self.__marker_online and self.__robot_online:
-                self.logger.info("Unlocking robot UI")
+            if self.__marker_online:
+                self.logger.info("Unlocking marker UI")
                 self.control_widget.lock_control_marker(False)  # unlock the UI
 
             else:
-                self.logger.info("Locking robot UI")
+                self.logger.info("Locking marker UI")
                 self.control_widget.lock_control_marker(True)
 
-            if self.__vision_online:
-                self.logger.info("Unlocking vision UI")
+            if self.__robot_online:
+                self.logger.info("Unlocking vision/robot UI")
                 self.control_widget.lock_control_vision(False)
 
             else:
-                self.logger.info("Locking vision IO")
+                self.logger.info("Locking vision/robot UI")
                 self.control_widget.lock_control_vision(True)
 
     # endregion
@@ -619,9 +630,9 @@ class ROSNodeCollab(QTROSNode):
         super().__init__(node_name=node_name, depends_on=depends_on, signals=signals)
 
         # publishers
-        self.__robot_control = self.create_publisher(
-            msg_type=MessageList.ROBOT2_CONTROL.value[1],
-            topic=MessageList.ROBOT2_CONTROL.value[0],
+        self.__marker_control = self.create_publisher(
+            msg_type=MessageList.MARKER_CONTROL.value[1],
+            topic=MessageList.MARKER_CONTROL.value[0],
             qos_profile=10,
         )
 
@@ -638,6 +649,13 @@ class ROSNodeCollab(QTROSNode):
         )
 
         # subscribers
+        self.create_subscription(
+            msg_type=MessageList.MARKER_STATUS.value[1],
+            topic=MessageList.MARKER_STATUS.value[0],
+            callback=self.marker_status_callback,
+            qos_profile=10,
+        )
+
         self.create_subscription(
             msg_type=MessageList.ROBOT2_STATUS.value[1],
             topic=MessageList.ROBOT2_STATUS.value[0],
@@ -681,7 +699,7 @@ class ROSNodeCollab(QTROSNode):
 
         elif cell == self.MARKER:
             assert isinstance(msg, Robot2Control)
-            self.__robot_control.publish(msg)
+            self.__marker_control.publish(msg)
 
         else:
             raise ValueError(f"Invalid cell (number: {cell})")
@@ -695,6 +713,10 @@ class ROSNodeCollab(QTROSNode):
         Args:
             msg (Robot2Status): The incoming message
         """
+        self.signals.status.emit(msg)
+
+    def marker_status_callback(self, msg: MarkerStatus):
+        """Callback method for the MarkerStatus subscription"""
         self.signals.status.emit(msg)
 
 

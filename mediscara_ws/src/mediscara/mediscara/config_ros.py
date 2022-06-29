@@ -19,7 +19,6 @@ class NodeList(Enum):
     SENSOR_NODE = "sensor"
     MARKER_NODE = "marker"
     LASER_NODE = "laser"
-    VISION_NODE = "vision"
     HMI_COLLAB_NODE = "hmi_collaborative"
     HMI_ROBOTIC_NODE = "hmi_robotic"
     FIWARE_NODE = "is_ros2"
