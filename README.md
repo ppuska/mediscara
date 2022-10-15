@@ -48,15 +48,17 @@ The whole project contains both robotic cells and their supplemetary state-of-th
 >    5. MRTC - Transformation Calculator
 --- 
 ### System Diadram
-<img src="https://iili.io/ZDTpx2.md.png" alt="drawing" style="width:500px;"/>
+<img src="pics/MediSCARA_system_diagramNew.PNG" style="width:1200px;"/>
 
-### Grafana
-![ZDzNWP.md.png](https://iili.io/ZDzNWP.md.png)
 
-### RAMP 
-![ZDIHI2.md.png](https://iili.io/ZDIHI2.md.png)
+
+|**GRAFANA**       |**RAMP**|
+|:-------------:|:------:|
+| <img src="https://iili.io/ZDzNWP.md.png" Style="height:400px;"/>| <img src="https://iili.io/ZDIHI2.md.png" Style="height:400px;"/>|
+
 
 ---
+
 ## ROSE-AP
 
 The ROSE-AP components of the project are:
