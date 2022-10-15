@@ -1,0 +1,3 @@
+[submodule "mediscara.mcu"]
+	path = mediscara.mcu
+	url = https://github.com/ppuska/mediscara.mcu
