@@ -64,4 +64,4 @@ The whole project contains both robotic cells and their supplemetary state-of-th
 The ROSE-AP components of the project are:
 - Master Control Unit (**MMCU**): [here](https://github.com/ppuska/mediscara.mcu)
 - PDF Generator (**MDPT**): [here](https://github.com/ppuska/mediscara.mdr)
-- Manager WebAPP (**MMWA**): [here](https://github.com/mediscara.manager)
+- Manager WebAPP (**MMWA**): [here](https://github.com/ppuska/mediscara.manager)
